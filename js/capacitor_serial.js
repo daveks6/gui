@@ -40,13 +40,18 @@ function getKissSerialPlugin() {
     if (typeof Capacitor === 'undefined') {
         throw new Error('window.Capacitor is not defined -- not running inside the Capacitor WebView?');
     }
-    var existing = Capacitor.Plugins && Capacitor.Plugins.KissSerial;
-    if (existing && typeof existing.addListener === 'function') {
-        return existing;
-    }
     if (typeof Capacitor.registerPlugin !== 'function') {
         throw new Error('Capacitor.registerPlugin is not a function (typeof: ' + typeof Capacitor.registerPlugin + ')');
     }
+    // Deliberately never reuse Capacitor.Plugins.KissSerial as-is: Android's
+    // native bridge (native-bridge.js, separate from @capacitor/core)
+    // pre-populates it with a plain object of bare method stubs before our
+    // code ever runs. Its addListener is a real function -- confirmed on
+    // real hardware via CAPACITOR_DIAG -- but not a Promise-returning one,
+    // which is what broke this ("plugin.addListener(...).then is not a
+    // function"). @capacitor/core's registerPlugin() builds the correct
+    // Promise-based proxy (and safely returns the cached one on repeat
+    // calls, so calling this every time is fine).
     return Capacitor.registerPlugin('KissSerial');
 }
 
