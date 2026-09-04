@@ -117,6 +117,9 @@ $(document).ready(function () {
 							
 			} catch (error) {
 				console.log('Connect error: ' + error.message);
+				alert('Connect error: ' + error.name + ': ' + error.message);
+				GUI.switchToConnect();
+				GUI.connectingTo = false;
 			}
 		});
 	}

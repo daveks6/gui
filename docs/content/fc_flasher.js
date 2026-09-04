@@ -103,6 +103,7 @@ var fcFlasherReadErrorHandler = function (info) {
     					});
     			} catch (error) {
     				console.log('Connect error: ' + error.message);
+    				alert('Connect error: ' + error.name + ': ' + error.message);
     			}
     		});
 		}
