@@ -66,36 +66,33 @@ $(document).ready(function () {
 					
 					let device;
 
-					if (typeof navigator.serial !== 'undefined') {
-						// Native Web Serial API (desktop Chrome/Edge, and newer Android
-						// Chrome builds that have started rolling this out). Deliberately
-						// unfiltered: a vendorId/productId-filtered requestPort() reliably
-						// shows an empty chooser on Android for this exact device even
-						// though the IDs match exactly (confirmed via the unfiltered
-						// "Diagnose USB" WebUSB button, which finds it every time) --
-						// same underlying platform quirk as the WebUSB path below.
+					// Some Android Chrome builds now expose navigator.serial as a
+					// callable API that isn't actually functional yet -- requestPort()
+					// resolves the call but finds no matching device, throwing
+					// "No port selected by the user" even when the device is right
+					// there (confirmed via the unfiltered "Diagnose USB" WebUSB button,
+					// which finds it every time on the same phone). So rather than
+					// trust navigator.serial's mere existence, try it and fall back to
+					// the WebUSB path (via web-serial-polyfill) on ANY failure -- covers
+					// both "doesn't exist" and "exists but broken" the same way.
+					try {
+						if (typeof navigator.serial === 'undefined') {
+							throw new Error('navigator.serial is not available');
+						}
 						device = await navigator.serial.requestPort({'filters': []});
-					} else if (typeof navigator.usb !== 'undefined') {
-						// Android Chrome does not implement navigator.serial, but does
-						// support WebUSB. The FC shows up as a standard USB CDC-ACM
-						// virtual COM port, so we can talk to it over WebUSB using
-						// Google's web-serial-polyfill (js/libraries/web-serial-polyfill.js),
-						// which exposes the same SerialPort-shaped object web_serial.js expects.
-						//
+					} catch (serialError) {
+						if (typeof navigator.usb === 'undefined') {
+							throw serialError;
+						}
+						console.log('navigator.serial failed (' + serialError.message + '), falling back to WebUSB');
 						// Call navigator.usb.requestDevice() ourselves instead of going
 						// through WebSerialPolyfill.serial.requestPort() (which always adds
-						// a hard-coded USB interface classCode filter), and without any
-						// vendor/product ID filter either -- on Android a vendor/product
-						// filtered requestDevice() reliably shows an empty chooser for this
-						// device even though the IDs match exactly (confirmed via the
-						// unfiltered "Diagnose USB" button, which finds it every time).
-						// SerialPort still validates the selected device has the expected
-						// CDC-ACM interface structure afterwards and throws clearly if not,
-						// so this is safe even without pre-filtering the chooser.
+						// a hard-coded USB interface classCode filter). SerialPort still
+						// validates the selected device has the expected CDC-ACM interface
+						// structure afterwards and throws clearly if not, so this is safe
+						// even without pre-filtering the chooser.
 						let usbDevice = await navigator.usb.requestDevice({'filters': []});
 						device = new WebSerialPolyfill.SerialPort(usbDevice);
-					} else {
-						throw new Error('Neither Web Serial nor WebUSB is available in this browser.');
 					}
 
 					serialDevice = getSerialDriverForPort(selectedPort);

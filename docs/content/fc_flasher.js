@@ -79,15 +79,19 @@ var fcFlasherReadErrorHandler = function (info) {
     			var selectedPort = String($('#port').val());
     			try {
     					let device;
-    					if (typeof navigator.serial !== 'undefined') {
-    						// See js/connection_handler.js for why this is unfiltered.
+    					// See js/connection_handler.js for why this falls back on any
+    					// navigator.serial failure rather than trusting its existence.
+    					try {
+    						if (typeof navigator.serial === 'undefined') {
+    							throw new Error('navigator.serial is not available');
+    						}
     						device = await navigator.serial.requestPort({'filters': []});
-    					} else if (typeof navigator.usb !== 'undefined') {
-    						// See js/connection_handler.js for why this is unfiltered.
+    					} catch (serialError) {
+    						if (typeof navigator.usb === 'undefined') {
+    							throw serialError;
+    						}
     						let usbDevice = await navigator.usb.requestDevice({'filters': []});
     						device = new WebSerialPolyfill.SerialPort(usbDevice);
-    					} else {
-    						throw new Error('Neither Web Serial nor WebUSB is available in this browser.');
     					}
     					serialDevice = getSerialDriverForPort(selectedPort);
     					serialDevice.connect(device, {
