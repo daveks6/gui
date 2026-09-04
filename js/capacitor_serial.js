@@ -30,6 +30,17 @@ function uint8ArrayToBase64(bytes) {
     return btoa(binary);
 }
 
+// window.Capacitor.Plugins.KissSerial (populated automatically for any
+// natively-registered plugin) doesn't reliably carry the addListener/
+// removeAllListeners event-handling methods -- those only get added to a
+// plugin's proxy through Capacitor's own registerPlugin() call, which is
+// normally done for you by a plugin's JS/TS wrapper package. Since
+// KissSerial has no such package (it's native-only, registered directly in
+// MainActivity), call registerPlugin() here ourselves to get a complete proxy.
+var KissSerialPlugin = (typeof Capacitor !== 'undefined' && Capacitor.registerPlugin)
+    ? Capacitor.registerPlugin('KissSerial')
+    : null;
+
 var capacitorSerial = {
     connectionId: false,
     bitrate: 0,
@@ -42,7 +53,7 @@ var capacitorSerial = {
 
     connect: function (device, options, callback) {
         var self = this;
-        var plugin = Capacitor.Plugins.KissSerial;
+        var plugin = KissSerialPlugin;
 
         plugin.connect({ baudRate: options.baudRate || 115200 }).then(function () {
             self.connectionId = true;
@@ -79,7 +90,7 @@ var capacitorSerial = {
 
     disconnect: function (callback) {
         var self = this;
-        var plugin = Capacitor.Plugins.KissSerial;
+        var plugin = KissSerialPlugin;
 
         if (self.dataListenerHandle) { self.dataListenerHandle.remove(); self.dataListenerHandle = null; }
         if (self.errorListenerHandle) { self.errorListenerHandle.remove(); self.errorListenerHandle = null; }
@@ -106,7 +117,7 @@ var capacitorSerial = {
             var bytes = new Uint8Array(item.data);
             var base64Data = uint8ArrayToBase64(bytes);
 
-            Capacitor.Plugins.KissSerial.write({ data: base64Data }).then(function () {
+            KissSerialPlugin.write({ data: base64Data }).then(function () {
                 self.bytesSent += bytes.length;
 
                 if (item.callback) item.callback({});
