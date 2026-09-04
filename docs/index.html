@@ -78,6 +78,7 @@
             	<select id="port" title="Port">
             	</select>
             	<a id="connect" class="connect" href="#" data-i18n="menu.connect">Connect</a>
+            	<a id="usb_diag" href="#" style="margin-left:10px;font-size:11px;color:#888;">Diagnose USB</a>
             <!-- 	<a class="navigation-menu-button" href="#" data-i18n="menu.menu">Menu</a> -->
             </div>
         	
@@ -125,6 +126,42 @@
 					console.log('Service worker registration failed: ' + error.message);
 				});
 			});
+		}
+
+		// Standalone diagnostic: shows exactly what navigator.usb sees, with no
+		// vendor/product filter at all, so connection problems can be told apart
+		// (device invisible to WebUSB entirely vs. visible but not matching our
+		// expected IDs) without needing a PC for remote debugging.
+		if (!isNative() && (typeof navigator.usb !== 'undefined')) {
+			var usbDiagLink = document.getElementById('usb_diag');
+			usbDiagLink.addEventListener('click', async function (e) {
+				e.preventDefault();
+				try {
+					var device = await navigator.usb.requestDevice({ filters: [] });
+					var lines = [];
+					lines.push('name: ' + (device.productName || '(none)'));
+					lines.push('manufacturer: ' + (device.manufacturerName || '(none)'));
+					lines.push('vendorId: 0x' + device.vendorId.toString(16));
+					lines.push('productId: 0x' + device.productId.toString(16));
+					(device.configurations || []).forEach(function (cfg, ci) {
+						(cfg.interfaces || []).forEach(function (iface) {
+							(iface.alternates || []).forEach(function (alt) {
+								lines.push('config ' + ci + ' interface ' + iface.interfaceNumber +
+									': class=0x' + alt.interfaceClass.toString(16) +
+									' subclass=0x' + alt.interfaceSubclass.toString(16) +
+									' protocol=0x' + alt.interfaceProtocol.toString(16) +
+									' endpoints=' + alt.endpoints.length);
+							});
+						});
+					});
+					alert(lines.join('\n'));
+				} catch (error) {
+					alert('USB diagnose failed: ' + error.name + ': ' + error.message);
+				}
+			});
+		} else {
+			var usbDiagLinkHide = document.getElementById('usb_diag');
+			if (usbDiagLinkHide) usbDiagLinkHide.style.display = 'none';
 		}
 	</script>
 
