@@ -80,7 +80,13 @@ var fcFlasherReadErrorHandler = function (info) {
     			try {
     					let device;
     					let filters = [{ usbVendorId: 0x0483, usbProductId: 0x5740 }];
-    					device = await navigator.serial.requestPort({'filters': filters});
+    					if (typeof navigator.serial !== 'undefined') {
+    						device = await navigator.serial.requestPort({'filters': filters});
+    					} else if (typeof navigator.usb !== 'undefined') {
+    						device = await WebSerialPolyfill.serial.requestPort({'filters': filters});
+    					} else {
+    						throw new Error('Neither Web Serial nor WebUSB is available in this browser.');
+    					}
     					serialDevice = getSerialDriverForPort(selectedPort);
     					serialDevice.connect(device, {
     						baudRate: 115200,
