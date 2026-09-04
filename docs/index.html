@@ -79,6 +79,7 @@
             	</select>
             	<a id="connect" class="connect" href="#" data-i18n="menu.connect">Connect</a>
             	<a id="usb_diag" href="#" style="margin-left:10px;font-size:11px;color:#888;">Diagnose USB</a>
+            	<a id="reset_cache" href="#" style="margin-left:10px;font-size:11px;color:#888;">Reset Cache</a>
             <!-- 	<a class="navigation-menu-button" href="#" data-i18n="menu.menu">Menu</a> -->
             </div>
         	
@@ -163,8 +164,28 @@
 			var usbDiagLinkHide = document.getElementById('usb_diag');
 			if (usbDiagLinkHide) usbDiagLinkHide.style.display = 'none';
 		}
+
+		// Unregisters the service worker and clears its caches from inside the
+		// page itself, since chrome://serviceworker-internals is unusable on
+		// mobile (no per-origin search, lists every site's workers at once).
+		if ('serviceWorker' in navigator) {
+			document.getElementById('reset_cache').addEventListener('click', async function (e) {
+				e.preventDefault();
+				try {
+					var regs = await navigator.serviceWorker.getRegistrations();
+					for (var i = 0; i < regs.length; i++) await regs[i].unregister();
+					if ('caches' in window) {
+						var keys = await caches.keys();
+						for (var j = 0; j < keys.length; j++) await caches.delete(keys[j]);
+					}
+					alert('Cleared ' + regs.length + ' service worker(s) and their caches.\nNow fully close this tab and reopen the page.');
+				} catch (error) {
+					alert('Reset failed: ' + error.name + ': ' + error.message);
+				}
+			});
+		}
 	</script>
 
-<div style='position:fixed;top:0;right:0;z-index:99999;background:#000;color:#0f0;font:10px monospace;padding:2px 6px;opacity:.85;'>build 9035c61-20260904T125418Z</div></body>
+<div style='position:fixed;top:0;right:0;z-index:99999;background:#000;color:#0f0;font:10px monospace;padding:2px 6px;opacity:.85;'>build d3dde25-20260904T130308Z</div></body>
 
 </html>
