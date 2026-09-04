@@ -50,6 +50,26 @@ function getKissSerialPlugin() {
     return Capacitor.registerPlugin('KissSerial');
 }
 
+// Same shape as the CAPACITOR_DIAG startup log in main.html, but captured at
+// the exact moment something fails instead of at page load, since those two
+// have shown different results in practice.
+function dumpCapacitorDiag() {
+    try {
+        return JSON.stringify({
+            typeofCapacitor: typeof Capacitor,
+            typeofRegisterPlugin: typeof Capacitor !== 'undefined' ? typeof Capacitor.registerPlugin : 'n/a',
+            pluginKeys: (typeof Capacitor !== 'undefined' && Capacitor.Plugins) ? Object.keys(Capacitor.Plugins) : null,
+            kissSerial: (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.KissSerial) ? {
+                typeofConnect: typeof Capacitor.Plugins.KissSerial.connect,
+                typeofAddListener: typeof Capacitor.Plugins.KissSerial.addListener,
+                keys: Object.keys(Capacitor.Plugins.KissSerial)
+            } : 'not present'
+        });
+    } catch (e) {
+        return 'dumpCapacitorDiag failed: ' + e.message;
+    }
+}
+
 var capacitorSerial = {
     connectionId: false,
     bitrate: 0,
@@ -99,8 +119,10 @@ var capacitorSerial = {
 
             if (callback) callback(true);
         }).catch(function (error) {
+            var diag = dumpCapacitorDiag();
+            console.log('CAPACITOR_DIAG (connect failure) ' + diag);
             console.log('KissSerial connect failed: ' + error.message);
-            alert('Connect error: ' + error.message);
+            alert('Connect error: ' + error.message + '\n\n' + diag);
             if (callback) callback(false);
         });
     },
