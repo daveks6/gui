@@ -1,7 +1,7 @@
 'use strict';
 
 // Bump this on every release so browsers pick up the new asset versions.
-const CACHE_NAME = 'kiss-ultra-gui-v1';
+const CACHE_NAME = 'kiss-ultra-gui-v2';
 
 const APP_SHELL = [
     './',
@@ -45,40 +45,23 @@ self.addEventListener('fetch', function (event) {
         return;
     }
 
-    if (request.mode === 'navigate') {
-        // Network-first for HTML so updates show up immediately; fall back
-        // to the cached shell when offline.
-        event.respondWith(
-            fetch(request).then(function (response) {
+    // Network-first for everything (HTML, JS, CSS, images): this app is
+    // actively changing, and a stale cached script silently shadowing a
+    // fresh deploy is worse than the extra network round-trip. Only fall
+    // back to cache when actually offline.
+    event.respondWith(
+        fetch(request).then(function (response) {
+            if (response && response.ok) {
                 var copy = response.clone();
                 caches.open(CACHE_NAME).then(function (cache) {
                     cache.put(request, copy);
                 });
-                return response;
-            }).catch(function () {
-                return caches.match('./index.html');
-            })
-        );
-        return;
-    }
-
-    // Cache-first for static assets (js/css/images/i18n), refreshing the
-    // cache in the background on every hit.
-    event.respondWith(
-        caches.match(request).then(function (cached) {
-            var fetchPromise = fetch(request).then(function (response) {
-                if (response && response.ok) {
-                    var copy = response.clone();
-                    caches.open(CACHE_NAME).then(function (cache) {
-                        cache.put(request, copy);
-                    });
-                }
-                return response;
-            }).catch(function () {
-                return cached;
+            }
+            return response;
+        }).catch(function () {
+            return caches.match(request).then(function (cached) {
+                return cached || (request.mode === 'navigate' ? caches.match('./index.html') : undefined);
             });
-
-            return cached || fetchPromise;
         })
     );
 });

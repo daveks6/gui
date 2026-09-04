@@ -129,8 +129,12 @@ var webSerial = {
          
             readerCancelCallback = false;
             readLoop(device);
-            
+
             if (request.callback) request.callback(true);
+        }).catch(function (error) {
+            console.log('SERIAL: Failed to open device: ' + error.message);
+            alert('Failed to open device: ' + error.message);
+            if (request.callback) request.callback(false);
         });
     },
     disconnect: function (callback) {
