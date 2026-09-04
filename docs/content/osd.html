@@ -1,0 +1,52 @@
+<div class="flex-container">
+	<div class="column column-left" style="width: 380px; height: 330px">
+		<div class="block" id="osd_block">
+			<div class="title" data-i18n="title.osd-mirror">OSD Mirror</div>
+			<div class="body" style="width: 382px; height: 299px">
+				<div class="osd">
+
+					<div style="width: 370px">
+
+						<div id="osd_mirror">
+							<div id="osd_screen" class="osd_screen"></div>
+
+							<div id="osdframe">
+								<canvas id="osd" width="370" height="288"></canvas>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="column column-100">
+
+		<div class="block">
+			<div class="title">Backgrounds</div>
+			<div class="body">
+				<ul class="osd-backgrounds-thimbnails">
+
+				</ul>
+			</div>
+		</div>
+		
+		<div id="osdkc" class="block" style="display:none">
+			<div class="title">Keyboard Controls</div>
+			<div class="body">
+				Z - Yaw left, X - Yaw Right. Hold Z to enter OSD Menu.<br/> 
+				Arrows - Roll and Pitch<br/>
+				Enter, Space - Select<br/>
+				Numbers - Throttle<br/>
+			</div>
+		</div>
+	</div>
+	
+	<div class="footer">
+		<a id="backup" 	class="u-button" href="#" title="Backup to file" data-i18n="button.backup">Backup</a>&nbsp;
+		<a id="restore" class="u-button" href="#" title="Restore from file" data-i18n="button.restore" style="margin-right:10px">Restore</a>&nbsp;
+		<!--  a id="save" 	class="u-button" href="#" title="Save Settings to EEPROM" data-i18n="button.save" style="margin-right:10px">Save</a>&nbsp; -->
+	</div>
+		
+</div>
+
+   <input style="display:none" type="file" id="files" name="files[]" accept=".txt" />

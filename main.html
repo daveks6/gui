@@ -5,10 +5,20 @@
 	<link rel="icon" type="image/png" href="images/favicon.png" />
     <title>KISS ULTRA</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="author" content="flyduino" />
     <meta name="author" content="Programming: Alexander Fedorov aka FedorCommander" />
     <meta name="author" content="Programming: Felix Niessen aka juuuut" />
     <meta name="author" content="Graphics: Max Levine" />
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="theme-color" content="#d32f2f" />
+    <link rel="apple-touch-icon" href="./images/pwa/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="KISS ULTRA" />
+
     <link type="text/css" rel="stylesheet" href="./css/css/style.css" media="all" />
     <script type="text/javascript" src="./js/libraries/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="./js/libraries/jquery-ui.min.js"></script>
@@ -17,6 +27,7 @@
     <script type="text/javascript" src="./js/libraries/queue.js"></script>
     <script type="text/javascript" src="./js/input_validation.js"></script>
     <script type="text/javascript" src="./js/gui.js"></script>
+    <script type="text/javascript" src="./js/libraries/web-serial-polyfill.js"></script>
     <script type="text/javascript" src="./js/chrome_serial.js"></script>
     <script type="text/javascript" src="./js/web_serial.js"></script>
     <script type="text/javascript" src="./js/serial.js"></script>
@@ -106,7 +117,17 @@
 			<div class="modal-footer"><a class="update-download u-button" href="https://github.com/KissUltra/gui/releases/latest" target="_blank">Download</a></div>
 		</div>
 	</div>
-	
+
+	<script type="text/javascript">
+		if (('serviceWorker' in navigator) && !isNative()) {
+			window.addEventListener('load', function () {
+				navigator.serviceWorker.register('./sw.js').catch(function (error) {
+					console.log('Service worker registration failed: ' + error.message);
+				});
+			});
+		}
+	</script>
+
 </body>
 
 </html>

@@ -1,0 +1,80 @@
+<div class="flex-container">
+	<div class="column column-left column-33 max-height" style="flex-direction:column">
+		<div class="block">
+			    <div class="title" data-i18n="title.receiver">Receiver</div>
+			    <div class="body">
+        			<div id="rbars" class="bars"></div>
+        		</div>
+		</div>
+		
+		<div class="block block-h-100">
+			    <div class="title" data-i18n="title.rates">Rates</div>
+			    <div class="body">
+        			<table class="rc_rates">
+				<tr>
+					<th class="name"></th>
+					<th class="rate" data-i18n="column.rc-rate">RC Rate</th>
+					<th class="expo" data-i18n="column.rc-expo">Rate</th>
+					<th class="curve" data-i18n="column.rc-curve">RC Curve</th>
+				</tr>
+				<tr class="roll">
+					<td class="name" data-i18n="column.roll">Roll</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+				</tr>
+				<tr class="pitch">
+					<td class="name" data-i18n="column.pitch">Pitch</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+				</tr>
+				<tr class="yaw">
+					<td class="name" data-i18n="column.yaw">Yaw</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+					<td>
+						<input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+					</td>
+				</tr>
+			</table>
+        			
+        	</div>
+		</div>
+		
+		<div class="footer">
+			<a id="save" class="u-button" href="#" title="Save Settings to EEPROM" data-i18n="button.save" style="margin-right:10px">Save Settings</a>&nbsp;
+		</div>
+	</div>	
+	
+	<div class="column column-67">
+		<div class="block">
+			    <div class="title" data-i18n="title.charts">Charts</div>
+			    <div class="body">
+					<div id="rates_chart_roll" class="rc_chart"></div>
+					<div id="rates_chart_pitch" class="rc_chart"></div>
+					<br />
+					<div id="rates_chart_yaw" class="rc_chart"></div>
+					<div id="model" class="rc_chart"></div>
+        		</div>
+		</div>
+	</div>	
+	
+</div>
+

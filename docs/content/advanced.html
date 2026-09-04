@@ -1,0 +1,971 @@
+<div class="flex-container">
+	<div class="column column-left">
+
+
+		<div class="block">
+			<div class="title" data-i18n="title.custom-orientation">Custom FC orientation</div>
+			<div class="body">
+				<dl>
+					<dt class="wide">
+					<input class="unsafe"
+							type="checkbox" disabled="disabled" name="CBO" />&nbsp; <span
+							data-i18n="column.use-custom-orientation"
+							class="display:inline-block">Use custom FC orientation</span>
+					</dt>
+				</dl>
+			
+				<table id="CBODATA">					
+					<tr>
+						<td width="40%">&nbsp;</td>
+						<td width="20%" data-i18n="column.roll">Roll</td>
+						<td width="20%" data-i18n="column.pitch">Pitch</td>
+						<td width="20%" data-i18n="column.yaw">Yaw</td>
+					</tr>
+					<tr>
+						<td data-i18n="[html]column.fc-orientation">FC orientation &deg;</td>
+						<td><input class="unsafe" disabled="disabled" type="number"
+							lang="en-150" step="1" size="3" name="CBO0" min="-180" max="180"
+							data-step="1" data-precision="0" value="0" /></td>
+						<td><input class="unsafe" disabled="disabled" type="number"
+							lang="en-150" step="1" size="3" name="CBO1" min="-180" max="180"
+							data-step="1" data-precision="0" value="0" /></td>
+						<td><input class="unsafe" disabled="disabled" type="number"
+							lang="en-150" step="1" size="3" name="CBO2" min="-180" max="180"
+							data-step="1" data-precision="0" value="0" /></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+
+		
+		<div id="reverseMotors" class="block">
+			<div class="title" id="reverseMotorsTitle" data-i18n="title.reverse-motors">Yaw control direction</div>
+			<div class="body">
+				<dl>
+					<dt class="wide">
+						<input class="unsafe" type="checkbox" name="reverseMotors" /> &nbsp;
+						<span data-i18n="column.reverse-motors" id="reverseMotorsText">Reverse yaw control direction</span>
+					</dt>
+				</dl>
+			</div>
+		</div>
+		
+		<div id="launchMode" class="block">
+			<div class="title" id="LaunchModeTitle" data-i18n="title.launchMode">Launchmode</div>
+			<div class="body">
+			<dl>
+				<dt class="wide">
+					<input class="unsafe" type="checkbox" name="launchMode" /> &nbsp;
+					<span data-i18n="column.launchMode" id="launchModeText">Enable launchmode</span>
+				</dt>
+			</dl>
+			</div>
+		</div>
+		
+		<div class="block">
+
+			<div class="title" data-i18n="title.rx-deadbands">RX deadbands</div>
+			<div class="body">
+			<table>
+				<tr>
+					<td width="40%">&nbsp;</td>
+					<td width="20%" data-i18n="column.roll">Roll</td>
+					<td width="20%" data-i18n="column.pitch">Pitch</td>
+					<td width="20%" data-i18n="column.yaw">Yaw</td>
+				</tr>
+				<tr>
+					<td data-i18n="column.rx-deadband">RX deadband</td>
+					<td>
+						<input class="unsafe" type="number" lang="en-150" step="1" size="3" name="DB0" min="0" max="250" data-step="1"
+						 data-precision="0" value="0" />
+					</td>
+					<td>
+						<input class="unsafe" type="number" lang="en-150" step="1" size="3" name="DB1" min="0" max="250" data-step="1"
+						 data-precision="0" value="0" />
+					</td>
+					<td>
+						<input class="unsafe" type="number" lang="en-150" step="1" size="3" name="DB2" min="0" max="250" data-step="1"
+						 data-precision="0" value="0" />
+					</td>
+				</tr>
+			</table>
+			</div>
+		</div>
+
+		<div id="serialnew" class="block" style="display: none;">
+			<div class="title" data-i18n="title.serial-config">Serial config</div>
+			<div class="body">
+			<table>
+				<tr>
+					<td width="100%" colspan="4">
+						<input class="unsafe" type="checkbox" disabled="disabled" name="CSC" />&nbsp;
+						<span data-i18n="column.use-custom-serialconfiguration" class="display:inline-block">Use custom serial configuration</span>
+					</td>
+				</tr>
+			</table>
+			<div id="newserial" >
+				<dl id="serial0"></dl>
+				<dl id="serial1"></dl>
+				<dl id="serial2"></dl>
+				<dl id="serial3"></dl>
+				<dl id="serial4"></dl>
+				<dl id="serial5"></dl>
+				<dl id="serial6"></dl>
+				<dl id="serial7"></dl>
+			</div>
+			</div>
+		</div>
+		
+		
+		<div id="serial" class="block">
+			<div class="title" data-i18n="title.logger-config">Logger config</div>
+			<div class="body">
+			<dl>
+				<dt>
+					<span data-i18n="column.device">Device</span>
+				</dt>
+				<dd>
+					<select class="unsafe" name="loggerConfig" id="loggerConfig">
+						<option value="0" data-i18n="serial.0">OSD</option>
+						<option value="11" data-i18n="serial.11">VTX</option>
+						<option value="1" data-i18n="serial.1">Logger / 10%</option>
+						<option value="2" data-i18n="serial.2">Logger / 20%</option>
+						<option value="3" data-i18n="serial.3">Logger / 30%</option>
+						<option value="4" data-i18n="serial.4">Logger / 40%</option>
+						<option value="5" data-i18n="serial.5">Logger / 50%</option>
+						<option value="6" data-i18n="serial.6">Logger / 60%</option>
+						<option value="7" data-i18n="serial.7">Logger / 70%</option>
+						<option value="8" data-i18n="serial.8">Logger / 80%</option>
+						<option value="9" data-i18n="serial.9">Logger / 90%</option>
+						<option value="10" data-i18n="serial.10">Logger / 100%</option>
+					</select>
+				</dd>
+			</dl>
+			
+				<dl class="general-settings" id="loggerSpeed">
+					<dt class="logger-speed" data-i18n="column.logger-speed">Logger Baudrate</dt>
+					<dd class="logger-speed-variables">
+						<select name="loggerSpeed">
+							<option value="0">115200 </option>
+							<option value="1">250000 </option>
+							<option value="2">1500000 </option>
+							<option value="3">2000000 </option>
+							<option value="4">2470000</option>
+						</select>
+					</dd>
+				</dl>
+
+				<dl class="general-settings" id="loggerDebug">
+					<dt class="logger-debug" data-i18n="column.debug-fields">Debug fields</dt>
+					<dd class="logger-debug-variables">
+						<select name="loggerDebugVariables">
+							<option value="0" data-i18n="debug.0">--</option>
+							<option value="1" data-i18n="debug.1">Raw Gyroscope</option>
+							<option value="2" data-i18n="debug.2">Raw Accelerometer</option>
+							<option value="3" data-i18n="debug.3">Loop parameters</option>
+							<option value="4" data-i18n="debug.4">ESC Voltage</option>
+							<option value="5" data-i18n="debug.5">ESC Current</option>
+							<option value="6" data-i18n="debug.6">ESC Temperature</option>
+							<option value="7" data-i18n="debug.7">ESC RPMs</option>
+							<option value="8" data-i18n="debug.8">ESC Consumption</option>
+							<option value="9" data-i18n="debug.9">Filter Frequency</option>
+						</select>
+					</dd>
+				</dl>
+
+			</div>
+		</div>
+
+		<div id="vtx" class="block">
+			<div class="title" data-i18n="title.vtx-config">VTX config</div>
+			<div class="body">
+			<dl>
+				<dt>
+					<span title="VTX type" data-i18n="column.vtx-type">Type</span>
+				</dt>
+				<dd>
+					<select class="unsafe" name="vtxType" id="vtxType">
+						<option value="0" data-i18n="vtx.0">--</option>
+<!-- 						<option value="1" data-i18n="vtx.1">Dummy VTX</option> -->
+						<option value="2" data-i18n="vtx.2">IRC Tramp HV</option>
+						<option value="3" data-i18n="vtx.3">TBS Unify Smart Audio</option>
+						<option value="4" data-i18n="vtx.4">TBS EVO Crossfire</option>
+
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				
+				<dt class="vtx_opts">
+					<span title="VTX freq" data-i18n="column.vtx-frequency">Frequency</span>
+				</dt>
+				<dd class="vtx_opts">
+					<select name="vtxChannel" id="vtxChannel">
+						<option value="0" data-i18n="vtx-freq.0">A:1 (5865 MHz)</option>
+						<option value="1" data-i18n="vtx-freq.1">A:2 (5845 MHz)</option>
+						<option value="2" data-i18n="vtx-freq.2">A:3 (5825 MHz)</option>
+						<option value="3" data-i18n="vtx-freq.3">A:4 (5805 MHz)</option>
+						<option value="4" data-i18n="vtx-freq.4">A:5 (5785 MHz)</option>
+						<option value="5" data-i18n="vtx-freq.5">A:6 (5765 MHz)</option>
+						<option value="6" data-i18n="vtx-freq.6">A:7 (5745 MHz)</option>
+						<option value="7" data-i18n="vtx-freq.7">A:8 (5725 MHz)</option>
+
+						<option value="8" data-i18n="vtx-freq.8">B:1 (5733 MHz)</option>
+						<option value="9" data-i18n="vtx-freq.9">B:2 (5752 MHz)</option>
+						<option value="10" data-i18n="vtx-freq.10">B:3 (5771 MHz)</option>
+						<option value="11" data-i18n="vtx-freq.11">B:4 (5790 MHz)</option>
+						<option value="12" data-i18n="vtx-freq.12">B:5 (5809 MHz)</option>
+						<option value="13" data-i18n="vtx-freq.13">B:6 (5828 MHz)</option>
+						<option value="14" data-i18n="vtx-freq.14">B:7 (5847 MHz)</option>
+						<option value="15" data-i18n="vtx-freq.15">B:8 (5866 MHz)</option>
+
+						<option value="16" data-i18n="vtx-freq.16">E:1 (5705 MHz)</option>
+						<option value="17" data-i18n="vtx-freq.17">E:2 (5685 MHz)</option>
+						<option value="18" data-i18n="vtx-freq.18">E:3 (5665 MHz)</option>
+						<option value="19" data-i18n="vtx-freq.19">E:4 (5645 MHz)</option>
+						<option value="20" data-i18n="vtx-freq.20">E:5 (5885 MHz)</option>
+						<option value="21" data-i18n="vtx-freq.21">E:6 (5905 MHz)</option>
+						<option value="22" data-i18n="vtx-freq.22">E:7 (5925 MHz)</option>
+						<option value="23" data-i18n="vtx-freq.23">E:8 (5945 MHz)</option>
+
+						<option value="24" data-i18n="vtx-freq.24">IRC/FS:1 (5740 MHz)</option>
+						<option value="25" data-i18n="vtx-freq.25">IRC/FS:2 (5760 MHz)</option>
+						<option value="26" data-i18n="vtx-freq.26">IRC/FS:3 (5780 MHz)</option>
+						<option value="27" data-i18n="vtx-freq.27">IRC/FS:4 (5800 MHz)</option>
+						<option value="28" data-i18n="vtx-freq.28">IRC/FS:5 (5820 MHz)</option>
+						<option value="29" data-i18n="vtx-freq.29">IRC/FS:6 (5840 MHz)</option>
+						<option value="30" data-i18n="vtx-freq.30">IRC/FS:7 (5860 MHz)</option>
+						<option value="31" data-i18n="vtx-freq.31">IRC/FS:8 (5880 MHz)</option>
+
+						<option value="32" data-i18n="vtx-freq.32">RaceBand:1 (5658 MHz)</option>
+						<option value="33" data-i18n="vtx-freq.33">RaceBand:2 (5695 MHz)</option>
+						<option value="34" data-i18n="vtx-freq.34">RaceBand:3 (5732 MHz)</option>
+						<option value="35" data-i18n="vtx-freq.35">RaceBand:4 (5769 MHz)</option>
+						<option value="36" data-i18n="vtx-freq.36">RaceBand:5 (5806 MHz)</option>
+						<option value="37" data-i18n="vtx-freq.37">RaceBand:6 (5843 MHz)</option>
+						<option value="38" data-i18n="vtx-freq.38">RaceBand:7 (5880 MHz)</option>
+						<option value="39" data-i18n="vtx-freq.39">RaceBand:8 (5917 MHz)</option>
+					</select>
+				</dd>
+			</dl>
+			<dl>
+				<dt class="vtx_opts" data-i18n="[html]column.vtx-low-power">Low Power: (mW)&nbsp;</dt>
+				<dd class="vtx_opts">
+					<input type="number" lang="en-150" step="1" name="vtxPowerLow" data-step="1" min="0" max="3000" data-precision="0"
+					 value="25" />
+				</dd>
+			</dl>
+			<dl>
+				<dt class="vtx_opts"  data-i18n="[html]column.vtx-high-power">High Power: (mW)&nbsp;</dt>
+				<dd class="vtx_opts">
+					<input type="number" lang="en-150" step="1" name="vtxPowerHigh" data-step="1" min="0" max="3000" data-precision="0"
+					 value="25" />
+				</dd>
+			</dl>
+			
+			</div>
+		</div>
+
+		<div id="motorBuzzer" class="block">
+			<div class="title" data-i18n="title.buzzer-emulation">Buzzer emulation</div>
+			<div class="body">
+			<dl>
+				<dt class="wide">
+					<input type="checkbox" name="motorBuzzer" /> &nbsp;
+					<span data-i18n="column.buzzer-emulation">Emulate with motors</span>
+				</dt>
+			</dl>
+			</div>
+		</div>
+
+		<div id="led" class="block">
+			<div class="title" data-i18n="title.led-color">Led color</div>
+			<div class="body">
+			<dl>
+				<dt>
+					<span title="Led Color" data-i18n="column.led-color">Select Color</span>
+				</dt>
+				<dd>
+					<select disabled="true" name="RGBSelector">
+						<option value="0,0,0" data-i18n="led.black">Black</option>
+						<option value="255,255,255" data-i18n="led.white">White</option>
+						<option value="255,255,0" data-i18n="led.yellow">Yellow</option>
+						<option value="255,123,0" data-i18n="led.orange">Orange</option>
+						<option value="255,0,0" data-i18n="led.red">Red</option>
+						<option value="128,0,128" data-i18n="led.purple">Purple</option>
+						<option value="0,0,255" data-i18n="led.blue">Blue</option>
+						<option value="0,255,0" data-i18n="led.green">Green</option>
+						<option value="0,255,255" data-i18n="led.cyan">Cyan</option>
+						<option value="" data-i18n="led.custom">Custom</option>
+					</select>
+					<input type="hidden" id="colorPicker" />
+					<input type="hidden" name="RGB" id="RGB" value="" />
+				</dd>
+			</dl>
+			<dl class="general-settings" id="ledBrightness">
+				<dt>
+					<span title="Led Brightness" data-i18n="column.led-brightness">Brightness</span> %
+				</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="ledBrightness" data-step="1" min="0" max="100" data-precision="0"
+					 value="255" />
+				</dd>
+			</dl>
+			</div>
+		</div>
+		
+		
+		
+		<div id="adjustments" class="block" style="display:none">
+			<div class="title" data-i18n="title.adjustments">Adjustments</div>
+			<div class="body">
+		
+			<dl class="general-settings" id=VSO >
+				<dt title="Voltage Sensor Offset" data-i18n="column.voltage.sensor.offset">Voltage sensor offset</dt>
+				<dd>
+						<select style="width: 80px" name="voltageSensorOffset">
+							<option value="236">-2,0v</option>
+							<option value="237">-1,9v</option>
+							<option value="238">-1,8v</option>
+							<option value="239">-1,7v</option>
+							<option value="240">-1,6v</option>
+							<option value="241">-1,5v</option>
+							<option value="242">-1,4v</option>
+							<option value="243">-1,3v</option>
+							<option value="244">-1,2v</option>
+							<option value="245">-1,1v</option>
+							<option value="246">-1,0v</option>
+							<option value="247">-0,9v</option>
+							<option value="248">-0,8v</option>
+							<option value="249">-0,7v</option>
+							<option value="250">-0,6v</option>
+							<option value="251">-0,5v</option>
+							<option value="252">-0,4v</option>
+							<option value="253">-0,3v</option>
+							<option value="254">-0,2v</option>
+							<option value="255">-0,1v</option>
+							<option value="0">--</option>
+							<option value="1">+0,1v</option>
+							<option value="2">+0,2v</option>
+							<option value="3">+0,3v</option>
+							<option value="4">+0,4v</option>
+							<option value="5">+0,5v</option>
+							<option value="6">+0,6v</option>
+							<option value="7">+0,7v</option>
+							<option value="8">+0,8v</option>
+							<option value="9">+0,9v</option>
+							<option value="10">+1,0v</option>
+							<option value="11">+1,1v</option>
+							<option value="12">+1,2v</option>
+							<option value="13">+1,3v</option>
+							<option value="14">+1,4v</option>
+							<option value="15">+1,5v</option>
+							<option value="16">+1,6v</option>
+							<option value="17">+1,7v</option>
+							<option value="18">+1,8v</option>
+							<option value="19">+1,9v</option>
+							<option value="20">+2,0v</option>
+						</select>
+					</dd>
+			</dl>
+			
+			</div>
+		</div>
+		
+		
+	</div>
+	
+	<!--  Right column -->
+	
+	<div class="column column-right">
+		
+		<div  class="block">
+			<div class="title">Flight performance</div>
+			<div class="body">
+			<dl>
+				<dt>
+					<span data-i18n="column.setpoint-weight">Setpoint weight in Dterm(%)</span>
+				</dt>
+				<input disabled="true" type="number" lang="en-150" step="1" name="SID" data-step="1" min="0" max="100"
+				 data-precision="0" value="100" />
+			</dl>
+			
+			<dl id="brakingFactor">
+				<dt>
+					<span data-i18n="column.braking-factor">Braking Factor (%)</span>
+				</dt>
+				<input disabled="true" type="number" lang="en-150" step="1" name="brakingFactor" data-step="1" min="0" max="100"
+				 data-precision="0" value="100" />
+			</dl>
+			</div>
+		</div>
+		
+		
+
+		<div id="AdaptiveFilter" class="block">
+			<div class="title" data-i18n="title.adaptive-filter">Adaptive Filter</div>
+			<div class="body">
+			<dl>
+				<dt>
+					<input type="checkbox" name="adaptiveFilter" /> &nbsp;
+					<span data-i18n="column.adaptive-filter">Enable adaptive filter</span>
+				</dt>
+			</dl>
+			</div>
+		</div>
+
+		<div id="Notch" class="block">
+			<div class="title" data-i18n="title.notch-filter">Notch Filter</div>
+			<div class="body">
+			<table>
+				<tr>
+					<td width="176px">&nbsp;</td>
+					<td width="60px">
+						<span data-i18n="column.roll">Roll</span> &nbsp; &nbsp;
+						<input type="checkbox" name="NFE0" disabled="true" />
+					</td>
+					<td width="60px">
+						<span data-i18n="column.pitch">Pitch</span> &nbsp; &nbsp;
+						<input type="checkbox" name="NFE1" disabled="true" />
+					</td>
+				</tr>
+				<tr>
+					<td data-i18n="column.notch-center">Center Frequency: (Hz)</td>
+					<td>
+						<input disabled="true" type="number" lang="en-150" step="1" name="NFCF0" data-step="1" min="0" max="490"
+						 data-precision="0" value="200" size="3" />
+					</td>
+					<td>
+						<input disabled="true" type="number" lang="en-150" step="1" name="NFCF1" data-step="1" min="0" max="490"
+						 data-precision="0" value="200" size="3" />
+					</td>
+				</tr>
+				<tr>
+					<td data-i18n="column.notch-cutoff">Cutoff Frequency: (Hz)</td>
+					<td>
+						<input disabled="true" type="number" lang="en-150" step="1" name="NFCO0" data-step="1" min="0" max="490"
+						 data-precision="0" value="100" size="3" />
+					</td>
+					<td>
+						<input disabled="true" type="number" lang="en-150" step="1" name="NFCO1" data-step="1" min="0" max="490"
+						 data-precision="0" value="100" size="3" />
+					</td>
+				</tr>
+			</table>
+			</div>
+		</div>
+		
+		<div id="LPFs" class="block">
+			<div class="title">Advanced LPF settings</div>
+			<div class="body">
+				<dl>
+					<dt style="width:220px;">
+						<span>Roll/Pitch LPF FRQ</span>&nbsp;</dt>
+					<select name="mainlpf" disabled="true">
+						<option value="0" data-i18n="filter.0">Off</option>
+						<option value="1" data-i18n="filter.1">High</option>
+						<option value="2" data-i18n="filter.2">Medium High</option>
+						<option value="3" data-i18n="filter.3">Medium</option>
+						<option value="4" data-i18n="filter.4">Medium Low</option>
+						<option value="5" data-i18n="filter.5">Low</option>
+						<option value="6" data-i18n="filter.6">Very Low</option>
+					</select>
+				</dl>
+	
+
+				<dl class="general-settings" disabled="true">
+					<dt style="width:220px;">
+						<span>Yaw LPF FRQ</span>&nbsp;</dt>
+					<select name="yawlpf" disabled="true">
+						<option value="0" data-i18n="filter.0">Off</option>
+						<option value="1" data-i18n="filter.1">High</option>
+						<option value="2" data-i18n="filter.2">Medium High</option>
+						<option value="3" data-i18n="filter.3">Medium</option>
+						<option value="4" data-i18n="filter.4">Medium Low</option>
+						<option value="5" data-i18n="filter.5">Low</option>
+						<option value="6" data-i18n="filter.6">Very Low</option>
+					</select>
+				</dl>
+		
+	
+				<dl class="general-settings" disabled="true">
+					<dt style="width:220px;">
+						<span>Dterm LPF FRQ</span>&nbsp;</dt>
+					<select name="Dlpf" disabled="true">
+						<option value="0" data-i18n="filter.0">Off</option>
+						<option value="1" data-i18n="filter.1">High</option>
+						<option value="2" data-i18n="filter.2">Medium High</option>
+						<option value="3" data-i18n="filter.3">Medium</option>
+						<option value="4" data-i18n="filter.4">Medium Low</option>
+						<option value="5" data-i18n="filter.5">Low</option>
+						<option value="6" data-i18n="filter.6">Very Low</option>
+					</select>
+				</dl>
+			</div>
+		</div>
+
+		<div id="yawCF" class="block">
+			<div class="title" data-i18n="title.yaw-filter">Yaw Filter</div>
+			<div class="body">
+			<dl>
+				<dt style="width:220px;">
+					<span data-i18n="column.yaw-filter-strength">Yaw Filter strength</span>&nbsp;</dt>
+				<input disabled="true" type="number" lang="en-150" step="1" name="YCF" data-step="1" min="0" max="97"
+				 data-precision="0" value="92" />
+			</dl>
+			</div>
+		</div>
+
+		<div id="bat" class="block">
+			<div class="title" data-i18n="title.lipo-alarm">Lipo alarm</div>
+			<div class="body">
+			<dl>
+				<dt title="low battery alarm" style="width:220px" data-i18n="column.lipo-volts">Voltage is less than </dt>
+				<dd>
+					<input type="number" lang="en-150" step="0.1" name="vbatAlarm" data-step="0.1" min="0" max="26" data-precision="1"
+					 value="0.0" />
+					<input type="hidden" name="vbatAlarm" id="vbatAlarm" value="" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt title="mah alarm" style="width:220px" data-i18n="column.lipo-mah">Consumption is greater than </dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="mahAlarm" data-step="1" min="0" max="24000" data-precision="0"
+					 value="0" />
+					<input type="hidden" name="mahAlarm" id="mahAlarm" value="" />
+				</dd>
+			</dl>
+			</div>
+		</div>
+
+		<div id="analogCurrent" class="block">
+			<div class="title" data-i18n="title.analog-current">Analog current sensor</div>
+			<div class="body">
+			<dl id="ccpadmodediv">
+				<dt style="width:220px">
+					<span data-i18n="column.cc-mode">CC pad mode</span>
+				</dt>
+				<dd>
+					<select class="unsafe" name="ccPadMode" id="ccPadMode">
+						<option value="0" data-i18n="cc-mode.0">Camera control</option>
+						<option value="1" data-i18n="cc-mode.1">Current sensor</option>
+					</select>
+				</dd>
+			</dl>
+			
+			<dl id="currentSensorDivider">
+				<dt  style="width:220px" data-i18n="column.current-sensor-divider">Current sensor divider </dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="currentSensorDivider" data-step="1" min="1" max="65535" data-precision="0"
+					 value="0" />
+				</dd>
+			</dl>
+			
+			</div>
+		</div>
+
+		<div id="djiosd" style="display:none" class="block">
+			<div class="title" data-i18n="title.dji.osd">DJI OSD</div>
+			<div class="body">
+			
+			<dl id="mspCanvas">
+				<dt title="osd layout" style="width:220px" data-i18n="column.dji.osd.canvas">OSD Mode</dt>
+				<dd>
+					<select class="unsafe" style="width:95px" name="mspCanvas">
+						<option value="0">MSP</option>
+						<option value="1">HDZERO</option>
+						<option value="2">DJI WTF</option>
+						<option value="3">AVATAR</option>
+					</select>
+				</dd>
+			</dl>
+
+			<dl class="msposd">
+				<dt title="osd layout" style="width:220px" data-i18n="column.dji.osd.layout">Layout</dt>
+				<dd>
+					<select class="unsafe" style="width:95px" name="djiLayout">
+						<option value="0">Custom</option>
+						<option value="1">All around</option>
+						<option value="2">Bottom</option>
+						<option value="3">Top</option>
+						<option value="4">Left top</option>
+						<option value="5">Right top</option>
+						<option value="6">Left bottom</option>
+						<option value="7">Right bottom</option>
+					</select>
+				</dd>
+			</dl>
+			<dl class="msposd">
+				<dt title="osd units" style="width:220px" data-i18n="column.dji.osd.units">Units</dt>
+				<dd>
+					<select class="unsafe" style="width:95px" name="djiUnits">
+						<option value="0">Metric</option>
+						<option value="1">Imperial</option>
+					</select>
+				</dd>
+			</dl>
+			<dl class="msposd">
+				<dt title="crosshair" style="width:220px" data-i18n="column.dji.osd.crosshair">Show crosshair</dt>
+				<dd>
+					<input class="unsafe" type="checkbox" name="djiCrosshair" />
+				</dd>
+			</dl>
+			<dl class="msposd">
+				<dt title="gps" style="width:220px" data-i18n="column.dji.osd.gps">GPS data</dt>
+				<dd>
+					<input class="unsafe" type="checkbox" name="djiGPS" />
+				</dd>
+			</dl>
+			</div>
+		</div>
+		
+		<div id="gps" class="block"">
+			<div class="title" data-i18n="title.gps">GPS</div>
+			<div class="body">
+
+			<dl class="general-settings" id="gpsprotocol">
+				<dt title="GPS protocol" style="width:220px" data-i18n="column.gps.protocol">GPS protocol</dt>
+				<dd>
+					<select class="unsafe" style="width:80px" name="gpsprotocol">
+						<option value="0">NMEA</option>
+						<option value="1">UBX</option>
+					</select>
+				</dd>
+			</dl>
+			
+			<dl class="general-settings" id="gpstimezone">
+				<dt title="GPS timezone" style="width:220px" data-i18n="column.gps.timezonel">GPS timezone</dt>
+				<dd>
+					<select class="unsafe" style="width:80px" name="tzIndex">
+							<option value="0">-12:00</option>
+							<option value="1">-11:30</option>
+							<option value="2">-11:00</option>
+							<option value="3">-10:30</option>
+							<option value="4">-10:00</option>
+							<option value="5">-09:30</option>
+							<option value="6">-09:00</option>
+							<option value="7">-08:30</option>
+							<option value="8">-08:00</option>
+							<option value="9">-07:30</option>
+							<option value="10">-07:00</option>
+							<option value="11">-06:30</option>
+							<option value="12">-06:00</option>
+							<option value="13">-05:30</option>
+							<option value="14">-05:00</option>
+							<option value="15">-04:30</option>
+							<option value="16">-04:00</option>
+							<option value="17">-03:30</option>
+							<option value="18">-03:00</option>
+							<option value="19">-02:30</option>
+							<option value="20">-02:00</option>
+							<option value="21">-01:30</option>
+							<option value="22">-01:00</option>
+							<option value="23">-00:30</option>
+							<option value="24">GMT</option>
+							<option value="25">+00:30</option>
+							<option value="26">+01:00</option>
+							<option value="27">+01:30</option>
+							<option value="28">+02:00</option>
+							<option value="29">+02:30</option>
+							<option value="30">+03:00</option>
+							<option value="31">+03:30</option>
+							<option value="32">+04:00</option>
+							<option value="33">+04:30</option>
+							<option value="34">+05:00</option>
+							<option value="35">+05:30</option>
+							<option value="36">+06:00</option>
+							<option value="37">+06:30</option>
+							<option value="38">+07:00</option>
+							<option value="39">+07:30</option>
+							<option value="40">+08:00</option>
+							<option value="41">+08:30</option>
+							<option value="42">+09:00</option>
+							<option value="43">+09:30</option>
+							<option value="44">+10:00</option>
+							<option value="45">+10:30</option>
+							<option value="46">+11:00</option>
+							<option value="47">+11:30</option>
+							<option value="48">+12:00</option>
+						</select>
+				</dd>
+			</dl>
+			</div>
+		</div>
+		
+		<div id="rth" class="block" style="display:none">
+			<div class="title" data-i18n="title.rth">RTH</div>
+			<div class="body">
+			<dl>
+				<dt title="Return altitude" style="width:220px" data-i18n="column.rth.return.altitude">Return altitude</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="rthReturnAltitude" data-step="1" min="0" max="1000" data-precision="0" value="150" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt title="Home altitude" style="width:220px" data-i18n="column.rth.home.altitude">Home altitude</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="rthHomeAltitude" data-step="1" min="0" max="1000" data-precision="0" value="40" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt title="Descent radius" style="width:220px" data-i18n="column.rth.descent.radius">Descent radius</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="rthDescentRadius" data-step="1" min="0" max="1000" data-precision="0" value="200" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt title="Max throttle" style="width:220px" data-i18n="column.rth.max.throttle">Maximum throttle</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="rthMaxThrottle" data-step="1" min="0" max="2000" data-precision="0" value="0" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt title="Hover throttle" style="width:220px" data-i18n="column.rth.hover.throttle">Hover throttle</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="rthHoverThrottle" data-step="1" min="0" max="2000" data-precision="0" value="0" />
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt title="Min throttle" style="width:220px" data-i18n="column.rth.min.throttle">Minimum throttle</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="rthMinThrottle" data-step="1" min="0" max="2000" data-precision="0" value="0" />
+				</dd>
+			</dl>
+			<input type="hidden" name="rthReturnSpeed" />
+			
+			<!-- <dl>
+				<dt title="Return speed" style="width:220px" data-i18n="column.rth.return.speed">Return speed</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="rthReturnSpeed" data-step="1" min="0" max="255" data-precision="0" value="0" />
+				</dd>
+			</dl> -->
+			
+			<dl>
+				<dt title="Home action" style="width:220px" data-i18n="column.rth.home.action">Home action</dt>
+				<dd>
+					<select style="width:95px" name="rthHomeAction">
+						<option value="0">Loiter</option>
+						<option value="1">Loiter until lipo alarm</option>
+						<option value="2">Disarm</option>
+					</select>
+				</dd>
+			</dl>
+
+			<dl class="general-settings" id="rthfailsafe">
+				<dt title="Failsafe Action" style="width:220px" data-i18n="column.rth.failsafe.action">RTH on Failsafe</dt>
+				<dd>
+					<input class="unsafe" type="checkbox" name="rtfFailsafeAction" />
+				</dd>
+			</dl>
+			
+			<dl class="general-settings" id="rthaltsource">
+				<dt title="RTH Altitude source" style="width:220px" data-i18n="column.rth.altitude.source">RTH altitude source</dt>
+				<dd>
+					<select class="unsafe" style="width:60px" name="rthaltsource">
+						<option value="0">GPS</option>
+						<option value="1">BARO</option>
+					</select>
+				</dd>
+			</dl>
+			</div>
+		</div>
+		
+		<div id="limits" class="block" style="display:none">
+			<div class="title" data-i18n="title.limits">Limits</div>
+			<div class="body">
+			<dl>
+				<dt title="Altitude Limit" style="width:220px" data-i18n="column.altlimit">Altitude Limit (m)</dt>
+				<dd>
+					<input type="number" lang="en-150" step="1" name="altLimit" data-step="1" min="0" max="65535" data-precision="0" value="0" />
+				</dd>
+			</dl>
+			</div>
+		</div>
+		
+		<div id="dshotRouter"  class="block">
+			<div class="title" data-i18n="title.dshot.router">DShot router</div>
+			<div class="body">
+			
+			<table>
+				<tbody><tr>
+					<td width="100%" colspan="4">
+						<input class="unsafe" type="checkbox" disabled="disabled" name="CDR">&nbsp;
+						<span data-i18n="column.use-custom-dshot-router" class="display:inline-block">Use custom DShot router</span>
+					</td>
+				</tr>
+			</tbody></table>
+			
+			<dl id="drouter">
+				<dt style="width:220px" data-i18n="column.dshot.router">Route channels</dt>
+				<dd style="height: unset;  vertical-align: top;">
+					<table>
+						<tr>
+							<th>1</th>
+							<th>2</th>
+							<th>3</th>
+							<th>4</th>
+						
+						</tr>
+						<tr>
+							<td>
+								<select class="unsafe" style="width:60px" name="ds1">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+							
+							<td>
+								<select class="unsafe" style="width:60px" name="ds2">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+							
+							<td>
+								<select class="unsafe" style="width:60px" name="ds3">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+							
+							<td>
+								<select class="unsafe" style="width:60px" name="ds4">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+						</tr>
+						
+							<tr>
+							<th>5</th>
+							<th>6</th>
+							<th>7</th>
+							<th>8</th>
+						
+						</tr>
+						<tr>
+							<td>
+								<select class="unsafe" style="width:60px" name="ds5">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+							
+							<td>
+								<select class="unsafe" style="width:60px" name="ds6">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+							
+							<td>
+								<select class="unsafe" style="width:60px" name="ds7">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+							
+							<td>
+								<select class="unsafe" style="width:60px" name="ds8">
+									<option value="0">Pin 1</option>
+									<option value="1">Pin 2</option>
+									<option value="2">Pin 3</option>
+									<option value="3">Pin 4</option>
+									<option value="4">Pad 5</option>
+									<option value="5">Pad 6</option>
+									<option value="6">Pad 7</option>
+									<option value="7">Pad 8</option>
+								</select>
+							</td>
+						</tr>
+					</table>
+					
+					
+				
+				</dd>
+			</dl>
+			</div>
+		</div>
+		
+		
+		
+		
+	</div>
+	
+	<div class="footer">
+		<a id="save" class="u-button" href="#" title="Save Settings to EEPROM" data-i18n="button.save" style="margin-right:10px">Save Settings</a>&nbsp;
+	</div>
+</div>
+
+
+<div id="serialDisclaimer" class="warning-disclaimer">
+	<div class="warning-disclaimer-inner">
+		<div class="warning1" data-i18n="title.warning"></div>
+		<div class="warning2" data-i18n="[html]text.serial-warning">
+
+		</div>
+		<br />
+		<br />
+		<a class="warning-button" href="#" data-i18n="text.motor-test-button"></a>
+	</div>
+</div> 
+
+<div id="dshotDisclaimer" class="warning-disclaimer">
+	<div class="warning-disclaimer-inner">
+		<div class="warning1" data-i18n="title.warning"></div>
+		<div class="warning2" data-i18n="[html]text.dshot-warning">
+
+		</div>
+		<br />
+		<br />
+		<a class="warning-button" href="#" data-i18n="text.motor-test-button"></a>
+	</div>
+</div> 

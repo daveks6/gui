@@ -1,0 +1,80 @@
+@import "variables";
+
+.esc_flasher {
+	
+		
+	.flash {
+	    position: absolute;
+	    bottom: 10px;
+	    right: 10px;
+	   	color: white;
+	    padding: 0 10px 0 10px;
+	    height: 20px;
+	    line-height: 20px;
+	    background-color: #339933;
+	}
+	
+	.flashAct {
+	    position: absolute;
+	    bottom: 10px;
+	    right: 10px;
+	    color: white;
+	    padding: 0 10px 0 10px;
+	    height: 20px;
+	    line-height: 20px;
+	    background-color: $background-color;
+	}
+	
+	.disabled {
+	    background-color: #666;
+	    cursor: wait;
+	}
+	
+	p {
+	    margin-bottom: 5px;
+	    padding-right: 5px;
+	}
+	
+	
+	.hidden {
+	    display: none;
+	}
+	
+	.loader {
+	    width: 16px;
+	    height: 16px;
+	    margin-left: 4px;
+	    position: relative;
+	    top: 4px;
+	    display: visible;
+	    margin-top: -4px;
+	    display: none;
+	}
+
+	.buttons {
+		text-align: right;
+    	margin-bottom: 5px;
+    	margin-right: 5px;
+	}
+
+} // esc flasher
+
+
+
+
+
+#remote_fw label {
+    display: block;
+    margin-bottom: 5px;
+    color: #e09338;
+    font-size: 16px;
+}
+
+
+.escSettings {
+    width: 100%;
+
+ 	td {
+    	text-align: center;
+	}
+}

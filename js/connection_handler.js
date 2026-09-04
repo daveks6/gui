@@ -66,8 +66,21 @@ $(document).ready(function () {
 					
 					let device;
 					let filters = [{ usbVendorId: 0x0483, usbProductId: 0x5740 }];
-					device = await navigator.serial.requestPort({'filters': filters});
-					
+
+					if (typeof navigator.serial !== 'undefined') {
+						// Desktop Chrome/Edge: native Web Serial API
+						device = await navigator.serial.requestPort({'filters': filters});
+					} else if (typeof navigator.usb !== 'undefined') {
+						// Android Chrome does not implement navigator.serial, but does
+						// support WebUSB. The FC shows up as a standard USB CDC-ACM
+						// virtual COM port, so we can talk to it over WebUSB using
+						// Google's web-serial-polyfill (js/libraries/web-serial-polyfill.js),
+						// which exposes the same SerialPort-shaped object web_serial.js expects.
+						device = await WebSerialPolyfill.serial.requestPort({'filters': filters});
+					} else {
+						throw new Error('Neither Web Serial nor WebUSB is available in this browser.');
+					}
+
 					serialDevice = getSerialDriverForPort(selectedPort);
 					serialDevice.connect(device, {
 						baudRate: 115200,

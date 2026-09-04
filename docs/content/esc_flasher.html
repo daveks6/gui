@@ -1,0 +1,184 @@
+<div class="flex-container esc_flasher">
+	<div class="column column-left">
+		<div class="block">
+			<div class="title" data-i18n="title.esc-flasher">KISS ESC Flasher</div>
+			<div class="body">
+				<p>
+					<a id="select_file" class="u-button" href="#" data-i18n="button.select-firmware">SELECT FIRMWARE</a>
+					<a id="download_file" class="u-button" href="#" data-i18n="button.select-remote-firmware"></a>
+					<img id="loader1" class="loader" src="images/ajax-loader.gif" />
+				</p>
+				
+				<div id="remote_fw" style="display:none">
+			<p class="half">
+				<label for="fc_type" data-i18n="text.esc-type">ESC type</label>
+				<select id="fc_type"></select>
+			</p>
+
+			<p class="half_right">
+				<label for="fw_version" data-i18n="text.firmware-versions">Firmware versions</label>
+				<select id="fw_version"></select>
+			</p>
+
+			<p>
+				<label for="fw_notes" data-i18n="text.release-notes">Release notes</label>
+				<textarea readonly="readonly" id="fw_notes"></textarea>
+			</p>
+
+			<p>
+				<a id="download_url" class="u-button" href="#" data-i18n="button.download-firmware"></a>
+				<img id="loader2" class="loader" src="images/ajax-loader.gif" />
+			</p>
+
+			<p></p>
+		</div>
+
+		<p id="file_info"></p>
+
+		<p id="flashp" class="hidden">
+			<a id="flash" class="u-button" href="#" data-i18n="button.flash-firmware">FLASH FIRMWARE</a>
+		</p>
+
+		<p id="status"></p>
+
+		<p id="esc_info">
+
+		</p>
+			</div>
+		</div>
+	</div>
+	
+	<div class="column">
+		<div class="block"  id="escInfoDiv" style="display:none">
+			<div class="title" data-i18n="title.esc-info">KISS ESC Info</div>
+			<div class="body">
+				<ul id="escInfo"></ul>
+			</div>
+		</div>
+		
+		<div class="block"  id="escSettingsDiv" style="display:none">
+			<div class="title" data-i18n="title.esc-settings">KISS ESC Settings</div>
+			<div class="body">
+				
+
+			<table class="escSettings">
+				<thead>
+					<th data-i18n="column.esc-number"></th>
+					<th data-i18n="column.esc-reverse"></th>
+					<th data-i18n="column.esc-3dmode"></th>
+				</thead>
+				<tbody>
+					<tr style="display:none">
+						<td>1</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+					<tr style="display:none">
+						<td>2</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+					<tr style="display:none">
+						<td>3</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+					<tr style="display:none">
+						<td>4</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+					<tr style="display:none">
+						<td>5</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+					<tr style="display:none">
+						<td>6</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+					<tr style="display:none">
+						<td>7</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+					<tr style="display:none">
+						<td>8</td>
+						<td>
+							<input class="unsafe direction" type="checkbox" />
+						</td>
+						<td>
+							<input class="unsafe 3d" type="checkbox" />
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			</div>
+			
+			<div class="buttons">
+				<a id="save" class="config_button u-button-red" href="#" title="Save Settings to ESC" data-i18n="button.save">Save Settings</a>
+			</div>
+			
+		</div>
+	</div>
+	<input style="display:none" type="file" id="escfiles" name="escfiles[]" />
+</div>
+
+<div class="flex-container flasher" id="dont-tab">
+	<div class="column column-left" style="width:100%;margin-top: 50px; padding-right:0px">
+		<div class="block warning2" style="background-image: url(images/warning_stripe.png);">
+		
+			<div style="width:calc(100%-10px); margin:10px; height:50px; text-align:center; background-color:black; font-size: 20px;line-height:50px;">
+				Please DO NOT change browser tab during flashing process!
+			</div>
+
+		</div>
+	</div>	
+</div>
+
+
+<div id="esc-flasher-disclaimer" class="warning-disclaimer">
+	<div class="warning-disclaimer-inner">
+		<div class="warning1" data-i18n="title.warning"></div>
+		<div class="warning2" data-i18n="[html]text.esc-flasher-warning"></div>
+		<br />
+		<br />
+		<a class="warning-button" href="#" data-i18n="button.esc-flasher-accept"></a>
+	</div>
+</div>
+<div id="esc-flasher-complete" class="warning-disclaimer">
+	<div class="warning-disclaimer-inner">
+		<div class="warning1" data-i18n="title.esc-flasher-complete"></div>
+		<div class="warning2" data-i18n="[html]text.esc-flasher-complete"></div>
+	</div>
+</div>
