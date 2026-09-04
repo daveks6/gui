@@ -1,0 +1,8 @@
+{
+  "appId": "com.kissultra.gui",
+  "appName": "KISS ULTRA GUI",
+  "webDir": "../docs",
+  "android": {
+    "allowMixedContent": false
+  }
+}

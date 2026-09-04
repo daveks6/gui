@@ -64,35 +64,45 @@ $(document).ready(function () {
 					console.log('Connecting to: ' + selectedPort);
 					GUI.connectingTo = selectedPort;
 					
-					let device;
+					let device = null;
 
-					// Some Android Chrome builds now expose navigator.serial as a
-					// callable API that isn't actually functional yet -- requestPort()
-					// resolves the call but finds no matching device, throwing
-					// "No port selected by the user" even when the device is right
-					// there (confirmed via the unfiltered "Diagnose USB" WebUSB button,
-					// which finds it every time on the same phone). So rather than
-					// trust navigator.serial's mere existence, try it and fall back to
-					// the WebUSB path (via web-serial-polyfill) on ANY failure -- covers
-					// both "doesn't exist" and "exists but broken" the same way.
-					try {
-						if (typeof navigator.serial === 'undefined') {
-							throw new Error('navigator.serial is not available');
+					if (isCapacitorNative()) {
+						// Running inside the Capacitor-wrapped Android app: talk to
+						// Android's UsbManager directly through the native KissSerial
+						// plugin (same approach Betaflight Configurator uses), since
+						// the WebView here has no WebUSB/Web Serial support at all.
+						// No browser device-picker step needed -- KissSerialPlugin.connect()
+						// finds the device and handles the Android USB permission
+						// dialog itself.
+					} else {
+						// Some Android Chrome builds now expose navigator.serial as a
+						// callable API that isn't actually functional yet -- requestPort()
+						// resolves the call but finds no matching device, throwing
+						// "No port selected by the user" even when the device is right
+						// there (confirmed via the unfiltered "Diagnose USB" WebUSB button,
+						// which finds it every time on the same phone). So rather than
+						// trust navigator.serial's mere existence, try it and fall back to
+						// the WebUSB path (via web-serial-polyfill) on ANY failure -- covers
+						// both "doesn't exist" and "exists but broken" the same way.
+						try {
+							if (typeof navigator.serial === 'undefined') {
+								throw new Error('navigator.serial is not available');
+							}
+							device = await navigator.serial.requestPort({'filters': []});
+						} catch (serialError) {
+							if (typeof navigator.usb === 'undefined') {
+								throw serialError;
+							}
+							console.log('navigator.serial failed (' + serialError.message + '), falling back to WebUSB');
+							// Call navigator.usb.requestDevice() ourselves instead of going
+							// through WebSerialPolyfill.serial.requestPort() (which always adds
+							// a hard-coded USB interface classCode filter). SerialPort still
+							// validates the selected device has the expected CDC-ACM interface
+							// structure afterwards and throws clearly if not, so this is safe
+							// even without pre-filtering the chooser.
+							let usbDevice = await navigator.usb.requestDevice({'filters': []});
+							device = new WebSerialPolyfill.SerialPort(usbDevice);
 						}
-						device = await navigator.serial.requestPort({'filters': []});
-					} catch (serialError) {
-						if (typeof navigator.usb === 'undefined') {
-							throw serialError;
-						}
-						console.log('navigator.serial failed (' + serialError.message + '), falling back to WebUSB');
-						// Call navigator.usb.requestDevice() ourselves instead of going
-						// through WebSerialPolyfill.serial.requestPort() (which always adds
-						// a hard-coded USB interface classCode filter). SerialPort still
-						// validates the selected device has the expected CDC-ACM interface
-						// structure afterwards and throws clearly if not, so this is safe
-						// even without pre-filtering the chooser.
-						let usbDevice = await navigator.usb.requestDevice({'filters': []});
-						device = new WebSerialPolyfill.SerialPort(usbDevice);
 					}
 
 					serialDevice = getSerialDriverForPort(selectedPort);

@@ -1,0 +1,18 @@
+{
+  "name": "kiss-ultra-gui-android",
+  "version": "1.0.0",
+  "description": "Capacitor Android wrapper for the KISS ULTRA GUI, with a native USB serial plugin (mirrors Betaflight Configurator's approach) since Android Chrome's WebUSB/Web Serial support is not reliable for CDC-ACM flight controllers.",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync android",
+    "open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0"
+  }
+}

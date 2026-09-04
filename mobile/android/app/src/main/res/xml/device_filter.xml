@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Lets Android auto-offer to launch this app when the KISS ULTRA FC (or its
+  bootloader) is plugged in. vendor-id/product-id are decimal, not hex:
+  0x0483 = 1155 (STMicroelectronics), 0x5740 = 22336 (Virtual COM Port),
+  0xdf11 = 57105 (STM32 DFU bootloader).
+-->
+<resources>
+    <usb-device vendor-id="1155" product-id="22336" />
+    <usb-device vendor-id="1155" product-id="57105" />
+</resources>

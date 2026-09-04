@@ -1,6 +1,6 @@
 'use strict';
 
-var ANDROID_OTG_SERIAL = "USB OTG", KISSFC_WIFI = "KISS WIFI", WEB_SERIAL = "Web Serial";
+var ANDROID_OTG_SERIAL = "USB OTG", KISSFC_WIFI = "KISS WIFI", WEB_SERIAL = "Web Serial", CAPACITOR_SERIAL = "Native USB";
 
 var serialDevice;
 
@@ -13,6 +13,9 @@ function getAvailableSerialDevices(callback) {
             if (typeof androidOTGSerial !== 'undefined') devices.push(ANDROID_OTG_SERIAL);
             if (callback) callback(devices);
         });
+    } else if (isCapacitorNative() && (typeof capacitorSerial !== 'undefined')) {
+        devices.push(CAPACITOR_SERIAL);
+        if (callback) callback(devices);
     } else {
         if (typeof webSerial !== 'undefined') devices.push(WEB_SERIAL);
         if (callback) callback(devices);
@@ -22,6 +25,8 @@ function getAvailableSerialDevices(callback) {
 function getSerialDriverForPort(selectedPort) {
     if (selectedPort === ANDROID_OTG_SERIAL && (typeof androidOTGSerial !== 'undefined')) {
         return androidOTGSerial;
+    } else if (selectedPort === CAPACITOR_SERIAL && (typeof capacitorSerial !== 'undefined')) {
+        return capacitorSerial;
     } else if (selectedPort === WEB_SERIAL && (typeof webSerial !== 'undefined')) {
         return webSerial;
     }else if (typeof chromeSerial !== 'undefined') {

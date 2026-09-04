@@ -11,6 +11,10 @@ function isNative() {
 	}
 }
 
+function isCapacitorNative() {
+	return (typeof Capacitor !== 'undefined') && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+}
+
 function getProxyURL(url) {
 	if (isNative()) {
 		return url;
@@ -102,7 +106,7 @@ $(document).ready(function () {
     	checkGithubRelease(chrome.runtime.getManifest().version);
     } else {
     	
-    	var hasSerialSupport = (navigator.serial !== undefined) || (navigator.usb !== undefined);
+    	var hasSerialSupport = isCapacitorNative() || (navigator.serial !== undefined) || (navigator.usb !== undefined);
 
     	if (!hasSerialSupport || ((navigator.userAgent.match(/Opera|OPR\//) ? true : false))) {
     		$(".modal-body").html("<p class='header'>WRONG BROWSER!</p>Kiss Ultra Web GUI works only in browsers with Web Serial or WebUSB support.<br><br>" +
