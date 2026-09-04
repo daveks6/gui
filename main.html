@@ -136,7 +136,14 @@
 	</div>
 
 	<script type="text/javascript">
-		if (('serviceWorker' in navigator) && !isNative()) {
+		// Only the GitHub Pages web/PWA build benefits from a service worker
+		// (offline caching). Inside the Capacitor app, Capacitor's own
+		// WebViewLocalServer already serves every asset locally from the APK,
+		// so there's nothing for a service worker to add -- only a real
+		// hazard, since a registered SW's cache persists across `adb install -r`
+		// reinstalls (app data isn't cleared by a reinstall), meaning it can
+		// keep serving stale JS from an old build indefinitely otherwise.
+		if (('serviceWorker' in navigator) && !isNative() && !isCapacitorNative()) {
 			window.addEventListener('load', function () {
 				navigator.serviceWorker.register('./sw.js').catch(function (error) {
 					console.log('Service worker registration failed: ' + error.message);
