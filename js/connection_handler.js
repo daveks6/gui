@@ -65,11 +65,16 @@ $(document).ready(function () {
 					GUI.connectingTo = selectedPort;
 					
 					let device;
-					let filters = [{ usbVendorId: 0x0483, usbProductId: 0x5740 }];
 
 					if (typeof navigator.serial !== 'undefined') {
-						// Desktop Chrome/Edge: native Web Serial API
-						device = await navigator.serial.requestPort({'filters': filters});
+						// Native Web Serial API (desktop Chrome/Edge, and newer Android
+						// Chrome builds that have started rolling this out). Deliberately
+						// unfiltered: a vendorId/productId-filtered requestPort() reliably
+						// shows an empty chooser on Android for this exact device even
+						// though the IDs match exactly (confirmed via the unfiltered
+						// "Diagnose USB" WebUSB button, which finds it every time) --
+						// same underlying platform quirk as the WebUSB path below.
+						device = await navigator.serial.requestPort({'filters': []});
 					} else if (typeof navigator.usb !== 'undefined') {
 						// Android Chrome does not implement navigator.serial, but does
 						// support WebUSB. The FC shows up as a standard USB CDC-ACM

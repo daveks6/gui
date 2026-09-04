@@ -79,9 +79,9 @@ var fcFlasherReadErrorHandler = function (info) {
     			var selectedPort = String($('#port').val());
     			try {
     					let device;
-    					let filters = [{ usbVendorId: 0x0483, usbProductId: 0x5740 }];
     					if (typeof navigator.serial !== 'undefined') {
-    						device = await navigator.serial.requestPort({'filters': filters});
+    						// See js/connection_handler.js for why this is unfiltered.
+    						device = await navigator.serial.requestPort({'filters': []});
     					} else if (typeof navigator.usb !== 'undefined') {
     						// See js/connection_handler.js for why this is unfiltered.
     						let usbDevice = await navigator.usb.requestDevice({'filters': []});
