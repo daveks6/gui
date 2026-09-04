@@ -76,7 +76,17 @@ $(document).ready(function () {
 						// virtual COM port, so we can talk to it over WebUSB using
 						// Google's web-serial-polyfill (js/libraries/web-serial-polyfill.js),
 						// which exposes the same SerialPort-shaped object web_serial.js expects.
-						device = await WebSerialPolyfill.serial.requestPort({'filters': filters});
+						//
+						// Call navigator.usb.requestDevice() ourselves instead of going
+						// through WebSerialPolyfill.serial.requestPort(), which always adds
+						// a hard-coded USB interface classCode filter on top of the
+						// vendor/product ID filter -- if that doesn't line up exactly with
+						// how Android reports the device's descriptors, the device silently
+						// never appears in the chooser. Matching on vendor/product ID alone
+						// is enough; SerialPort locates the CDC interface afterwards from
+						// the device's real descriptors regardless of how it was picked.
+						let usbDevice = await navigator.usb.requestDevice({'filters': [{ vendorId: 0x0483, productId: 0x5740 }]});
+						device = new WebSerialPolyfill.SerialPort(usbDevice);
 					} else {
 						throw new Error('Neither Web Serial nor WebUSB is available in this browser.');
 					}
