@@ -206,8 +206,42 @@
 				}
 			});
 		}
+
+		// Runs automatically on load (no button, no user interaction needed)
+		// so this can be pulled from `adb logcat` without touching the phone --
+		// the app's own WebView devtools bridge doesn't serve its /json
+		// discovery endpoint on this device, so this is the only remaining way
+		// to see the real Capacitor/plugin state directly.
+		if (isCapacitorNative()) {
+			try {
+				var diag = {
+					typeofCapacitor: typeof Capacitor,
+					typeofRegisterPlugin: typeof Capacitor.registerPlugin,
+					typeofPlugins: typeof Capacitor.Plugins,
+					pluginKeys: Capacitor.Plugins ? Object.keys(Capacitor.Plugins) : null,
+					pluginHeaderNames: Capacitor.PluginHeaders ? Capacitor.PluginHeaders.map(function (p) { return p.name; }) : 'no PluginHeaders',
+					existingKissSerial: Capacitor.Plugins && Capacitor.Plugins.KissSerial ? {
+						typeofConnect: typeof Capacitor.Plugins.KissSerial.connect,
+						typeofAddListener: typeof Capacitor.Plugins.KissSerial.addListener
+					} : 'Plugins.KissSerial not present'
+				};
+				try {
+					var resolved = getKissSerialPlugin();
+					diag.getKissSerialPluginResult = {
+						typeofConnect: typeof resolved.connect,
+						typeofAddListener: typeof resolved.addListener,
+						sameObjectAsPluginsEntry: resolved === (Capacitor.Plugins && Capacitor.Plugins.KissSerial)
+					};
+				} catch (innerError) {
+					diag.getKissSerialPluginResult = 'threw: ' + innerError.message;
+				}
+				console.log('CAPACITOR_DIAG ' + JSON.stringify(diag));
+			} catch (error) {
+				console.log('CAPACITOR_DIAG failed to run: ' + error.message);
+			}
+		}
 	</script>
 
-<div style='position:fixed;top:0;right:0;z-index:99999;background:#000;color:#0f0;font:10px monospace;padding:2px 6px;opacity:.85;'>build 1926d6a-20260904T152535Z</div></body>
+<div style='position:fixed;top:0;right:0;z-index:99999;background:#000;color:#0f0;font:10px monospace;padding:2px 6px;opacity:.85;'>build 122b250-20260904T153118Z</div></body>
 
 </html>
