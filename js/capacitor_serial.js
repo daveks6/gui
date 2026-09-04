@@ -30,16 +30,25 @@ function uint8ArrayToBase64(bytes) {
     return btoa(binary);
 }
 
-// window.Capacitor.Plugins.KissSerial (populated automatically for any
-// natively-registered plugin) doesn't reliably carry the addListener/
-// removeAllListeners event-handling methods -- those only get added to a
-// plugin's proxy through Capacitor's own registerPlugin() call, which is
-// normally done for you by a plugin's JS/TS wrapper package. Since
-// KissSerial has no such package (it's native-only, registered directly in
-// MainActivity), call registerPlugin() here ourselves to get a complete proxy.
-var KissSerialPlugin = (typeof Capacitor !== 'undefined' && Capacitor.registerPlugin)
-    ? Capacitor.registerPlugin('KissSerial')
-    : null;
+// Resolved lazily (at connect-time) rather than once when this script
+// parses, in case Capacitor's bridge hasn't finished initializing yet at
+// script-load time -- by the time the user actually taps Connect, well
+// after the page has fully loaded, it certainly has. Throws with a
+// specific, alertable reason instead of silently returning something that
+// fails later with a confusing "not a function" error.
+function getKissSerialPlugin() {
+    if (typeof Capacitor === 'undefined') {
+        throw new Error('window.Capacitor is not defined -- not running inside the Capacitor WebView?');
+    }
+    var existing = Capacitor.Plugins && Capacitor.Plugins.KissSerial;
+    if (existing && typeof existing.addListener === 'function') {
+        return existing;
+    }
+    if (typeof Capacitor.registerPlugin !== 'function') {
+        throw new Error('Capacitor.registerPlugin is not a function (typeof: ' + typeof Capacitor.registerPlugin + ')');
+    }
+    return Capacitor.registerPlugin('KissSerial');
+}
 
 var capacitorSerial = {
     connectionId: false,
@@ -53,7 +62,15 @@ var capacitorSerial = {
 
     connect: function (device, options, callback) {
         var self = this;
-        var plugin = KissSerialPlugin;
+        var plugin;
+        try {
+            plugin = getKissSerialPlugin();
+        } catch (error) {
+            console.log('KissSerial plugin unavailable: ' + error.message);
+            alert('KissSerial plugin unavailable: ' + error.message);
+            if (callback) callback(false);
+            return;
+        }
 
         plugin.connect({ baudRate: options.baudRate || 115200 }).then(function () {
             self.connectionId = true;
@@ -90,7 +107,16 @@ var capacitorSerial = {
 
     disconnect: function (callback) {
         var self = this;
-        var plugin = KissSerialPlugin;
+        var plugin;
+        try {
+            plugin = getKissSerialPlugin();
+        } catch (error) {
+            console.log('KissSerial plugin unavailable: ' + error.message);
+            self.connectionId = false;
+            self.bitrate = 0;
+            if (callback) callback({});
+            return;
+        }
 
         if (self.dataListenerHandle) { self.dataListenerHandle.remove(); self.dataListenerHandle = null; }
         if (self.errorListenerHandle) { self.errorListenerHandle.remove(); self.errorListenerHandle = null; }
@@ -117,7 +143,7 @@ var capacitorSerial = {
             var bytes = new Uint8Array(item.data);
             var base64Data = uint8ArrayToBase64(bytes);
 
-            KissSerialPlugin.write({ data: base64Data }).then(function () {
+            getKissSerialPlugin().write({ data: base64Data }).then(function () {
                 self.bytesSent += bytes.length;
 
                 if (item.callback) item.callback({});
