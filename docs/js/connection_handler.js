@@ -78,14 +78,16 @@ $(document).ready(function () {
 						// which exposes the same SerialPort-shaped object web_serial.js expects.
 						//
 						// Call navigator.usb.requestDevice() ourselves instead of going
-						// through WebSerialPolyfill.serial.requestPort(), which always adds
-						// a hard-coded USB interface classCode filter on top of the
-						// vendor/product ID filter -- if that doesn't line up exactly with
-						// how Android reports the device's descriptors, the device silently
-						// never appears in the chooser. Matching on vendor/product ID alone
-						// is enough; SerialPort locates the CDC interface afterwards from
-						// the device's real descriptors regardless of how it was picked.
-						let usbDevice = await navigator.usb.requestDevice({'filters': [{ vendorId: 0x0483, productId: 0x5740 }]});
+						// through WebSerialPolyfill.serial.requestPort() (which always adds
+						// a hard-coded USB interface classCode filter), and without any
+						// vendor/product ID filter either -- on Android a vendor/product
+						// filtered requestDevice() reliably shows an empty chooser for this
+						// device even though the IDs match exactly (confirmed via the
+						// unfiltered "Diagnose USB" button, which finds it every time).
+						// SerialPort still validates the selected device has the expected
+						// CDC-ACM interface structure afterwards and throws clearly if not,
+						// so this is safe even without pre-filtering the chooser.
+						let usbDevice = await navigator.usb.requestDevice({'filters': []});
 						device = new WebSerialPolyfill.SerialPort(usbDevice);
 					} else {
 						throw new Error('Neither Web Serial nor WebUSB is available in this browser.');
