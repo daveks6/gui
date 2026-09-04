@@ -101,6 +101,20 @@
     </div>
 
     <script type="text/javascript" src="cordova.js"></script>
+    <!--
+        Android's native Capacitor bridge (injected as part of cordova.js's
+        response, see JSExport.java) only sets up a bare
+        window.Capacitor = { Plugins: {} } skeleton -- registerPlugin(),
+        isNativePlatform(), and the full addListener-capable plugin proxy
+        system live in @capacitor/core's own JS, which a normal Capacitor
+        app gets bundled in automatically by its build tool. This app has
+        no bundler, so it's vendored directly (see mobile/node_modules/
+        @capacitor/core/dist/capacitor.js) and loaded here, after cordova.js
+        so it safely extends the existing window.Capacitor rather than
+        replacing it. Harmless on desktop/PWA builds: window.Capacitor
+        never gets created there, so this becomes a no-op.
+    -->
+    <script type="text/javascript" src="js/libraries/capacitor-core.js"></script>
     <script type="text/javascript" src="js/startup.js"></script>
     <!-- GA -->
     <div class="modal-overlay" style="display:none"></div>
@@ -187,6 +201,6 @@
 		}
 	</script>
 
-<div style='position:fixed;top:0;right:0;z-index:99999;background:#000;color:#0f0;font:10px monospace;padding:2px 6px;opacity:.85;'>build dd4c253-20260904T151241Z</div></body>
+<div style='position:fixed;top:0;right:0;z-index:99999;background:#000;color:#0f0;font:10px monospace;padding:2px 6px;opacity:.85;'>build ea0cfff-20260904T151939Z</div></body>
 
 </html>
