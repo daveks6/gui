@@ -1,0 +1,93 @@
+/*
+   Mobile responsive overrides, added for the Android/PWA port.
+
+   The original app was built desktop-first for the nwjs app (whose own
+   window config sets min_width: 1000) and carries that assumption into
+   the web CSS too: #mainWrapper and #portArea both have a hard
+   `min-width: 1000px`, which makes the page physically wider than any
+   phone screen no matter what the viewport meta tag says. That's the
+   root cause of the horizontal overflow/cut-off nav bar seen on Android.
+
+   Kept as a separate file (loaded after style.css) rather than edited
+   into style.css directly, since style.css is generated from the
+   original authors' Sass sources and there's no working Sass toolchain
+   in this fork's build process to regenerate it -- easier and safer to
+   layer overrides on top than to hand-edit compiled output.
+*/
+
+@media (max-width: 768px) {
+    #mainWrapper {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #portArea {
+        min-width: 0;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .portSelector {
+        flex-grow: 1;
+        padding-bottom: 8px;
+    }
+
+    /* Eight menu buttons can't fit one row on a phone; scroll sideways
+       through them instead of wrapping/squeezing them unreadably. */
+    #navigation {
+        float: none;
+        width: 100%;
+        margin: 0;
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    #navigation::-webkit-scrollbar {
+        display: none;
+    }
+
+    .navigation-menu-button {
+        flex: 0 0 auto;
+        padding: 12px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    /* #portArea can now be one or two rows tall depending on wrapping,
+       so #content needs more clearance than the desktop-fixed 60px, and
+       a bit less side margin to make better use of a narrow screen. */
+    #content {
+        margin-top: 100px;
+        height: calc(100% - 110px);
+        width: calc(100% - 20px);
+        margin-left: 10px;
+        padding: 5px;
+    }
+
+    /* These column widths (65/50/33%) were sized against a >=1000px
+       parent; below tablet width they leave too little room for labels
+       and inputs to stay legible, so stack them full-width instead. */
+    .wrapper-wide,
+    .wrapper-narrow,
+    .wrapper-half {
+        float: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 480px) {
+    #portArea #port {
+        width: 110px;
+    }
+
+    #portArea .connect {
+        width: 70px;
+    }
+
+    .navigation-menu-button {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+}
