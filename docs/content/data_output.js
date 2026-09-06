@@ -11,16 +11,14 @@ CONTENT.data_output.initialize = function (callback) {
     self.updateTimeout;
     self.motorTestEnabled = false;
     self.requestTelemetry = true;
-    self.imuInitialized = false;
     self.telemetry = {};
     self.gps = {};
     self.homeinfo = {};
     self.telemCount = 0;
     self.config = {};
     self.motors = 4;
-    
+    self.yaw = 0;
     self.curMapping = "";
-
        
     GUI.switchContent('data_output', function () {
     	 kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
@@ -41,6 +39,7 @@ CONTENT.data_output.initialize = function (callback) {
     		 kissProtocol.send(kissProtocol.GET_TELEMETRY, [kissProtocol.GET_TELEMETRY], function () {
     	         GUI.load("./content/data_output.html", htmlLoaded);
     	     });
+
          });
     });
 
@@ -57,6 +56,10 @@ CONTENT.data_output.initialize = function (callback) {
         else if (val > (315 - dividor) || val < (315 + dividor)) retval = "NW"
         return retval
     }
+    
+    function angle2radians(angle) {
+    	return angle * 10 * Math.PI / 180;
+    }
 
     function animateModel(timestamp) {
         if (GUI.activeContent == 'data_output') {
@@ -67,40 +70,19 @@ CONTENT.data_output.initialize = function (callback) {
             }
             var frameTime = timestamp - self.lastTimestamp;
             self.lastTimestamp = timestamp;
-            if (!self.imuInitialized) {
-                imuInit(1 / 60, 0.1);
-                self.imuInitialized = true;
-            }
 
             if (frameTime > 0) {
-
-                imuUpdate(+self.telemetry['GyroRaw'][0] * 2000 * Math.PI / 180,
-                    -self.telemetry['GyroRaw'][1] * 2000 * Math.PI / 180,
-                    +self.telemetry['GyroRaw'][2] * 2000 * Math.PI / 180,
-                    +self.telemetry['ACCRaw'][0],
-                    +self.telemetry['ACCRaw'][1],
-                    +self.telemetry['ACCRaw'][2]);
-
+            	var data = kissProtocol.data[kissProtocol.GET_TELEMETRY];
                 $("#model").kissModel('reset');
-                var axisRate = { 'roll': 0, 'pitch': 0, 'yaw': 0 };
-                if (!isNaN(Quaternion[0]) &&
-                    !isNaN(Quaternion[1]) &&
-                    !isNaN(Quaternion[2]) &&
-                    !isNaN(Quaternion[3])) {
-                    var q = new THREE.Quaternion(Quaternion[0], Quaternion[1], Quaternion[2], Quaternion[3]);
-                    var rotation = new THREE.Euler().setFromQuaternion(q, "XYZ");
-                    axisRate = { 'roll': rotation.z, 'pitch': rotation.y, 'yaw': -rotation.x };
-                } else {
-                    imuInit(1 / 60, 0.1);
-                }
-                $("#model").kissModel('updateRate', axisRate);
+                $("#model").kissModel('updateAngle', { 'roll': -angle2radians(data['angle'][0]), 'pitch': -angle2radians(data['angle'][1]), 'yaw':  -angle2radians(data['angle'][2] - self.yaw) });
+                var th = (data['RXcommands'][0] - 1000) / 1000;
+                if (th < 0) th = 0;
+                if (th > 1) th = 1;
+                $("#model").kissModel('updateSpeed', th );
                 $("#model").kissModel('refresh');
             }
         }
     }
-    
-    
-
 
     function htmlLoaded() {
         // generate receiver bars
@@ -113,13 +95,15 @@ CONTENT.data_output.initialize = function (callback) {
         window.clearTimeout(self.updateTimeout);
         self.requestTelemetry = true;
 
-
         var data = kissProtocol.data[kissProtocol.GET_SETTINGS];
-
 
         $('.mixerPreview img').attr('src', './images/mixer/' + data['CopterType'] + (data['ESCOutputLayout'] > 0 && (data['CopterType'] == 1 || data['CopterType'] == 2) ? '_' + data['ESCOutputLayout'] : '') + (data['reverseMotors'] == 0 ? '' : '_inv') + ".png");
 
-
+        if (self.config.ver >= 141) {
+        	$("#calibrateRadio").show();
+        } else {
+        	$("#calibrateRadio").hide();
+        }
 
         for (var i = 0; i < receiverNames.length; i++) {
         	receiverContainer.append($.Mustache.render("receiver-bar-template", {'name':receiverNames[i]}));
@@ -192,8 +176,10 @@ CONTENT.data_output.initialize = function (callback) {
             self.motorTestEnabled = this.checked;
             if (self.motorTestEnabled) {
                 $(".motor-test").first().trigger('change');
+                $(".calibrateAccelerometer").addClass('disabled');
             } else {
                 $(".motor-test").prop("disabled", true);
+                $(".calibrateAccelerometer").removeClass('disabled');
                 var tmp = {
                     'buffer': new ArrayBuffer(9),
                     'motorTestEnabled': 0,
@@ -228,28 +214,77 @@ CONTENT.data_output.initialize = function (callback) {
         // creation
 
         $('a.reset_model').click(function () {
-            self.imuInitialized = false;
+            self.yaw = kissProtocol.data[kissProtocol.GET_TELEMETRY].angle[2];
         });
-
+        
+        
+        
         $('a.calibrateAccelerometer').click(function () {
-            var config = kissProtocol.data[kissProtocol.GET_SETTINGS];
-            var data = kissProtocol.data[kissProtocol.GET_TELEMETRY];
+			if (!self.motorTestEnabled) {
+            	var config = kissProtocol.data[kissProtocol.GET_SETTINGS];
+            	var data = kissProtocol.data[kissProtocol.GET_TELEMETRY];
 
-            self.requestTelemetry = false;
+            	self.requestTelemetry = false;
+				self.yaw = 0;
+            	// not a correct way to do it
+            	config['ACCZero'][0] = (data['ACCRaw'][0]) * 1000;
+            	config['ACCZero'][1] = (data['ACCRaw'][1]) * 1000;
+            	config['ACCZero'][2] = (data['ACCRaw'][2] - 1.0) * 1000;
 
-            // not a correct way to do it
-            config['ACCZero'][0] = (data['ACCRaw'][0]) * 1000;
-            config['ACCZero'][1] = (data['ACCRaw'][1]) * 1000;
-            config['ACCZero'][2] = (data['ACCRaw'][2] - 1.0) * 1000;
+            	kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]), function () {
+                	self.requestTelemetry = true;
+                	fastDataPoll();
+           	 });
+            }
+        });
+        
+        $('#calibrateRadio').click(function () {
+        	if (!$(this).hasClass('disabled')) {
+        		$("#calibrateRadio").addClass('disabled');
+        		var config = kissProtocol.data[kissProtocol.GET_SETTINGS];
+        		var data = kissProtocol.data[kissProtocol.GET_TELEMETRY];
 
-            kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]), function () {
-                self.requestTelemetry = true;
-                fastDataPoll();
-            });
+        		self.requestTelemetry = false;
+
+        		var average = Math.round((data['RXcommands'][1] + data['RXcommands'][2] + data['RXcommands'][3]) / 3);
+        		if (average < 1450) {
+        			average = 1450;
+        		}
+        		if (average > 1550) {
+        			average = 1550;
+        		}
+        		
+        	
+        		console.log("Average of RPY = " + average);
+        		
+        		var diff = average - 1500;
+        		
+        		console.log("Diff of RPY = " + diff);
+        		
+        		
+        		config['rxCenter'] += diff;
+        		
+        		console.log("New of RPY = " + config['rxCenter']);
+        	
+        		if (diff != 0) {
+        			kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]), function () {
+        				self.requestTelemetry = true;
+        				fastDataPoll();
+        				$("#calibrateRadio").removeClass('disabled');
+        			});
+        		} else {
+        			self.requestTelemetry = true;
+        			fastDataPoll();
+        			$("#calibrateRadio").removeClass('disabled');
+        		}
+        	} else {
+        		console.log("Disabled");
+        	}
         });
 
         var legendItems = $('dl.legend dd');
         var meterScale = { 'min': 1000, 'max': 2000 };
+        var oldGraphData = -1;
 
         function updateUI() {
             var data = kissProtocol.data[kissProtocol.GET_TELEMETRY];
@@ -257,10 +292,15 @@ CONTENT.data_output.initialize = function (callback) {
             var homeinfo = kissProtocol.data[kissProtocol.GET_HOME_INFO];
 
             var useGraphData = parseInt($('select[name="graphTitle"]').val());
+            
+            if (useGraphData != oldGraphData) {
+				oldGraphData = useGraphData;
+  			    self.clearSamples(self.graphData);
+			}
 
             if (!self.ESCTelemetry) {
                 self.ESCTelemetry = 1;
-                $('select[name="graphTitle"]').html('<option value="0" data-i18n="telemetry.0">Gyro &amp; ACC Data:</option><option value="1" data-i18n="telemetry.1">ESC Temperatures:</option><option id="ESCTelemetrie" value="2" data-i18n="telemetry.2">ESC Voltanges:</option><option value="3" data-i18n="telemetry.3">ESC Currents:</option><option value="4" data-i18n="telemetry.4">ESC used A/h</option><option value="5" data-i18n="telemetry.5">ESC E-RpM / 1000</option><option value="6" data-i18n="telemetry.6">ESC TLM Stats</option>' + (data.RXStats !== undefined ? '<option value="7" data-i18n="telemetry.7">RX Uplink</option><option value="8" data-i18n="telemetry.8">RX Downlink</option>' : '') + '<option value="9" data-i18n="telemetry.9">FC Stats</option>').children().i18n();
+                $('select[name="graphTitle"]').html('<option value="0" data-i18n="telemetry.0">Gyro &amp; ACC Data:</option><option value="1" data-i18n="telemetry.1">ESC Temperatures:</option><option id="ESCTelemetrie" value="2" data-i18n="telemetry.2">ESC Voltanges:</option><option value="3" data-i18n="telemetry.3">ESC Currents:</option><option value="4" data-i18n="telemetry.4">ESC used A/h</option><option value="5" data-i18n="telemetry.5'+ (self.config.ver >= 144 ? ".1": "") +'">ESC eRPM / 1000</option>' + (data.RXStats !== undefined ? '<option value="7" data-i18n="telemetry.7">RX Uplink</option><option value="8" data-i18n="telemetry.8">RX Downlink</option>' : '') + '<option value="9" data-i18n="telemetry.9">FC Stats</option>').children().i18n();
             }
             if (!data) {
                 if (GUI.activeContent == 'data_output') self.updateTimeout = window.setTimeout(function () { updateUI(); }, 5);
@@ -309,7 +349,7 @@ CONTENT.data_output.initialize = function (callback) {
             } else if (useGraphData == 9) {
                 $('#graph1').text($.i18n('legend.29'));
                 $('#graph2').text($.i18n('legend.30'));
-                $('#graph3').text('');
+                $('#graph3').text($.i18n('legend.31'));
                 $('#graph4').text('');
                 $('#graph5').text('');
                 $('#graph6').text('');
@@ -327,13 +367,13 @@ CONTENT.data_output.initialize = function (callback) {
             var receiverLabelArrayLength = receiverLabelArray.length;
             for (var i = 0; i < receiverLabelArrayLength; i++) {
                 receiverFillArray[i].css('width', ((data['RXcommands'][i] - meterScale.min) / (meterScale.max - meterScale.min) * 100).clamp(0, 100) + '%');
-                receiverLabelArray[i].text(data['RXcommands'][i]);
+                receiverLabelArray[i].text(data['RXcommands'][i].toFixed(0));
             
             }
             var motorLabelArrayLength = motorLabelArray.length;
             for (var i = 0; i < motorLabelArrayLength; i++) {
                 motorFillArray[i].css('width', ((data['PWMOutVals'][i] - meterScale.min) / (meterScale.max - meterScale.min) * 100).clamp(0, 100) + '%');
-                motorLabelArray[i].text(data['PWMOutVals'][i]);
+                motorLabelArray[i].text(data['PWMOutVals'][i].toFixed(0));
             }
             
             self.barResize();
@@ -406,38 +446,39 @@ CONTENT.data_output.initialize = function (callback) {
                     break;
                 case 1:
                 	for (var i=0; i<self.motors; i++) {
-                		legendItems.eq(i).text(data['ESC_Telemetrie'+i][0].toFixed(3));
+                		legendItems.eq(i).text(data['ESC_Telemetrie'+i][0].toFixed(0));
                 		sampleBlock.push((data['ESC_Telemetrie'+i][0] / 35) - midscale);
                 	}
                     break;
                 case 2:
                  	for (var i=0; i<self.motors; i++) {
-                 		legendItems.eq(i).text((data['ESC_Telemetrie'+i][1] / 100).toFixed(3));
+                 		legendItems.eq(i).text((data['ESC_Telemetrie'+i][1] / 100).toFixed(2));
                  		sampleBlock.push((data['ESC_Telemetrie'+i][1] / 1000) - midscale);
                  	}
                     break;
                 case 3:
                 	for (var i=0; i<self.motors; i++) {
-                		legendItems.eq(i).text((data['ESC_Telemetrie'+i][2] / 100).toFixed(3));
+                		legendItems.eq(i).text((data['ESC_Telemetrie'+i][2] / 100).toFixed(2));
                 		sampleBlock.push((data['ESC_Telemetrie'+i][2] / 1000) - midscale);
                 	}
                     break;
                 case 4:
                 	for (var i=0; i<self.motors; i++) {
-                		legendItems.eq(i).text((data['ESC_Telemetrie'+i][3] / 1000).toFixed(3));
+                		legendItems.eq(i).text((data['ESC_Telemetrie'+i][3]).toFixed(0));
                 		sampleBlock.push((data['ESC_Telemetrie'+i][3] / 5000) - midscale);
                 	}
                     break;
                 case 5:
                 	for (var i=0; i<self.motors; i++) {
-                		legendItems.eq(i).text((data['ESC_Telemetrie'+i][4] / 10).toFixed(3));
-                		sampleBlock.push((data['ESC_Telemetrie'+i][4] / 1000) - midscale);
-                	}
-                    break;
-                case 6:
-                	for (var i=0; i<6; i++) {
-                		legendItems.eq(i).text((data['ESC_TelemetrieStats'][i]).toFixed(3));
-                		sampleBlock.push((data['ESC_TelemetrieStats'][i] / 35) - midscale);
+						if (self.config.ver >= 144) {
+							if (self.config.magnets == 0) self.config.magnets = 14;
+							var rpm =  (100 * data['ESC_Telemetrie'+i][4]) / (self.config.magnets / 2);
+                			legendItems.eq(i).text(rpm.toFixed(0));
+                			sampleBlock.push((rpm.toFixed(0) / 15000) - midscale);
+                		} else {
+							legendItems.eq(i).text((data['ESC_Telemetrie'+i][4] / 10).toFixed(3));
+                			sampleBlock.push((data['ESC_Telemetrie'+i][4] / 1000) - midscale);
+						}
                 	}
                     break;
                 case 7:
@@ -471,22 +512,45 @@ CONTENT.data_output.initialize = function (callback) {
                     sampleBlock.push((data['RXStats'].downSNR / 100) - midscale);
                     break;
                 case 9:
-                    legendItems.eq(0).text(data['idleTime']);
+                	var load = 100 - data['idleTime'];
+                	if (load < 0) load = 0;
+                	if (load > 100) load = 100;
+                    legendItems.eq(0).text(load);
                     legendItems.eq(1).text((data['LiPoVolt'] * 10).toFixed(2));
-                    legendItems.eq(2).text('');
+                    legendItems.eq(2).text((data['LiPoAmp'] * 10).toFixed(2));
                     legendItems.eq(3).text('');
                     legendItems.eq(4).text('');
                     legendItems.eq(5).text('');
-                    sampleBlock.push(data['idleTime'] / 500);
+                    sampleBlock.push((load / 35) - midscale);
                     sampleBlock.push((data['LiPoVolt'] / 2) - midscale);
+                    sampleBlock.push((data['LiPoAmp'] / 2) - midscale);
                     break;
             }
 
             self.addSample(self.graphData, sampleBlock);
             self.renderGraph();
-
+            
+            
             if (gps !== undefined) {
-                $("#gpsblock").show();
+				if (gps.latitude != 0 || 
+					gps.longitude != 0 ||
+					gps.satellites != 0 ||
+					gps.fix != 0 ||
+					gps.course != 0 ||
+					gps.altitude !=0 ) {
+						$("#gpsblock").show();
+					}
+			}
+            
+            if (homeinfo !== undefined) {
+				if (homeinfo.homeDistance != 0 ||
+					homeinfo.homeDirection != 0 ||
+					homeinfo.homeRelativeAltitude != 0) {
+				    	$("#homeblock").show();
+				    }
+			}
+ 
+            if (gps !== undefined) {
                 $("#latitude").text(gps.latitude.toFixed(6));
                 $("#longitude").text(gps.longitude.toFixed(6));
                 $("#speed").text(gps.speed.toFixed(2) + " km/h");
@@ -496,7 +560,6 @@ CONTENT.data_output.initialize = function (callback) {
             }
 
             if (homeinfo !== undefined) {
-                $("#homeblock").show();
                 $("#homePointDistance").text(homeinfo.homeDistance.toFixed(2) + " m");
                 $("#homePointDirection").text(homeinfo.homeDirection.toFixed(2));
                 $("#homePointrelativeHeight").text(homeinfo.homeRelativeAltitude.toFixed(2) + " m");
@@ -535,10 +598,12 @@ CONTENT.data_output.initialize = function (callback) {
             }
         }
 
+        console.log(kissProtocol.data[kissProtocol.GET_SETTINGS]);
         $("#model").kissModel({
             'mixer': kissProtocol.data[kissProtocol.GET_SETTINGS].CopterType,
             'width': 190,
-            'height': 190
+            'height': 190,
+            'reverse': kissProtocol.data[kissProtocol.GET_SETTINGS].reverseMotors == 1
         })
 
 
@@ -570,13 +635,17 @@ CONTENT.data_output.addSample = function (data, sample, scale) {
     data.push(arr);
 };
 
+CONTENT.data_output.clearSamples = function (data) {
+   data.length = 0;
+};
+
 CONTENT.data_output.initializeGraph = function (selector, data) {
     var canvas = document.getElementById(selector);
     var graph = {
         'selector': selector,
         'canvas': canvas,
         'context': canvas.getContext('2d'),
-        'colors': ['#00A8F0', '#f02525', '#C0D800', '#9440ED', '#f8921a', '#147A66', '#fff', '#fff', '#fff', '#fff'],
+        'colors': ['#00A8F0', '#f02525', '#C0D800', '#9440ED', '#f8921a', '#147A66', '#5558ab', '#55ab8a'],
         'ticks': [10, 8],
         'data': data
     };
@@ -669,15 +738,23 @@ CONTENT.data_output.drawGraph = function (graph, scale) {
 CONTENT.data_output.resizeCanvas = function () {
     var wrapper = $('.plot');
     var r = 0;
-    if ($("#model").css("float") == "right") r = 190;
+    if ($("#model").css("float") == "right") r = 200;
     $('#graph').prop('width', wrapper.width() - 160 - r); // -160px for legend
 
     CONTENT.data_output.renderGraph();
 }
 
 CONTENT.data_output.cleanup = function (callback) {
+	$("#model").kissModel('destroy');
+	  
     $(window).off('resize', this.barResize);
     $(window).off('resize', this.resizeCanvas);
+    
+    if (self.updateTimeout != 0) {
+		window.clearTimeout(self.updateTimeout);
+	}
+	kissProtocol.removePendingRequests();
+	
     if (this.motorTestEnabled) {
         console.log("For safety reasons, turning off the motors");
         var tmp = {
@@ -685,9 +762,15 @@ CONTENT.data_output.cleanup = function (callback) {
             'motorTestEnabled': 0,
             'motorTest': [0, 0, 0, 0, 0, 0, 0, 0]
         };
-        kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp))
+        kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp), function() {
+			console.log("Motors turned off");
+			this.motorTestEnabled = false;
+			if (callback) callback();
+		});
+
+    } else {
+    	if (callback) callback();
     }
-    if (callback) callback();
 };
 
 

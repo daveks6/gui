@@ -114,15 +114,17 @@
             return this.each(function () {
                 var self = $(this),
                     data = pluginData(self);
-                if (!data) {
-                    self.data(PLUGIN_NAME, $.extend(true, {
-                    	currentStep: 0,
-                        name: '',
-                        buttonsTemplate : "wizard-buttons",
-                        steps: []
-                    }, options));
-                    data = pluginData(self);
-                }
+                	console.log("Wizard.init: ", data);
+                	if (!data) {
+                		self.data(PLUGIN_NAME, $.extend(true, {
+                			currentStep: 0,
+                			name: '',
+                			buttonsTemplate : "wizard-buttons",
+                			steps: []
+                		}, options));
+                		data = pluginData(self);
+                		console.log("Wizard.data: ", data);
+                	}
                 privateMethods.build(self);
 
             });
@@ -130,6 +132,7 @@
         destroy: function () {
             return this.each(function () {
                 $(this).removeData(PLUGIN_NAME);
+            	console.log("Wizard.destroy");
             });
         },
         steps: function () {
@@ -137,12 +140,6 @@
                 data = pluginData(self);
             return data.steps;
         },
-//        setValue: function (newValue) {
-//            var self = $(this);
-//            var data = pluginData(self);
-//            data.value = newValue;
-//           // privateMethods.changeValue(self);
-//        },
     };
 
     $.fn.kissWizard = function (method) {

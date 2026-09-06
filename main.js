@@ -1,7 +1,7 @@
 'use strict';
 
 const MIN_CONFIG_VERSION = 126;
-const MAX_CONFIG_VERSION = 137;
+const MAX_CONFIG_VERSION = 146;
 
 function isNative() {
 	if (typeof(nw) !== 'undefined') {
@@ -19,7 +19,7 @@ function getProxyURL(url) {
 	if (isNative()) {
 		return url;
 	} else {
-		return "proxy.php?url=" + encodeURIComponent(url);
+		return "https://by0njmwmh8.execute-api.eu-central-1.amazonaws.com/default/kiss-ultra-download-proxy?url=" +  encodeURIComponent(url);
 	}
 }
 
@@ -79,13 +79,13 @@ function hideModal() {
 }
 
 function checkGithubRelease(currVersion) {
-		
-    console.log("Looking for version newer then " + currVersion);
+
+   /* console.log("Looking for version newer then " + currVersion);
     $.get('https://api.github.com/repos/KissUltra/gui/releases', function (releaseData) {
         console.log(releaseData);
         if (releaseData.length > 0) {
-        	console.log('Latest release found: ' + releaseData[0].tag_name, ' parameter: ' + currVersion);
-        	if (semver.gt(releaseData[0].tag_name, currVersion)) {
+        	console.log('Latest release found: ' + semver.clean(releaseData[0].tag_name), ' parameter: ' + currVersion);
+        	if (semver.gt(semver.clean(releaseData[0].tag_name), currVersion)) {
         		console.log('New version ' + releaseData[0].tag_name + ' available!');
         		showUpdateModal();
         	} else {
@@ -93,7 +93,7 @@ function checkGithubRelease(currVersion) {
         		console.log('Latest version!');
         	}
     	}
-    });
+    });*/
 };
 
 $(document).ready(function () {
@@ -112,7 +112,7 @@ $(document).ready(function () {
     		$(".modal-body").html("<p class='header'>WRONG BROWSER!</p>Kiss Ultra Web GUI works only in browsers with Web Serial or WebUSB support.<br><br>" +
     				"Please install latest version of Google Chrome or Microsoft Edge.<br><br>" +
     				"If you are unable to use one of those browsers, feel free to install native GUI from github.");
-        	$(".modal-footer").html("<a class='u-button' href='https://github.com/KissUltra/gui/releases/latest'>Download Native GUI</a>");
+        	$(".modal-footer").html("<a class='u-button' href='https://github.com/KissUltra/gui/releases/latest'>Download Native GUI</a>  &nbsp; <a class='u-button' href='https://github.com/KissUltra/wiki/wiki/'>Read Ultra WIKI</a> &nbsp; <a class='u-button' href='https://discord.gg/egHCzgNjH3'>Join Ultra Discord</a");
         	$(".modal-overlay").show();
         	$(".modal").css({'top':'100px'}).show();
         	$(".modal-overlay").off('click'); 

@@ -233,8 +233,9 @@
     "telemetry.1": "Temperaturas ESC",
     "telemetry.2": "Voltajes ESC",
     "telemetry.3": "Tensiones ESC",
-    "telemetry.4": "A/h usados en ESC",
+    "telemetry.4": "mAh usados en ESC",
     "telemetry.5": "ESC E-RpM / 1000",
+    "telemetry.5.1": "ESC RPM",
     "telemetry.6": "Estadísticas Tel. ESC",
     "text.3d": "3D",
     "text.acro": "Acro",
@@ -249,7 +250,7 @@
     "text.esc-flasher-loaded": "Cargado $1 bloques de $2",
     "text.esc-flasher-progress": "Progreso $1%",
     "text.esc-flasher-success": "OPERACIÓN REALIZADA CON ÉXITO!",
-    "text.esc-flasher-warning": "¡Precaución - potencialmente peligroso!<br/><br/>El flasheador solo funciona con ESC KISS 24A<br> con <b>bootloader</b> (version 1.02 o superior)!<br/><br/>¡Por favor retira las palas antes de comenzar la operación de flasheo de ESC!<br/><br/>Utiliza esta función bajo tu responsabilidad.<br/><br/>¡Después de flashear tendras que reiniciar la FC!<br/><br/>",
+    "text.esc-flasher-warning": "¡Precaución - potencialmente peligroso!<br/><br/>El flasheador solo funciona con ESC ULTRA / KISS / VOLTARA!<br/><br/>¡Por favor retira las palas antes de comenzar la operación de flasheo de ESC!<br/><br/>Utiliza esta función bajo tu responsabilidad.<br/><br/>¡Después de flashear tendras que reiniciar la FC!<br/><br/>",
     "text.esc-type": "ESC type",
     "text.fc-flasher-complete": "¡¡¡Flasheo completo!!!",
     "text.fc-flasher-failure": "FALLO: $1",
@@ -292,11 +293,11 @@
     "title.charts": "Gráficos",
     "title.custom-esc-orientation": "Motor output mapping",
     "title.custom-orientation": "Orientación de la FC personalizada",
-    "title.esc-flasher": "Flasheador ESC KISS",
+    "title.esc-flasher": "Flasheador ESC",
     "title.esc-flasher-complete": "¡¡¡Flasheo de ESC completo!!!",
-    "title.esc-info": "Información ESC KISS",
-    "title.esc-settings": "KISS ESC settings",
-    "title.fc-flasher": "Flasheados KISS ESC",
+    "title.esc-info": "Información ESC",
+    "title.esc-settings": "ESC settings",
+    "title.fc-flasher": "Flasheados ULTRA",
     "title.filter": "Filtro",
     "title.general-settings": "Configuración general",
     "title.kiss": "ULTRA FCFC Flight Control GUI",
@@ -482,6 +483,51 @@
 	"title.motor.wizard": "Motor Wizard",
 	"button.wizard.next": "Next",
 	"button.wizard.prev": "Back",
-	"button.wizard.save": "Save"
-    
-}  
+	"button.wizard.save": "Save",
+	
+	"column.acc-factor": "Acceleration factor (%)",
+	"column.exp-mode": "Experimental mode",
+	"column.experimental": "Enable",
+	"column.msp.baudrate": "Serial Baudrate",
+	
+	"button.factory-reset": "FACTORY RESET",
+	
+	"column.voltage.source": "Voltage source",
+	"column.current.source": "Current source",
+	"column.battery.type": "Battery type",
+	"title.voltage-current": "Voltage and current",
+	"column.lipo-volts": "Voltage is less than alarm (V)",
+	"column.lipo-mah": "MAh is greater than alarm (mAh)",
+	
+	"text.rx-center": "Stick center",
+	"button.calibrate-radio": "Calibrate stick center",
+	"legend.31": "Current",
+	
+	"title.rec.wizard": "Recommended settings",
+	"button.wizard.no": "No",
+	"button.wizard.yes": "Yes",
+	"button.wizard.flash": "FC Flasher",
+	"text.restore-warning": "Caution - potentially dangerous!<br/><br/>Restoring backup from the craft with <b>different FC orientation</b> or <b>different ESC layout</b><br/><br/>or <b>different propellers direction</b> can be <b>DANGEROUS!!!!</b><br/><br/><b>CHECK EVERYTHING</b> without propellers <b>BEFORE ARMING</b> this craft!<br/><br/>",
+	
+	"button.esc-reload": "RELOAD ESC",
+	
+	"column.altHold": "Alt Hold",
+	"column.led-mode": "Type",
+	
+	"led.rgb": "RGB",
+	"led.pwm": "PWM",
+	"led.gpio": "ON/OFF",
+	"led.inv-gpio": "OFF/ON",
+	"column.aux.led-brightness": "Led Brightness",
+	"column.aux.led-color": "Led Color",
+	"column.fast-telemetry": "Fast Telemetry",
+	"button.advanced.esc.config": "ULTRA ESC CONFIG",
+	"title.ultra-esc-config": "ULTRA ESC Config",
+	"column.config-mode": "Configuration mode",
+	"configMode.0": "Multiple ESC config",
+	"configMode.1": "Single ESC config",
+	"button.esc-saveall": "Save All",
+	"button.esc-reloadall": "Reload All"
+	
+			
+}

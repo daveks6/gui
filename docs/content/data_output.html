@@ -1,20 +1,22 @@
-<div class="flex-container">
+<div class="flex-container" style="justify-content: space-between">
 	<div class="column column-left column-33 max-height">
 		<div class="block">
 			    <div class="title" data-i18n="title.receiver">Receiver</div>
 			    <div class="body">
         			<div id="rbars" class="bars" ></div>
         		</div>
+        		
+        		<a id="calibrateRadio" class="calibrateRadio u-button-red"  data-i18n="button.calibrate-radio" style="float:right; margin-right:18px;" data-help="calibrateRadio">Calibrate Radio</a>
 		</div>
 	</div>	
 	
-	<div class="column column-left column-33 max-height">
+	<div class="column column-left column-33 max-height" style="width:34%">
 		<div class="block">
 		  	<div id="motorTestTitle" class="title">
             	<span data-i18n="title.motors">Motors</span>
-            	<a class="motor-test-button u-button-red" href="#" style="font-size:11px;" data-i18n="button.test">TEST</a>
+            	<a class="motor-test-button u-button-red" style="font-size:11px;" data-i18n="button.test" data-help="motorTest">TEST</a>
             	<input style="display:none" type="checkbox" class="motor-test-enabled" />
-            	<a class="motor-wizard-button u-button-red" href="#" style="display:none" data-i18n="button.motor.wizard">Motor wizard</a>
+            	<a class="motor-wizard-button u-button-red"  style="display:none" data-i18n="button.motor.wizard" >Motor wizard</a>
         	</div>
         	<div id="mbars" class="bars"></div>
 
@@ -49,7 +51,7 @@
             		</tr>
             		<tr>
                 		<td colspan="4">
-                    		<a class="calibrateAccelerometer u-button-red" href="#"  data-i18n="button.calibrate-accelerometer">Calibrate Accelerometer</a>
+                    		<a class="calibrateAccelerometer u-button-red"  data-i18n="button.calibrate-accelerometer" data-help="accelCalibration">Calibrate Accelerometer</a>
                			</td>
             		</tr>
         		</table>
@@ -107,8 +109,8 @@
 
 	<div class="column  column-100">
 		<div class="block">
-			        <div class="title"><span data-i18n="title.telemetry">Telemetry</span>
-            			<select name="graphTitle" style="position: relative; top:-1px;">
+			        <div class="title"><span data-i18n="title.telemetry" data-help="telemetry">Telemetry</span>
+            			<select name="graphTitle" style="position: relative; top:-1px;" data-help="telemetry">
                 			<option value="0" data-i18n="telemetry.0">Gyro &amp; ACC Data</option>
             			</select>
         			</div>
@@ -133,15 +135,19 @@
             <dd>&nbsp;</dd>
         </dl>
         <canvas id="graph" width="100" height="190"></canvas>
-        <div id="model" class="model_chart"></div>
+        <div id="model" class="model_chart" style="border: 1px solid #333"></div>
 
 
-        		<a class="u-button-red reset_model" href="#" data-i18n="button.reset-model">Reset model</a>
+        		<a class="u-button-red reset_model"  data-i18n="button.reset-model" data-help="resetModel">Reset model</a>
         		
         		<div style="height: 40px">&nbsp;</div>
 			
 			</div>
 		</div>
+	</div>
+	
+	<div class="footer">
+		<a id="hints" 	class="u-button u-button-help inactive" data-help="help,left">Help</a>&nbsp;
 	</div>
 	
 </div>
@@ -154,6 +160,6 @@
         </div>
         <br />
         <br />
-        <a class="warning-button" href="#" data-i18n="text.motor-test-button"></a>
+        <a class="warning-button"  data-i18n="text.motor-test-button"></a>
     </div>
 </div>

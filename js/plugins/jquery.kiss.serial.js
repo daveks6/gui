@@ -5,25 +5,35 @@
         };
 
     var privateMethods = {
+		
+		functionAllowed: function(self, func) {
+			var data = pluginData(self);
+			for (i=0; i<data.allowedFunctions.length; i++) {
+				if (data.allowedFunctions[i] == func) {
+					return true;
+				}
+			}
+			return false;
+		},
+		
         build: function (self) {
             var data = pluginData(self);
             var c = "";
-            c += '<dt class="kiss-serial-function">' + data.name + '</dt>';
+            c += '<dt class="kiss-serial-function"><span data-help="'+data.help+'">' + data.name + '</span></dt>';
             c += '<dd class="kiss-serial-function">';
 
-            c += '<select class="kiss-serial-mode unsafe">';
-            c += '<option value="0" data-i18n="serialtype.0">KissProtocol/OSD</option>';
-            c += '<option value="1" data-i18n="serialtype.1">Logger</option>';
-            c += '<option value="2" data-i18n="serialtype.2">Receiver</option>';
-            c += '<option value="3" data-i18n="serialtype.3">VTX</option>';
-            c += '<option value="4" data-i18n="serialtype.4">ESC TLM / Onewire</option>';
-            c += '<option value="5" data-i18n="serialtype.5">Runcam</option>';
-            c += '<option value="6" data-i18n="serialtype.6">VTX + ESC TLM</option>';
+            c += '<select class="kiss-serial-mode unsafe" style="width:200px" data-help="'+data.help+'">';
+            if (privateMethods.functionAllowed(self, 0)) c += '<option value="0" data-i18n="serialtype.0">Kiss Protocol</option>';
+            if (privateMethods.functionAllowed(self, 1)) c += '<option value="1" data-i18n="serialtype.1">Logger</option>';
+            if (privateMethods.functionAllowed(self, 2)) c += '<option value="2" data-i18n="serialtype.2">Receiver</option>';
+            if (privateMethods.functionAllowed(self, 3)) c += '<option value="3" data-i18n="serialtype.3">VTX</option>';
+            if (privateMethods.functionAllowed(self, 4)) c += '<option value="4" data-i18n="serialtype.4">ESC TLM / Onewire</option>';
+            if (privateMethods.functionAllowed(self, 5)) c += '<option value="5" data-i18n="serialtype.5">Runcam</option>';
             if (data.version >= 118)
-                c += '<option value="7" data-i18n="serialtype.7">GPS</option>';
+               if (privateMethods.functionAllowed(self, 7)) c += '<option value="7" data-i18n="serialtype.7">GPS</option>';
             if (data.version >= 120) {
-                c += '<option value="8" data-i18n="serialtype.8">MSP OSD</option>';
-                c += '<option value="9" data-i18n="serialtype.9">DISABLED</option>';
+                if (privateMethods.functionAllowed(self, 8)) c += '<option value="8" data-i18n="serialtype.8">MSP OSD (HD)</option>';
+                if (privateMethods.functionAllowed(self, 9)) c += '<option value="9" data-i18n="serialtype.9">DISABLED</option>';
             }
             c += '</select></dd>';
             self.empty();
@@ -32,16 +42,23 @@
             $("select", self).on("change", function () {
                 data.value = parseInt($(".kiss-serial-mode", self).val());
                 privateMethods.changeModeState(self);
+                
+                // temporary fix for changing serials
+                $("input[name='altLimit']").trigger("change");
+                
             });
             if (data.change !== undefined) $("select", self).on("change", data.change);
             privateMethods.changeValue(self);
         },
         changeValue: function (self) {
             var data = pluginData(self);
-            if (data.value !== undefined) {
+            if (data.value !== undefined && privateMethods.functionAllowed(self, data.value)) {
                 $(".kiss-serial-mode", self).val(data.value);
                 privateMethods.changeModeState(self);
-            }
+            } else {
+				 $(".kiss-serial-mode", self).val(9);
+                privateMethods.changeModeState(self);
+			}
         },
         changeModeState: function (self) {
             var data = pluginData(self);
@@ -62,6 +79,7 @@
                     self.data(PLUGIN_NAME, $.extend(true, {
                         name: '',
                         value: 0,
+                        allowedFunctions: [0, 8]
                     }, options));
                     data = pluginData(self);
                 }

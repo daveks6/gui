@@ -8,8 +8,8 @@
         build: function (self) {
             var data = pluginData(self);
             var c = "";
-            c += '<dt class="kiss-aux-function">' + data.name + '</dt>';
-            c += '<dd><select class="kiss-aux-channel unsafe">';
+            c += '<dt class="kiss-aux-function  class="unsafe"><span data-help="'+data.help+'">' + data.name + '</span></dt>';
+            c += '<dd><select class="kiss-aux-channel unsafe" data-help="'+data.help+',left">';
             c += '<option value="0">--</option>';
             c += '<option value="1">AUX1</option>';
             c += '<option value="2">AUX2</option>';
@@ -18,7 +18,7 @@
             c += '<option value="5">AUX5</option>';
             c += '<option value="6">AUX6</option>';
             c += '<option value="7">AUX7</option>';
-            c += '</select><select class="kiss-aux-mode unsafe">';
+            c += '</select><select class="kiss-aux-mode unsafe" data-help="auxRange,right">';
             c += '<option value="0" data-i18n="aux.0">--</option>';
             if (data.knobOnly) c += '<option value="6" data-i18n="aux.6">Knob</option>';
             else {
@@ -29,7 +29,7 @@
                 c += '<option value="5" data-i18n="aux.5">High</option>';
                 if (data.knob) c += '<option value="6" data-i18n="aux.6">Knob</option>';
             }
-            c += '</select></dd>';
+            c += '</select>&nbsp;<span class="kiss-aux-detect-button unsafe">☰</span></dd>';
             self.append(c);
 
             $("select", self).on("change", function () {
@@ -38,19 +38,32 @@
             });
             if (data.change !== undefined) $("select", self).on("change", data.change);
             privateMethods.changeValue(self);
+            
+            $(".kiss-aux-detect-button", self).on("click", function(){
+				if (!$(this).hasClass("unsafe_active")) {
+					var funcId = +$(self).attr("id").substr(3);
+					var funcName = $(self).children("dt").first().children("span").first().text();
+					$(self).parent().trigger("detect_start", {funcId: funcId, funcName: funcName});
+				}
+			});
         },
         changeValue: function (self) {
             var data = pluginData(self);
             if (data.value !== undefined) {
                 $(".kiss-aux-channel", self).val(data.value >> 4);
-                $(".kiss-aux-mode", self).val(data.value & 0xf);
+                if (data.knobOnly) {
+					$(".kiss-aux-mode", self).val(6);
+				} else {
+                	$(".kiss-aux-mode", self).val(data.value & 0xf);
+                }
                 privateMethods.changeModeState(self);
+                
             }
         },
         changeModeState: function (self) {
             var data = pluginData(self);
-            if (data.value >> 4 == 0) $(".kiss-aux-mode", self).hide();
-            else $(".kiss-aux-mode", self).show();
+            if (data.value >> 4 == 0) { $(".kiss-aux-mode", self).hide();  $(".kiss-aux-detect-button", self).show(); }
+            else { $(".kiss-aux-mode", self).show(); $(".kiss-aux-detect-button", self).hide(); }
         }
     };
 
@@ -85,9 +98,11 @@
         setValue: function (newValue) {
             var self = $(this);
             var data = pluginData(self);
+            console.log("Setting value to " + newValue);
             data.value = newValue;
             privateMethods.changeValue(self);
-        },
+            $(".kiss-aux-channel", self).trigger("change");
+        }
     };
 
     $.fn.kissAux = function (method) {

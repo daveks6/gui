@@ -109,6 +109,10 @@ function parseBootloaderHexFile(hexFile) {
     for (var i = 0; i < hexFileArr.length; i++) {
         var lineArr = hexFileArr[i].split("");
         if (i == 3) {
+        	
+        	console.log(lineArr);
+        	
+        	
             if (parseInt(lineArr[3]) == 4) {
                 BlockName = 'page';
                 BlockStartSign = 70;
@@ -116,6 +120,9 @@ function parseBootloaderHexFile(hexFile) {
                 BlockName = 'block';
                 BlockStartSign = 69;
             } else if ((parseInt(lineArr[3]) == 0) && (parseInt(lineArr[2]) == 1)) {
+                BlockName = 'block';
+                BlockStartSign = 69;
+            } else if ((parseInt(lineArr[3]) == 0) && (parseInt(lineArr[2]) == 2)) { // 8k bl
                 BlockName = 'block';
                 BlockStartSign = 69;
             } else {

@@ -1,4 +1,3 @@
-'use strict';
 
 
 CONTENT.advanced = {
@@ -9,6 +8,7 @@ CONTENT.advanced = {
 CONTENT.advanced.initialize = function (callback) {
     var self = this;
     var settingsFilled = 0;
+    CONTENT.advanced.fcType = "u1";
 
     GUI.switchContent('advanced', function () {
         kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
@@ -29,9 +29,31 @@ CONTENT.advanced.initialize = function (callback) {
     	return false;
     } 
     
+    self.fcTypePrefix = function() {
+    	if (kissProtocol.data[kissProtocol.GET_HARDWARE_INFO] != undefined) {
+    		var info = kissProtocol.data[kissProtocol.GET_HARDWARE_INFO];
+    		var brd = (info.hardwareVersion & 0xFF00) >> 8;
+    		if (brd == 1) {
+    			return "u1";
+    		} else if (brd == 2) {
+    			return "mu1";
+    		} else if (brd == 3) {
+    			return "u2";
+    		} else if (brd == 4) {
+    			return "mu2";
+    		} else if (brd == 5) {
+    			return "u3";
+    		} 
+    	} 
+    	return "u1";
+    } 
+        
     function htmlLoaded(data) {
         validateBounds('#content input[type="number"]');
 
+        CONTENT.advanced.fcType = self.fcTypePrefix();
+       
+        
         // serial warning
         $(".warning-disclaimer").hide();
         $(".warning-button").on("click", function () {
@@ -91,6 +113,23 @@ CONTENT.advanced.initialize = function (callback) {
         	}
         }
     		
+    		
+    	if (data['ver'] >= 145) {
+			$("#ledMode").show();
+			$("select[name='ledMode']").val(data['ledMode']);
+			
+			if (+data["ledMode"] > 0) {
+				$("#ledColor").hide();
+				if (+data["ledMode"] > 1) {
+					$("#ledBrightness").hide();
+				}
+			}
+		} else {
+			$("#ledMode").hide();
+			$("#ledColor").show();
+			$("#ledBrightness").show();
+		}	
+    		
 
         $('select[name="loggerConfig"]').val(data['loggerConfig']);
 
@@ -115,8 +154,7 @@ CONTENT.advanced.initialize = function (callback) {
         		$("#currentSensorDivider").show();
         		$('select[name="ccPadMode"]').val(0).hide();
         		$("#ccpadmodediv").hide();
-        		$("#analogCurrent > .title").attr('data-i18n', 'title.analog-current2');
-        		changeLanguage();
+        		$("#analogCurrent > .title").attr('data-i18n', 'title.analog-current2').i18n();
         	} else {
         		if (data['ccPadMode'] == 0) {
         			$("#currentSensorDivider").hide();
@@ -124,6 +162,13 @@ CONTENT.advanced.initialize = function (callback) {
         			$("#currentSensorDivider").show();
         		}
         	}
+        	
+        	if (data['ver'] > 140) {
+        		if ((((+data['sensors']) >> 2) & 0x03) == 0) {
+					$("#currentSensorDivider").hide();
+				}
+			}
+        	
         	$("#mspCanvas").show();
         	
         	$('select[name="mspCanvas"]').val(data['mspCanvas']);
@@ -133,11 +178,33 @@ CONTENT.advanced.initialize = function (callback) {
         		$(".msposd").show();
         	}
         }
-       
+        
+        if (data['ver'] < 140) {
+			$("select[name='mspCanvas'] option[value='5']").remove();
+		}
+        
+        if (data['ver'] < 141) {
+        	$(".sensors").hide();
+        } else {
+        	$(".sensors").show();
+        	$('select[name="voltageSource"]').val((+data['sensors']) & 0x03);         // bbxxccvv
+        	$('select[name="currentSource"]').val(((+data['sensors']) >> 2) & 0x03);
+        	$('select[name="batteryType"]').val(((+data['sensors']) >> 6) & 0x03);
+        }
+        
         $('select[name="mspCanvas"]').on('change', function() {
-        	if ($(this).val() != 0) {
+        	var o = +($(this).val());
+        	if (o != 0) {
         		$(".msposd").hide();
+        		if ((o == 2) && (data['ver'] >= 138)) {
+        			$("#mspBaud").show();
+        		} else {
+        			$("select[name='mspBaud']").val(0);
+        			$("#mspBaud").hide();
+        		}
         	} else {
+        		$("select[name='mspBaud']").val(0);
+    			$("#mspBaud").hide();
         		$(".msposd").show();
         	}
         });
@@ -205,10 +272,6 @@ CONTENT.advanced.initialize = function (callback) {
              	$("#CBODATA").hide();
             }
         });
-
-//        for (var i = 0; i < 64; i++) {
-//            $("select[name='lapTimerTransponderId']").append("<option value='" + i + "'>" + ((i == 0) ? '--' : i) + "</option>");
-//        }
 
         $("select[name='vtxChannel']").val(data['vtxChannel']);
 
@@ -318,10 +381,15 @@ CONTENT.advanced.initialize = function (callback) {
         	$('select[name="ccPadMode"]').val(data['ccPadMode']);
 
         	$('select[name="ccPadMode"]').on("change", function () {
-        		if ($(this).val() == 0)
+        		if ($(this).val() == 0) {
         			$("#currentSensorDivider").hide();
-        		else
-        			$("#currentSensorDivider").show();
+        		} else {
+        			if ($('select[name="currentSource"]').val(((+data['sensors']) >> 2) & 0x03) == 0) {
+						$("#currentSensorDivider").hide();
+					} else {
+						$("#currentSensorDivider").show();
+					}
+        		}
         	});
         }
         
@@ -333,10 +401,6 @@ CONTENT.advanced.initialize = function (callback) {
             $("select[name='lapTimerTypeAndInterface'] option[value='19']").remove();
         }
 
-        // Implementation of enhanced serial ports
-        if (data['ver'] >= 116) {
-            $('#serialnew').css('display', 'inline-block'); //unhide serial section
-            $('input[name="CSC"]').removeAttr("disabled"); //make checkbox changeable
             $("select[name='loggerConfig'] option[value='0']").html("disabled"); // remove logger option 0
 
             var serialsFunctions = []; //initialize serial array
@@ -353,10 +417,8 @@ CONTENT.advanced.initialize = function (callback) {
                     contentChange();
                 }
 
-                if (defaultSerialConfig != data['SerialSetup']) {
-                    $('input[name="CSC"]').prop('checked', 1);
                     populateSerialFields();
-                }
+                    updateSerials();
             });
 
             
@@ -387,7 +449,6 @@ CONTENT.advanced.initialize = function (callback) {
             }
 
             if (data['ver'] >= 122) {
-//                $("#rth").show()
                 $('input[name="rthReturnAltitude"]').val(+data['rthReturnAltitude']);
                 $('input[name="rthHomeAltitude"]').val(+data['rthHomeAltitude']);
                 $('input[name="rthDescentRadius"]').val(+data['rthDescentRadius']);
@@ -427,21 +488,53 @@ CONTENT.advanced.initialize = function (callback) {
             	$("#loggerSpeed").hide();
             	$("#analogCurrent").hide();
             }
-
-          
-            // Function for CSC changebox changes
-            $('input[name="CSC"]').on('change', function () {
-                if ($('input[name="CSC"]').prop('checked') ? 1 : 0 == 1) {
-                    populateSerialFields();
-                    $("#newserial").show();
-                    $("#serialDisclaimer").show();
-                } else {
-                    data['SerialSetup'] = defaultSerialConfig; // reset to default
-                    $("#newserial").hide();
-                    contentChange();
-                }
-
-            });
+            
+            
+            if (data['ver'] >= 138) {
+                $('input[name="accFactor"]').val(data['accFactor']);
+                $('input[name="expMode"').prop('checked', +data['expMode'] == 1 ? 1 : 0); 
+                $('select[name="mspBaud"]').val(+data["mspBaud"]);
+            	$('input[name="accFactor"]').removeAttr("disabled");
+            	$("#accFactor").show();
+            	$("#expMode").show();
+            	
+            	if (+data["mspCanvas"] != 2) {
+            		data["mspBaud"] = 0;
+            		$("#mspBaud").hide();
+            	} else {
+                	$("#mspBaud").show();
+            	}
+            } else {
+            	$("#accFactor").hide();
+            	$("#expMode").hide();
+            	$("#mspBaud").hide();
+            }
+            
+            $('select[name="currentSource"]').on('change', function() {
+				if (((+$('select[name="currentSource"]').val()) & 0x03) == 0) {
+					console.log("=== esc telem");
+					$("#currentSensorDivider").hide();
+					
+					if (!self.isUltra2()) {
+						$('select[name="ccPadMode"]').val(0);
+					}
+					
+					
+				} else {
+						if (self.isUltra2()) {
+							$("#currentSensorDivider").show();
+							$('select[name="ccPadMode"]').val(0).hide();
+							$("#ccpadmodediv").hide();
+							$("#analogCurrent > .title").attr('data-i18n', 'title.analog-current2').i18n();
+						} else {
+							
+							$('select[name="ccPadMode"]').val(1);
+							$("#currentSensorDivider").show();
+						}
+					console.log("=== curr sensor");
+				}
+			});
+            
             
             if (data['ver'] >= 129) {
             	
@@ -471,7 +564,7 @@ CONTENT.advanced.initialize = function (callback) {
             }
             
             if (data['ver'] >= 133) {
-            	$("#adjustments").show();
+            	$("#VSO").show();
                 $('select[name="voltageSensorOffset"]').val(+data['voltageSensorOffset']);
             }
             
@@ -486,18 +579,38 @@ CONTENT.advanced.initialize = function (callback) {
                 		$("select[name='ds"+(i+1)+"']").val(i);
                 	}
                     $("#drouter").hide();
-                    contentChange();
+                    contentChange(false);
                 }
 
             });
             
             function populateSerialFields() {
+				
+				
+				var allowedFunctions = [
+					[0, 9], 					// ser 0 
+					[0, 1, 2, 3, 5, 7, 8, 9], 	// ser 1
+					[2, 9], 					// ser 2
+					[0, 1, 2, 3, 5, 7, 8, 9],	// ser 3
+					[0, 1, 2, 3, 5, 7, 8, 9],	// ser 4
+					[4, 9], 					// ser 5
+					[0, 1, 2, 3, 5, 7, 8, 9],	// ser 6
+					[3, 9]						// ser 7
+					
+				];
+				
+            	
+            	var serialPads = ['USB', 'Connector','Receiver pads','Connector','Solder pads','ESC TLM pad','Solder pads','SA pad'];
+            	var fc = self.fcTypePrefix();
+            	
                 for (i = 0; i < serialsFunctions.length; i++) {
                     $("#serial" + i).kissSerial({
-                        name: $.i18n("title.serial") + ' ' + i,
+                        name: $.i18n("title.serial") + ' ' + i + " <span style='color:#888'>/ " + serialPads[i]+"</span>",
+                        help: fc+"-s"+i,
                         change: function () { updateSerials(); },
                         value: serialsFunctions[i],
-                        version: data['ver']
+                        version: data['ver'],
+                        allowedFunctions: allowedFunctions[i]
                     });
                 }
 
@@ -514,18 +627,32 @@ CONTENT.advanced.initialize = function (callback) {
                 	  }
                 }
                 
-                if (data.lipoConnected == 1) {
-                    $(".unsafe").addClass("unsafe_active");
-                } else {
-                    $(".unsafe").removeClass("unsafe_active");
-                }
+                GUI.processLipo(data.lipoConnected);
+                
                 $(".unsafe_active").prop('disabled', true);
+                GUI.rebuildHints();
             }
+            
             function readSerials() {
                 for (i = 0; i < 8; i++) {
                     serialsFunctions[i] = (data['SerialSetup'] >> (28 - (i * 4))) & 0x0F;
                 }
             }
+            
+            function setTelemetrySensors(enabled) {
+				if (!enabled) {
+					$("select[name='voltageSource'] option[value='0']").remove();
+					$("select[name='currentSource'] option[value='0']").remove();
+				} else {
+					if ($("select[name='voltageSource'] option[value='0']").length == 0) {
+						$("select[name='voltageSource']").prepend("<option value='0'>ESC Telemetry</option>");
+					}
+					if ($("select[name='currentSource'] option[value='0']").length == 0) {
+						$("select[name='currentSource']").prepend("<option value='0'>ESC Telemetry</option>");
+					}
+				}
+			}
+            
             function updateSerials() {
                 serialsFunctions = []; // reset array
                 data['SerialSetup'] = 0; // reset serialsetup
@@ -533,6 +660,7 @@ CONTENT.advanced.initialize = function (callback) {
                 var foundDJI = false;
                 var foundLogger = false;
                 var foundGPS = false;
+                var foundTelem = false;
                 for (i = 0; i < 8; i++) {
                     // update serialFunctions
                     serialsFunctions[i] = $("#serial" + i).kissSerial('value');
@@ -551,6 +679,9 @@ CONTENT.advanced.initialize = function (callback) {
                     if (serialsFunctions[i] == 7) {
                         foundGPS = true;
                     }
+                    if (serialsFunctions[i] == 4) {
+                        foundTelem = true;
+                    }
                 }
                 if (foundDJI) $("#djiosd").show(); else $("#djiosd").hide();
                 if (foundLogger) $("#serial").show(); else $("#serial").hide();
@@ -562,9 +693,11 @@ CONTENT.advanced.initialize = function (callback) {
                 } else {
                 	$("#rth,#gps,#rthaltsource").hide();
                 }
-                contentChange();
+                
+                setTelemetrySensors(foundTelem); // enable or disable esc telemetry
+                contentChange(false);
             }
-        }
+//        }
 
         var MCUid = '';
         for (var i = 0; i < 4; i++) {
@@ -680,21 +813,36 @@ CONTENT.advanced.initialize = function (callback) {
                 $(".vtx_opts").show();
             }
         });
+        
+        
+        if (data["ver"] >= 145) {
+			$("select[name='ledMode']").on('change', function() {
+				var ledMode  = +$(this).val();
+				if (ledMode == 0) {
+					$("#ledBrightness, #ledColor").show();
+				} else {
+					if (ledMode > 1) {
+						$("#ledBrightness, #ledColor").hide();
+					} else {
+						$("#ledBrightness").show();
+						$("#ledColor").hide();
+					}
+				}
+			});
+		};
+        
+        
 
-        if (data.lipoConnected == 1) {
-            $(".unsafe").addClass("unsafe_active");
-        } else {
-            $(".unsafe").removeClass("unsafe_active");
-        }
+        GUI.processLipo(data.lipoConnected);
+        
         $(".unsafe_active").prop('disabled', true);
 
         $("input,select").on("change", function () {
-            contentChange();
+            contentChange(true);
         });
 
         settingsFilled = 1;
-
-
+     
         function grabData() {
             data['BoardRotation'] = 0;
             if ($('input[name="CBO"]').prop('checked') ? 1 : 0 == 1) {
@@ -824,33 +972,37 @@ CONTENT.advanced.initialize = function (callback) {
             if (data['ver'] >= 133) {
             	data['voltageSensorOffset'] = +$("select[name='voltageSensorOffset']").val();
             }
-        }
-
-        function contentChange() {
-            $('#save').removeAttr("data-i18n");
-            $('#save').attr('data-i18n', 'button.save');
-            $('#save').text($.i18n("button.save"));
-            if (settingsFilled) {
-                $('#save').addClass("saveAct");
-
+            
+            
+            if (data['ver'] >= 138) {
+            	data['mspBaud'] = $("select[name='mspBaud']").val();
+             	data['expMode'] = $("input[name='expMode']").prop('checked') ? 1 : 0;
+            	data['accFactor'] = parseInt($('input[name="accFactor"]').val());
+            }
+            
+            if (data['ver'] >= 141) {
+            	var sensors = 0;
+            	sensors |= ((+$('select[name="voltageSource"]').val()) & 0x03);         // bbxxccvv
+            	sensors |= (((+$('select[name="currentSource"]').val()) & 0x03) << 2);
+            	sensors |= (((+$('select[name="batteryType"]').val()) & 0x03) << 6);
+            	data['sensors'] = sensors;
+            }
+            
+            if (data['ver'] >= 145) {
+            	data['ledMode'] = $("select[name='ledMode']").val();
             }
         }
 
-        if (!data['isActive']) {
-            $.ajax({
-                url: 'http://ultraesc.de/KISSFC/getActivation/index.php?SN=' + MCUid + '&VER=' + data['ver'],
-                cache: false,
-                dataType: "text",
-                success: function (key) {
-                    console.log('Got activation code ' + key);
-                    data['actKey'] = parseInt(key);
-                },
-                error: function () {
-                    console.log('getting activation code failed');
-                    data['actKey'] = 0;
-                }
-
-            });
+        function contentChange(mode) {
+			if (mode) {
+          	  $('#save').removeAttr("data-i18n");
+            	$('#save').attr('data-i18n', 'button.save');
+            	$('#save').text($.i18n("button.save"));
+            	if (settingsFilled) {
+                $('#save').addClass("saveAct");
+            	}
+            }
+            GUI.rebuildHints();
         }
 
         $('#save').on('click', function () {

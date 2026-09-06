@@ -37,10 +37,10 @@
  		<!--	<div class="title" data-i18n="title.motor.wizard">Motor Wizard</div> -->
 			<div class="body">
 <br>
-  You are about to start motor wizard. <br><br>
-  Please </b>REMOVE PROPELLERS</b> and follow the on-screen instructions.<br>For safety reasons, motor output will be limited to 10%<br><br> 
+  You are about to start motor wizard.<br><br>
+  Please </b>REMOVE PROPELLERS</b>, connect your LIPO and follow the on-screen instructions.<br>For safety reasons, motor output will be limited to 10%<br><br> 
 When you click NEXT, your ESC will be reset to NORMAL rotation direction!<br><br>
-ULTRA is about to learn its motor positions and directions for {{motors}} motors.<br><br>
+ULTRA is about to learn its motor positions and directions for {{motors}} motors.<br>
 			</div>
 		</div>
 </script>
@@ -48,9 +48,10 @@ ULTRA is about to learn its motor positions and directions for {{motors}} motors
 <script id="motor-wizard-buttons-template" type="text/html">
 		<div class="block" style="margin-bottom:2px">
 			<div class="body" style="height:26px; padding:0px">
-<a class="wizard-button-prev wizard-button wizard-button-disabled" href="#" data-i18n="button.wizard.prev">Back</a>
-<a class="wizard-button-next wizard-button wizard-button-disabled" href="#" data-i18n="button.wizard.next">Next</a>
-<a class="wizard-button-save wizard-button wizard-button-disabled" style="display:none" href="#" data-i18n="button.wizard.save">Save</a>
+<a class="wizard-button-prev wizard-button wizard-button-disabled" data-i18n="button.wizard.prev">Back</a>
+<a class="wizard-button-next wizard-button wizard-button-disabled"  data-i18n="button.wizard.next">Next</a>
+<a class="wizard-button wizard-button-cancel" data-i18n="button.wizard.cancel">Cancel</a>
+<a class="wizard-button-save wizard-button wizard-button-disabled" style="display:none"  data-i18n="button.wizard.save">Save</a>
 </div>
 		</div>
 </script>
@@ -103,8 +104,8 @@ ULTRA is about to learn its motor positions and directions for {{motors}} motors
 					Do you want to fly your ULTRA prop-in or prop-out?<br>Click on the image to change it.<br><br>
 				{{/complete}}
 				{{^complete}}
-					Unfortunatelly ULTRA is unable to recognise your ESC.<br><br>
-					This may happen if you selected wrong motors, or did not wire your ESC correctly.<br><br>
+					Unfortunately ULTRA was unable to recognize your ESC.<br><br>
+					This may happen if you selected wrong motor layout, or did not wire your ESC correctly.<br><br>
 					Please try again, check your wiring or use DSHOT Router for custom configuration.
 				{{/complete}}
 			</div>
@@ -116,7 +117,1511 @@ ULTRA is about to learn its motor positions and directions for {{motors}} motors
 </script>
  
  
+ <script id="factory-wizard-welcome-template" type="text/html">
+		<div class="block block-h-100">
+ 		<!--	<div class="title" data-i18n="title.motor.wizard">Motor Wizard</div> -->
+			<div class="body">
+<br>
+  You are about to reset your ULTRA to factory defaults.<br><br>
+All settings of your ULTRA and ULTRA OSD will be reverted to their initial state.<br><br>
+There is <b>NO</b> turning back! Make sure you have backups of FC and OSD configs!
+ 
+			</div>
+		</div>
+</script>
+
+ <script id="factory-wizard-done-template" type="text/html">
+		<div class="block block-h-100">
+ 		<!--	<div class="title" data-i18n="title.motor.wizard">Motor Wizard</div> -->
+			<div class="body">
+<br>
+ Please type <b>ULTRA</b> for confirmation!<br><br>
+
+<input type="text" id="factory-wizard-reset-input" style="text-align:center; color: #9C241B; font-weight: bold; text-transform:uppercase" autocomplete="off"></input><br><br>
+
+Please <b>REBOOT</b> your ULTRA after factory reset!
+ 
+			</div>
+		</div>
+</script>
  
  
+<script id="factory-wizard-buttons-template" type="text/html">
+		<div class="block" style="margin-bottom:2px">
+			<div class="body" style="height:26px; padding:0px">
+<a class="wizard-button-prev wizard-button"  data-i18n="button.wizard.prev">Back</a>
+<a class="wizard-button-next wizard-button"  data-i18n="button.wizard.next">Next</a>
+<a class="wizard-button-save wizard-button" style="display:none" data-i18n="button.wizard.save">Reset</a>
+</div>
+		</div>
+</script>
+
+<script id="factory-wizard-header-template" type="text/html">
+		<div class="block">
+ 			<div class="title" data-i18n="title.factory.wizard">Factory Reset Wizard</div>
+		</div>
+ </script>
  
+  
+<!-- HELP SYSTEM -->  
+  
+<script id="mixer-u1-help" type="text/html">
+	Select your craft type.
+</script>
+
+<script id="mixer-u2-help" type="text/html">
+	Select your craft type.
+</script>
+
+
+<script id="mixer-mu1-help" type="text/html">
+	Select your craft type.<br>You can use more then 4 motor setups with OneWire.
+</script>
+
+<script id="mixer-mu2-help" type="text/html">
+	Select your craft type.<br>You can use more then 4 motor setups with OneWire.
+</script>
+
+
+
+<script id="failsafe-help" type="text/html">
+	Duration in seconds, quad will stay in level mode after loosing rc link before it disarms.<br>Setting it to 0 will disarm the quad immideately.
+</script>
 		
+<script id="escLayout-help" type="text/html">
+	Select type and orientation of your esc. You can use motor wizard to let ULTRA help you with that.<br><br>
+	There are two types or layouts of escs at the moment. Kiss and Betaflight.<br><br>
+	<b>If you have BLHeli32 ESC, please use layouts prefixed with "BF"!<b>
+</script>
+
+<script id="motorWizard-help" type="text/html">
+	Let ULTRA guide you through few screens to determine your esc type and its orientation.<br>
+	Make sure that you set your esc configuration to "DEFAULT" and have LIPO connected!<br>
+	Motors must be wired in the right order of 1:1, 2:2, 3:3, 4:4!<br>
+	Your RADIO must be turned on for spinning your motors!
+</script>
+
+<script id="receiver-help" type="text/html">
+	Select protocol of your receiver. ELRS pilots should use Crossfire protocol!
+</script>
+
+<script id="crossfirePT-help" type="text/html">
+	Crossfire gimbal passthrough can be used on some tbs firmwares. Because there is no mixer involved<br>
+	you have to select mode of your radio manually. The gimbal passthrough works only on certain<br>
+	radios (Mambo, Tango) and supposedly makes your link 1ms faster. Not recommended.<br>
+	For normal usage just keep it default.<br><br>
+	Gimbal passtrough modes use AETR channel order.
+</script>
+
+<script id="rxCenter-help" type="text/html">
+	Some radios dont have channel trimming capabilities (like DJI radio).<br>
+	Here you can set center values of your radio manually. Default is 1500.<br><br>
+	For example, if you see this picture on data output page:<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/misc/1495.png"></div><br>
+	Set this value to 1495.
+</script>
+
+<script id="pidP-help" type="text/html">
+	P term of the pid controller.
+</script>
+
+<script id="pidI-help" type="text/html">
+	I term of the pid controller.
+</script>
+
+<script id="pidD-help" type="text/html">
+	D term of the pid controller.
+</script>
+
+<script id="rcRate-help" type="text/html">
+	Increases the strength of the RC channel signals into the PID controller.<br>
+	So if you have 0-1000 at RC rate 1.0, it will be 0-2000 with RC rate 2.0
+</script>
+
+<script id="rate-help" type="text/html">
+	Decreases the gyro influence depending on the stick max outputs.<br>
+	E.g. with roll stick at center you will always have 100% gyro influence<br>
+	with rate on 0.00 it will still be 100% with full deflection.<br>
+	But with 0.50 rate it will be 50% gyro influence at full deflection.
+</script>
+
+<script id="rcCurve-help" type="text/html">
+	Works like expo on your radio. It lowers the inputs around the center.
+</script>
+
+<script id="tpaP-help" type="text/html">
+	TPA P term multiplier. With TPA influence at 100%, P term will be multiplied by this value.
+</script>
+
+<script id="tpaI-help" type="text/html">
+	TPA I term multiplier. With TPA influence at 100%, I term will be multiplied by this value.
+</script>
+
+<script id="tpaD-help" type="text/html">
+	TPA D term multiplier. With TPA influence at 100%, D term will be multiplied by this value.
+</script>
+
+<script id="levelP-help" type="text/html">
+	P term of the level mode pid controller.
+</script>
+
+<script id="levelI-help" type="text/html">
+	I term of the level pid controller.
+</script>
+
+<script id="levelD-help" type="text/html">
+	D term of the level pid controller.
+</script>
+
+<script id="levelMaxAnglew-help" type="text/html">
+	Maximum angle of attitude that can be used for level mode. In degrees.
+</script>
+
+
+<script id="minThrottle-help" type="text/html">
+	Minimum throttle that ULTRA will send to the esc when armed.<br>
+	The value must be high enough to have stable motor startup!
+</script>
+
+
+<script id="maxThrottle-help" type="text/html">
+	Maximum throttle that ULTRA will send to the esc when armed.<br>
+	In some cases, when you want use say 4s motors on 6s, you<br>
+	can set this value lower then 2000 to prevent motor damage.<br>
+	Use it in combination with throttle scaling!
+</script>
+
+<script id="minCommand-help" type="text/html">
+	Below this value, pid controller will be turned off!<br>
+	Default value is 1000, meaning pid controller will be<br>
+	ALWAYS on. Should stay default (1000) unless you plan to<br>
+	do some idle up stuff.
+</script>
+
+<script id="scaling-help" type="text/html">
+	When enabled, pid controller will be working in the<br>
+	range between minCommand and minThrottle.<br>
+	Original Kiss had dead band there, so enabling<br>
+	scaling gives you 7% throttle resolution back.
+</script>
+
+<script id="escMode-help" type="text/html">
+	ESC protocol selection. DS2400 is most used<br>
+	protocol on all escs. Change it only if you are not<br>
+	able to use DS2400.
+</script>
+
+<script id="aux-help" type="text/html">
+	AUX channel assigned to this function.
+</script>
+
+<script id="auxRange-help" type="text/html">
+	AUX channel range that<br>
+	activates this function.
+</script>
+
+<script id="softArm-help" type="text/html">
+	When soft arm enabled, your pid controller<br>
+	will be inactive until you move throttle<br>
+	above 5%. Great for HD footage ;)
+</script>
+
+<script id="prearm-help" type="text/html">
+	Select AUX channel for PreArm safety.
+</script>
+
+<script id="prearmMode-help" type="text/html">
+	Select when PreArm safety will be<br>
+	activated. On first arm only<br>
+	or on every arm. Safety first!
+</script>
+
+<script id="lpf-help" type="text/html">
+	Gyro lpf filter. Higher you go, less<br>
+	it will filter. On advanced page you<br>
+	can set different value per axis.
+</script>
+
+
+<script id="arm-help" type="text/html">
+	Select AUX channel that will be used<br>
+	for arming your quad.
+</script>
+
+
+
+<script id="level-help" type="text/html">
+	Select AUX channel that will be used<br>
+	for enabling level mode.<br>
+	Make sure accelerometer is calibrated<br>
+	Before using level mode!
+</script>
+
+<script id="buzzer-help" type="text/html">
+	Select AUX channel that will be used<br>
+	for enabling your buzzer SOS signal.<br>
+	Make sure Turtle mode is<br>
+	not on the same channel if you are using<br>
+	BLHeli ESC!
+</script>
+
+<script id="led-help" type="text/html">
+	Select AUX channel that will be used<br>
+	for changing your LED color.
+</script>
+
+<script id="ledBrightness-help" type="text/html">
+	Select AUX channel that will be used<br>
+	for changing your LED brightness.
+</script>
+
+<script id="turtle-help" type="text/html">
+	Select AUX channel that will be used<br>
+	for turtle mode. Make sure Buzzer is<br>
+	not on the same channel if you are using<br>
+	BLHeli ESC!
+</script>
+
+<script id="runcam-help" type="text/html">
+	Select AUX channel that will be used<br>
+	to control RunCam. This is probably<br>
+	never used and might be deleted.
+</script>
+
+<script id="rth-help" type="text/html">
+	Select AUX channel that will be used<br>
+	to RTH. Remember, to exit RTH mode and<br>
+	regain control over the quad, you need<br>
+	to turn RTH switch ON and OFF!
+</script>
+
+<script id="inflightAction-help" type="text/html">
+	Select AUX channel that will be used<br>
+	to select parameter for inflight tuning.
+</script>
+
+<script id="inflightValue-help" type="text/html">
+	Select AUX channel that will be used<br>
+	to change value of inflight tuning parameter.<br>
+	It must be analog knob, unless you know<br>
+	what you doing!
+</script>
+
+<script id="vtxPower-help" type="text/html">
+	Select AUX channel that will be used<br>
+	to change power output of your vtx.<br>
+	If no AUX selected - ARM channel will<br>
+	be used automatically.
+</script>
+
+<script id="vtxBand-help" type="text/html">
+	Select AUX channel that will be used<br>
+	to change the band of your vtx.
+</script>
+
+<script id="vtxChannel-help" type="text/html">
+	Select AUX channel that will be used<br>
+	to change the channel of your vtx.
+</script>
+
+<script id="unsafe-help" type="text/html">
+	<br><br><font color="red">Cannot be changed with lipo!</font>
+</script>
+
+<script id="customOrientation-help" type="text/html">
+	If for some reason, your FC has to be mounted in not<br>
+	default position, you can set its custom orientation.
+</script>
+
+<script id="coRoll-help" type="text/html">
+	Set orientation of the FC on ROLL axis.<br>
+	Values can be set in the range -180 .. +180 degrees.<br>
+	Negative values for roll left, positive for roll right.
+</script>
+
+<script id="coPitch-help" type="text/html">
+	Set orientation of the FC on PITCH axis.<br>
+	Values can be set in the range -180 .. +180 degrees.<br>
+	Negative values for pitch up (back), <br>
+	positive for pitch down (forward).
+</script>
+
+<script id="coYaw-help" type="text/html">
+	Set orientation of the FC on YAW axis.<br>
+	Values can be set in the range -180 .. +180 degrees.<br>
+	Negative values for yaw left, positive for yaw right.
+</script>
+
+<script id="yawControl-help" type="text/html">
+	Enable it only if you run your setup props-out!<br>
+	ULTRA needs to know, how to control yaw axis.<br>
+	This parameter can be set automatically<br>
+	using Motor Wizard.
+</script>
+
+<script id="launchMode-help" type="text/html">
+	Launch mode allows you to slowly pitch down<br>
+	your quad on the racing launch pad without<br>
+	risk of I term windup and motors spinning up.
+</script>
+
+<script id="dbRoll-help" type="text/html">
+	Majority of the radios produce small jitter<br>
+	in the ROLL channel input. To avoid oscillations or<br>
+	other nasty effects, it is strongly recommended<br>
+	to set deadband on ROLL around 10 ticks.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/misc/deadband.png"></div><br>
+</script>
+
+<script id="dbPitch-help" type="text/html">
+	Majority of the radios produce small jitter<br>
+	in the PITCH channel input. To avoid oscillations or<br>
+	other nasty effects, it is strongly recommended<br>
+	to set deadband on PITCH around 10 ticks.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/misc/deadband.png"></div><br>
+</script>
+
+<script id="dbYaw-help" type="text/html">
+	Majority of the radios produce small jitter<br>
+	in the YAW channel input. To avoid oscillations or<br>
+	other nasty effects, it is strongly recommended<br>
+	to set deadband on YAW around 20 ticks.<br>
+	Setting deadband on yaw also will reduce<br>
+	effect of not straight throttle stick movement,<br>
+	that will also produce some yaw input.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/misc/deadband.png"></div><br>
+</script>
+
+<script id="serial-help" type="text/html">
+	Select it you have to change default functions<br>
+ 	of your serial ports. If you have HD video, GPS or<br>
+	logger, you just have to.
+</script>
+
+
+<script id="u1-s1-help" type="text/html">
+	Serial port 1 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u1-s2-help" type="text/html">
+	Serial 2 pads are dedicated for receiver.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u1-s3-help" type="text/html">
+	Serial 3 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u1-s4-help" type="text/html">
+	Serial 4 pads can be used for any customer devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u1-s5-help" type="text/html">
+	Serial 5 pads are dedicated for DShot ESC telemetry.<br>Also available on ESC connector!<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u1-s6-help" type="text/html">
+	Serial 6 pads can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u1-s7-help" type="text/html">
+	Serial 7 pad is dedicated for vtx control.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+
+<script id="u2-s1-help" type="text/html">
+	Serial port 1 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u2-s2-help" type="text/html">
+	Serial 2 pads are dedicated for receiver.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u2-s3-help" type="text/html">
+	Serial 3 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u2-s4-help" type="text/html">
+	Serial 4 pads can be used for any customer devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u2-s5-help" type="text/html">
+	Serial 5 pads are dedicated for DShot ESC telemetry.<br>Also available on ESC connector!<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u2-s6-help" type="text/html">
+	Serial 6 pads can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u2-s7-help" type="text/html">
+	Serial 7 pad is dedicated for vtx control.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+
+<script id="mu1-s1-help" type="text/html">
+	Serial port 1 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu1-s2-help" type="text/html">
+	Serial 2 pads are dedicated for receiver.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu1-s3-help" type="text/html">
+	Serial 3 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu1-s4-help" type="text/html">
+	Serial 4 pads can be used for any customer devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu1-s5-help" type="text/html">
+	Serial 5 is dedicated for DShot ESC telemetry.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu1-s6-help" type="text/html">
+	Serial 6 pads can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu1-s7-help" type="text/html">
+	Serial 7 pad is dedicated for vtx control.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+
+<script id="mu2-s1-help" type="text/html">
+	Serial port 1 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu2-s2-help" type="text/html">
+	Serial 2 pads are dedicated for receiver.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu2-s3-help" type="text/html">
+	Serial 3 connector can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu2-s4-help" type="text/html">
+	Serial 4 pads can be used for any customer devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" width="50%" height="auto"></div><br>
+</script>
+
+<script id="mu2-s5-help" type="text/html">
+	Serial 5 is dedicated for DShot ESC telemetry.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu2-s6-help" type="text/html">
+	Serial 6 pads can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="mu2-s7-help" type="text/html">
+	Serial 7 pad is dedicated for vtx control.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+
+
+<script id="u3-s1-help" type="text/html">
+	Serial port 1 connector can be used for devices like GPS/Logger/HD.<br>
+	You can connect DJI SBUS wire to RX2 pin.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u3-s2-help" type="text/html">
+	Serial 2 pads are dedicated for receiver.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u3-s3-help" type="text/html">
+	Serial 3 connector can be used for devices like GPS/Logger/HD.<br>
+	You can connect DJI SBUS wire to RX2 pin.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u3-s4-help" type="text/html">
+	Serial 4 pads can be used for any customer devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u3-s5-help" type="text/html">
+	Serial 5 pads are dedicated for DShot ESC telemetry.<br>Also available on ESC connector!<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u3-s6-help" type="text/html">
+	Serial 6 pads can be used for devices like GPS/Logger/HD.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+<script id="u3-s7-help" type="text/html">
+	Serial 7 pad is dedicated for vtx control.<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/serials/{{help}}.png" ></div><br>
+</script>
+
+
+
+<script id="vtxType-help" type="text/html">
+	ULTRA can control your analog vtx. Following<br>
+	types are supported over SA pad of the fc (Serial 7):<br><br>
+	<ul>
+		<li>- IRC Tramp</li>
+		<li>- TBS Smart Audio</li>
+	</ul>
+	<br>
+	You also can control TBS EVO connected to crossfire <br>
+	receiver RX TX pads and have it configured to work <br>
+	on crossfire protocol. You can select 'TBS EVO Crossfire'<br>
+	as your VTX and ULTRA will know how to access it via<br>
+	receiver using integrared Crossfire Router.<br><br>
+	Make sure your VTX is UNLOCKED!
+</script>
+
+<script id="vtxChannel-help" type="text/html">
+	Select the band and frequency of your VTX.
+</script>
+
+<script id="vtxMinPower-help" type="text/html">
+	Select the power VTX will be set when quad<br>
+	is disarmed or dedicated AUX function deactivated.
+</script>
+
+<script id="vtxMaxPower-help" type="text/html">
+	Select the power VTX will be set when quad<br>
+	is armed or dedicated AUX function activated.
+</script>
+
+<script id="buzzer-help" type="text/html">
+	If you dont have real buzzer connected to ULTRA,<br>
+	you still can emulate it with your motors.<br><br>
+
+	<div style="width:100%; text-align:center"><img src="./images/misc/{{fcType}}-buzzer.png" ></div><br>
+
+	<font color="red">Keep in mind that BLHeli cannot perform<br>
+	buzzing and turtling at the same time, so<br>
+	when using BLHeli - NEVER set those functions<br>
+ 	on the same AUX switch!</font><br><br>
+	<font color="red">Do not power buzzers with lipo from V1 boards!</font>
+</script>
+
+<script id="led-help" type="text/html">
+	You can use RGB leds with your ULTRA.<br>
+	You can select color of your leds from<br>
+	presets or pick one from the color picker.<br>
+
+	<div style="width:100%; text-align:center"><img src="./images/misc/{{fcType}}-led.png" ></div><br>
+
+	<font color="red">LEDs can consume a substantial amount of<br>
+	current when they are at full brightness!<br>Keep that in mind!</font>
+</script>
+
+<script id="ledBrightness-help" type="text/html">
+	Select brightness of your RGB led.
+</script>
+
+<script id="altLimit-help" type="text/html">
+	For compliance reasons, you can limit<br>
+	maximum altitude of your flight.<br>
+	ULTRA will inform you about that<br>
+	on OSD and will limit your throttle<br>
+	when you go above that altitude.<br>
+	Default value 0 turns off this feature.
+</script>
+
+<script id="dsRouter-help" type="text/html">
+	ULTRA allows you to remap motor outputs to<br>
+	different physical pins and pads.<br>
+	In most cases you DONT need to use it.
+</script>
+
+<script id="ds1-help" type="text/html">
+	Select pin or pad where Motor 1 signal<br>
+	will be routed to. 
+</script>
+
+<script id="ds2-help" type="text/html">
+	Select pin or pad where Motor 2 signal<br>
+	will be routed to. 
+</script>
+
+<script id="ds3-help" type="text/html">
+	Select pin or pad where Motor 3 signal<br>
+	will be routed to. 
+</script>
+
+<script id="ds4-help" type="text/html">
+	Select pin or pad where Motor 4 signal<br>
+	will be routed to. 
+</script>
+
+<script id="ds5-help" type="text/html">
+	Select pin or pad where Motor 5 signal<br>
+	will be routed to. 
+</script>
+
+<script id="ds6-help" type="text/html">
+	Select pin or pad where Motor 6 signal<br>
+	will be routed to. 
+</script>
+
+<script id="ds7-help" type="text/html">
+	Select pin or pad where Motor 7 signal<br>
+	will be routed to. 
+</script>
+
+<script id="ds8-help" type="text/html">
+	Select pin or pad where Motor 8 signal<br>
+	will be routed to. 
+</script>
+
+<script id="logLevel-help" type="text/html">
+	Select percentage of the pid loops to log.
+</script>
+
+<script id="logBaud-help" type="text/html">
+	Select baudrate of your logger.<br>
+	It MUST be the same as configured on<br>
+	your logger. OpenLogger can support<br>
+	baudrates up to 250000 baud.<br>
+	ULTRA Logger (and OpenLager) can log<br>
+	on 2000000 baud. Faster is better!
+</script>
+
+<script id="logDebug-help" type="text/html">
+	Usually, you do not need any extra debug fields<br>
+	to be logged. But if you do - you can select
+	some "RAW" data to log.
+</script>
+
+
+<script id="setpointWeight-help" type="text/html">
+	Set point weight defines "responsiveness" of the PID<br>
+	controller. Higher values will make it react<br>
+	more quickly, lower values will respond slower.<br>
+	This parameter can be used to define overall<br>
+	rigidness of your quad. 
+</script>
+
+<script id="brakingFactor-help" type="text/html">
+	Braking factor will help your quad to stop<br>
+	faster at the end of aggressive moves.<br>
+</script>
+
+<script id="accelerationFactor-help" type="text/html">
+	Acceleration factor will help your quad to start<br>
+	faster when you do fast stick movements.<br>
+</script>
+
+<script id="experimental-help" type="text/html">
+	Experimental mode has been designed for v2/v3<br>
+	flight controllers. It has some changes that<br>
+	are made for new IIM gyro. You may use it also<br>
+	on v1 flight controllers. Keep in mind, that<br>
+	you may need to use different pid values and rates!
+</script>
+
+<script id="adaptive-help" type="text/html">
+	Adaptive filtes is main filtering engine<br>
+	of ULTRA. Should NEVER be turned off without<br>
+	very special reason.
+</script>
+
+<script id="notchRoll-help" type="text/html">
+	In EXTREMELY RARE cases, you might need a<br>
+	extra notch filter on the roll axis.
+</script>
+
+<script id="notchPitch-help" type="text/html">
+	In EXTREMELY RARE cases, you might need a<br>
+	extra notch filter on the pitch axis.
+</script>
+
+<script id="notchRollCF-help" type="text/html">
+	Center frequency of the roll notch filter.
+</script>
+
+<script id="notchPitchCF-help" type="text/html">
+	Center frequency of the pitch notch filter.
+</script>
+
+<script id="notchCF-help" type="text/html">
+	Center frequency of the notch filter.
+</script>
+
+<script id="notchRollCO-help" type="text/html">
+	Cut off frequency of the roll notch filter.<br>
+	Must be below center frequency!
+</script>
+
+<script id="notchPitchCO-help" type="text/html">
+	Cut Off frequency of the pitch notch filter.<br>
+	Must be below center frequency!
+</script>
+
+<script id="notchCO-help" type="text/html">
+	Cut Off frequency of the notch filter.<br>
+	Must be below center frequency!
+</script>
+
+<script id="rpLpf-help" type="text/html">
+	Low pass filter for gyro roll and pitch axises.<br>
+	Higher (FREQ) you set - less it will filter.<br>
+	Keep it on HIGH in most cases! 
+</script>
+
+<script id="yLpf-help" type="text/html">
+	Low pass filter for gyro yaw axis.<br>
+	Higher (FREQ) you set - less it will filter.<br>
+	Keep it on HIGH in most cases! 
+</script>
+
+
+<script id="dLpf-help" type="text/html">
+	Low pass filter for D term.<br>
+	Higher (FREQ) you set - less it will filter.<br>
+	Keep it on HIGH in most cases! 
+</script>
+
+<script id="yawPFilter-help" type="text/html">
+	Yaw P term filter.<br>
+	Higher value will filter more.<br>
+	In most cases default value is<br>
+	enough. Default value 35.
+</script>
+
+<script id="voltageSource-help" type="text/html">
+	Voltage source tells ULTRA where to get<br>
+	information about lipo voltage.<br>
+	FC Sensor - analog sensor on ULTRA,<br>
+	ESC Telemetry - digital value that comes<br>
+	from ESC over DSHOT Telemetry (Serial 5 must<br>
+	be set to ESC Telem/OneWire of course).<br><br>
+	<font color="red">If you are using BlHeli ESC - USE FC SENSOR!</font>
+</script>
+
+<script id="currentSource-help" type="text/html">
+	Current source tells ULTRA where to get<br>
+	information about current.<br>
+	FC Sensor - analog sensor on ULTRA,<br>
+	ESC Telemetry - digital value that comes<br>
+	from ESC over DSHOT Telemetry (Serial 5 must<br>
+	be set to ESC Telem/OneWire of course).<br><br>
+	If you are using analog FC Sensor - you have to<br>
+	calibrate it. The procedure described in the WIKI.<br>
+	<div style="width:100%; text-align:center"><img src="./images/misc/{{fcType}}-current.png" ></div>
+	<font color="red">If you are using BlHeli ESC - USE FC SENSOR!</font>
+</script>
+
+<script id="voltageOffset-help" type="text/html">
+	FC voltage sensor by all means is not a precision<br>
+	instrument. Sometimes you can see wrong voltage<br>
+	in your gui or in osd. No problem! You can add<br>
+	voltage offset to correct it. So, if you see<br>
+	your full lipo shows 25.6v instead of<br>
+	normal 25.2v - just set voltage offset to -0.4v!
+</script>	
+
+<script id="currentDivider-help" type="text/html">
+	Analog current sensor has to be calibrated.<br>
+	You can easy do this in ULTRA OSD<br>
+	(Hardware tools -&gt; Current Calibration).<br>
+	Calibration procedure has been described in the WIKI.<br>
+	In the WIKI you can find some values for some escs.<br>
+	You can use them as good starting point.
+</script>	
+
+<script id="ccPad-help" type="text/html">
+	ULTRA v1 and ULTRA Mini v1 do not have<br>
+	dedicated current sensor pad, so we abuse<br>
+	Camera Control pad for that (aka CC pad hack).<br>
+	Here you can select what would be the mode<br>
+	of CC pad - Camera control or Current sensor<br><br>
+	<div style="width:100%; text-align:center"><img src="./images/misc/{{fcType}}-current.png" ></div>
+</script>
+
+<script id="batteryType-help" type="text/html">
+	For correct lipo cell count detection,<br>
+	please choose your battery type from<br>
+	Lipo, Lipo High Voltage or Li-Ion.
+</script>
+
+<script id="voltAlarm-help" type="text/html">
+	When your lipo voltage drops below<br>
+	this value - ULTRA will start beeping<br>
+	and will give you alarm on the OSD.
+</script>
+
+<script id="mahAlarm-help" type="text/html">
+	When your lipo consumption (mah) goes above<br>
+	this value - ULTRA will start beeping<br>
+	and will give you alarm on the OSD.
+</script>
+
+<script id="osdMode-help" type="text/html">
+	Every HD system has its own flavour and different<br>
+	features. Here you can select what kind of<br>
+	HD system you use. If you do not have canvas<br>
+	mode on your HD system - just use MSP.
+</script>
+
+<script id="osdBaud-help" type="text/html">
+	HD0 and DJI WTF support faster serial<br>
+	baudrate (230400). For HD0 you dont have<br>
+	to do anything. For DJI WTF you have to go<br>
+	to their CLI interface and execute<br> 
+	following commands:<br><br>
+	<font color="gray">package-config set msp-osd fast_serial true<br>
+	package-config apply msp-osd</font><br><br>
+</script>
+
+<script id="osdLayout-help" type="text/html">
+	You can select one of the few MSP OSD<br>
+	presets if you dont feel like editing<br>
+	your own. 
+</script>
+
+<script id="osdUnits-help" type="text/html">
+	Select metric or imperial system for<br>
+	your MSP OSD. 
+</script>
+
+<script id="osdCrosshair-help" type="text/html">
+	You can enable or disable crosshair sign<br>
+	in the center of your MSP OSD.
+</script>
+
+<script id="osdGPS-help" type="text/html">
+	You can enable or disable GPS sensors<br>
+	on your MSP OSD.
+</script>
+
+<script id="gpsProtocol-help" type="text/html">
+	Select NMEA or UBLOX protocol of your GPS.
+</script>
+
+<script id="gpsTimezone-help" type="text/html">
+	GPS date and time always broadcasted in GMT,<br>
+	but you can help ULTRA to show correct time<br>
+	by setting your local timezone.
+</script>
+
+<script id="rthAltitude-help" type="text/html">
+	Altitude of RTH flight in meters above home point.<br>
+	If its set to 0, altitude will be 50m higher then<br>
+	maximum altitude during flight.
+</script>
+
+<script id="homeAltitude-help" type="text/html">
+	Altitude of the loitering above home point<br>
+	at the end of RTH. In meters.
+</script>
+
+<script id="descentRadius-help" type="text/html">
+	When your quad returns to home, it will fly<br>
+	on RTH Altitude until it approaches descent<br>
+	radius distance. After that, it will come closer<br>
+	to the home point and perform graceful descent<br>
+	to reach home altitude. In meters. 200m is a good<be>
+	value. 
+</script>
+
+<script id="rthMaxThrottle-help" type="text/html">
+	Maximum throttle that is allowed to be used by RTH.<br>
+	Default value is 0 (approximately 85% of throttle).<br>
+	For powerfull setups it is recommended to set value<br>
+	in range 1600 - 1700. Keep in mind, that quad must have<br>
+	enough power to perform RTH!
+</script>
+
+<script id="rthHoverThrottle-help" type="text/html">
+	ULTRA can calculate good hover throttle on its own,<br>
+	so in MOST cases keep default value (0).
+</script>
+
+<script id="rthMinThrottle-help" type="text/html">
+	Minimum throttle that can be used by RTH.<br>
+	Keep it default (0).
+</script>
+
+<script id="rthHomeAction-help" type="text/html">
+	This parameter reserved for future use.<br>
+	ULTRA always will loiter above home point after<br>
+	return. So look up, and dont let it drop<br>
+	on your head or people around you.
+</script>
+
+<script id="rthFailsafe-help" type="text/html">
+	Enable it if you want your quad to return<br>
+	to home point in the event of failsafe.<br>
+	You MUST have RTH function set on your radio<br>
+	and MUST have Accelerometer calibrated!
+</script>
+
+<script id="altSource-help" type="text/html">
+	Since ULTRA has onboard barometer, you<br>
+	can select here what will be used as<br>
+	altitude source for RTH function.<br>
+	Using barometer provides more precise<br>
+	flight with lower amount of GPS satellites.<br>
+</script>
+
+<script id="preset-help" type="text/html">
+	Select here one of the team provided presets<br>
+	for your ULTRA. Its a good starting point<br>
+	for your quad or for further tuning.<br>
+	Pay attention! Some presets are made<br>
+	for experimental pid controller!
+</script>
+
+<script id="calibrateRadio-help" type="text/html">
+	If your radio doesnt send 1500 for Roll Pitch<br>
+	and Yaw channels, ULTRA can help you to set<br>
+	average value to get it as close as possible<br>
+	to 1500. Use it only if your radio doesnt<br>
+	have proper trim functionality (like DJI remote).<br>
+	This value can be set manually on Configuration page.
+</script>
+
+
+<script id="motorTest-help" type="text/html">
+	Always test your motors (without propellers)<br>
+	before maiden flight. Motor order and direction<br>
+	must be the same as on provided picture.<br>
+	If its not - please change your esc layout<br>
+	or use ULTRA Motor Wizard to set it up all<br>
+	automatically.<br><br>
+	Motor test also usefull to see quality<br>
+	of your motors.
+</script>
+
+<script id="accelCalibration-help" type="text/html">
+	You MUST calibrate accelerometer if you<br>
+	have plans to use Level mode or RTH.<br>
+	Place your quad to the flat and leveled<br>
+	surface and click calibration button.<br>
+	After successfull calibration, AngleX and AngleY<br>
+	parameters must read 0.
+</script>
+
+<script id="resetModel-help" type="text/html">
+	Make this model look pretty again :)
+</script>
+
+<script id="telemetry-help" type="text/html">
+	You can select several telemetry values<br>
+	to be graphed. Great way to check if your esc<br>
+	sends valid DSHOT telemetry or just to<br>
+	check quality of your motors.
+</script>
+
+<script id="customTPA-help" type="text/html">
+	By default, ULTRA will ALWAYS use TPA.<br>
+	You can change its parameters by<by>
+	enabling Custom TPA and changing its<br>
+	parameters.
+</script>
+
+<script id="TPABP1-help" type="text/html">
+	Throttle range in TPA has been split to<br>
+	3 bands. Breakpoint 1 defines beginning<br>
+	of the second band. Default value is 30.
+</script>
+
+<script id="TPABP2-help" type="text/html">
+	Throttle range in TPA has been split to<br>
+	3 bands. Breakpoint 2 defines beginning<br>
+	of the third band. Default value is 50.
+</script>
+
+
+<script id="TPAI1-help" type="text/html">
+	TPA influence in percent at 0 throttle.<br>
+	Default value is 30%.
+</script>
+
+<script id="TPAI2-help" type="text/html">
+	TPA influence in percent at Breakpoint 1 throttle.<br>
+	Default value is 0%.
+</script>
+
+<script id="TPAI3-help" type="text/html">
+	TPA influence in percent at Breakpoint 2 throttle.<br>
+	Default value is 0%.
+</script>
+
+<script id="TPAI4-help" type="text/html">
+	TPA influence in percent at full throttle.<br>
+	Default value is 100%.
+</script>
+
+<script id="osdLeft-help" type="text/html">
+	Same action as holding Roll left on OSD.<br>
+	Exit to previous screen.
+</script>
+
+<script id="osdMenu-help" type="text/html">
+	Entering Main Menu on OSD.<br>
+</script>
+
+
+<script id="osdContext-help" type="text/html">
+	Same action as holding Select on OSD.<br>
+	Opens page specific context.
+</script>
+
+
+<script id="osdContext-help" type="text/html">
+	Same action as holding Select on OSD.<br>
+	Opens page specific context.
+</script>
+
+<script id="osd169-help" type="text/html">
+	Switch to 16:9 aspect ratio.
+</script>
+
+<script id="osd43-help" type="text/html">
+	Switch to 4:3 aspect ratio.
+</script>
+
+
+<script id="serialClipboard-help" type="text/html">
+	Click on serial to copy it to the clipboard.
+</script>
+
+
+<script id="channelOrder-help" type="text/html">
+	Select order of your channels.
+</script>
+
+
+<script id="motor-bar-template" type="text/html">
+ <div class="bar-row">
+  	<div class="name">{{name}}</div>
+    	<div class="motor">
+        	<div class="meter-bar">
+            	<div class="label"></div>
+                	<div class="fill">
+                    	<div class="label"></div>
+                     </div>
+                </div>
+            </div>
+       	<div class="test" style="display:none; margin-left:5px"><input style="display:none" type="checkbox" class="motor-test" value="{{id}}"></div>
+    </div>
+</div>
+</script>
+
+
+<script id="receiver-bar-template" type="text/html">
+  <div class="bar-row">
+     <div class="name">{{name}}</div>
+        <div class="meter">
+           <div class="meter-bar">
+               <div class="label"></div>
+               <div class="fill">
+                    <div class="label"></div>
+                </div>
+           </div>
+         </div>
+      </div>
+  </div>
+</script>
+
+
+<script id="rec-wizard-welcome-template-u1" type="text/html">
+		<div class="block block-h-100">
+ 		<div class="title" style="margin-top: 10px" data-i18n="title.rec.wizard">Recommended Settings</div>
+			<div class="body">
+<br>
+  For best ULTRA v1 performance, we HIGHLY recommend the following settings:<br><br>
+  <table class="rec-wizard-table">
+	<tr>
+		<td class="left">PID preset:</td>
+		<td class="right">ULTRA DEFAULT</td>	  
+	</tr>
+	<tr>
+		<td class="left">Throttle scaling:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">Soft ARM:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">TPA:</td>
+		<td class="right">CUSTOM</td>	  
+	</tr>
+  </table>
+  <br>
+
+  Would you like to apply it to your configuration?
+			</div>
+		</div>
+</script>
+
+<script id="rec-wizard-welcome-template-u2" type="text/html">
+		<div class="block block-h-100">
+ 		<div class="title" style="margin-top: 10px" data-i18n="title.rec.wizard">Recommended Settings</div>
+			<div class="body">
+<br>
+  For best ULTRA v2 performance, we HIGHLY recommend the following settings:<br><br>
+  <table class="rec-wizard-table">
+  	<tr>
+		<td class="left">Experimental mode:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">PID preset:</td>
+		<td class="right">ULTRA2 EXP DEFAULT</td>	  
+	</tr>
+	<tr>
+		<td class="left">Throttle scaling:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">Soft ARM:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">TPA:</td>
+		<td class="right">CUSTOM</td>	  
+	</tr>
+  </table>
+
+  Would you like to apply it to your configuration?
+			</div>
+		</div>
+</script>
+
+
+<script id="rec-wizard-welcome-template-u3" type="text/html">
+		<div class="block block-h-100">
+ 		<div class="title" style="margin-top: 10px" data-i18n="title.rec.wizard">Recommended Settings</div>
+			<div class="body">
+<br>
+  For best ULTRA v3 performance, we HIGHLY recommend the following settings:<br><br>
+  <table class="rec-wizard-table">
+  	<tr>
+		<td class="left">Experimental mode:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">PID preset:</td>
+		<td class="right">ULTRA2 EXP DEFAULT</td>	  
+	</tr>
+	<tr>
+		<td class="left">Throttle scaling:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">Soft ARM:</td>
+		<td class="right">Yes</td>	  
+	</tr>
+	<tr>
+		<td class="left">TPA:</td>
+		<td class="right">CUSTOM</td>	  
+	</tr>
+  </table>
+
+  Would you like to apply it to your configuration?
+			</div>
+		</div>
+</script>
+
+<script id="rec-wizard-welcome-template-u2a" type="text/html">
+		<div class="block block-h-100">
+ 		<div class="title" style="margin-top: 10px"></div>
+			<div class="body">
+<br><br><br><br>For best experience, <br><br>please update your ULTRA<br><br>to the latest firmware!<br><br>
+ 			</div>
+		</div>
+</script>
+
+<script id="rec-wizard-buttons-template" type="text/html">
+		<div class="block" style="margin-bottom:2px">
+			<div class="body" style="height:26px; padding:0px">
+<a class="wizard-button-prev wizard-button wizard-button-disabled" data-i18n="button.wizard.prev">No</a>
+<a class="wizard-button-next wizard-button wizard-button-disabled"  data-i18n="button.wizard.next">Yes</a>
+<a class="wizard-button wizard-button-no" data-i18n="button.wizard.no">No</a>
+<a class="wizard-button wizard-button-yes" data-i18n="button.wizard.yes">Yes</a>
+<a class="wizard-button wizard-button-flash" data-i18n="button.wizard.flash" style="display:none">FC Flasher</a>
+</div>
+		</div>
+</script>
+
+
+
+<script id="aux-wizard-welcome-template" type="text/html">
+		<div class="block block-h-100">
+ 		<!--	<div class="title" data-i18n="title.motor.wizard">Motor Wizard</div> -->
+			<div class="body">
+<br>
+  Please toggle AUX switch and set it to desired position for <b>{{funcName}}</b> on your radio.<br><br>
+  
+  	<div id="auxbars" class="bars">
+					<div class="bar-row">
+     					<div class="name">AUX1</div>
+        				<div class="meter">
+           					<div class="meter-bar meter-bar-aux1">
+               					<div class="label" style="margin-left: 0px;">1000</div>
+               					<div class="fill" style="width: 0%;">
+                    				<div class="label" style="margin-left: 0px;">1000</div>
+               					</div>
+        					</div>
+      					</div>
+					</div>
+					
+					<div class="bar-row">
+     					<div class="name">AUX2</div>
+        				<div class="meter">
+           					<div class="meter-bar  meter-bar-aux2">
+               					<div class="label" style="margin-left: 0px;">1000</div>
+               					<div class="fill" style="width: 0%;">
+                    				<div class="label" style="margin-left: 0px;">1000</div>
+               					</div>
+        					</div>
+      					</div>
+					</div>
+					
+					
+					<div class="bar-row">
+     					<div class="name">AUX3</div>
+        				<div class="meter">
+           					<div class="meter-bar  meter-bar-aux3">
+               					<div class="label" style="margin-left: 0px;">1000</div>
+               					<div class="fill" style="width: 0%;">
+                    				<div class="label" style="margin-left: 0px;">1000</div>
+               					</div>
+        					</div>
+      					</div>
+					</div>
+					
+					
+					<div class="bar-row">
+     					<div class="name">AUX4</div>
+        				<div class="meter">
+           					<div class="meter-bar  meter-bar-aux4">
+               					<div class="label" style="margin-left: 0px;">1000</div>
+               					<div class="fill" style="width: 0%;">
+                    				<div class="label" style="margin-left: 0px;">1000</div>
+               					</div>
+        					</div>
+      					</div>
+					</div>
+					
+					
+					<div class="bar-row">
+     					<div class="name">AUX5</div>
+        				<div class="meter">
+           					<div class="meter-bar  meter-bar-aux5">
+               					<div class="label" style="margin-left: 0px;">1000</div>
+               					<div class="fill" style="width: 0%;">
+                    				<div class="label" style="margin-left: 0px;">1000</div>
+               					</div>
+        					</div>
+      					</div>
+					</div>
+					
+					
+					<div class="bar-row">
+     					<div class="name">AUX6</div>
+        				<div class="meter">
+           					<div class="meter-bar  meter-bar-aux6">
+               					<div class="label" style="margin-left: 0px;">1000</div>
+               					<div class="fill" style="width: 0%;">
+                    				<div class="label" style="margin-left: 0px;">1000</div>
+               					</div>
+        					</div>
+      					</div>
+					</div>
+					
+					
+					<div class="bar-row">
+     					<div class="name">AUX7</div>
+        				<div class="meter">
+           					<div class="meter-bar  meter-bar-aux7">
+               					<div class="label" style="margin-left: 0px;">1000</div>
+               					<div class="fill" style="width: 0%;">
+                    				<div class="label" style="margin-left: 0px;">1000</div>
+               					</div>
+        					</div>
+      					</div>
+					</div>
+					
+					
+ 				</div>
+ 
+			
+			<span class="active-aux-message" style="display:none; height:30px; line-height: 30px"><b>{{funcName}}</b> will be active when <b><span class="active-aux-channel"></span></b> is <b><span class="active-aux-value"></span></b></span>
+
+			</div>
+		</div>
+</script>
+
+<script id="aux-wizard-buttons-template" type="text/html">
+		<div class="block" style="margin-bottom:2px">
+			<div class="body" style="height:26px; padding:0px">
+				<a class="wizard-button wizard-button-cancel" data-i18n="button.wizard.cancel">Cancel</a>
+				<a class="wizard-button-setaux wizard-button" data-i18n="button.wizard.setaux">Set Function</a>
+</div>
+		</div>
+</script>
+
+<script id="aux-wizard-header-template" type="text/html">
+		<div class="block">
+ 			<div class="title" data-i18n="title.motor.wizard">AUX Wizard</div>
+		</div>
+</script>
+
+<!-- restore wizard -->
+
+<script id="restore-wizard-welcome-template" type="text/html">
+		<div class="block block-h-100">
+ 		<!--	<div class="title" data-i18n="title.motor.wizard">Motor Wizard</div> -->
+			<div class="body">
+<br>
+ Caution - potentially dangerous!<br/>
+ Restoring backup from the craft with <b>different FC orientation</b> or <b>different ESC layout</b><br/>
+ or <b>different propellers direction</b> can be <b>DANGEROUS!!!!</b><br/><b>CHECK EVERYTHING</b> without propellers <b>BEFORE ARMING</b> this craft!<br/><br/>
+ 
+ What would you like to restore?<br/><br/>
+ 
+ <div style="display: flex;">
+	 <div style="width:33%">&nbsp;</div> 
+	 <div style="width: 34%;">
+	    <div style="text-align: left; display: inline-block">
+ 		<input type="checkbox" id="restore-fc" class="restore_checkbox">&nbsp;FC Configuration<br/>
+ 		<input type="checkbox" id="restore-osd"  class="restore_checkbox">&nbsp;OSD Configuration<br/>
+ 	    </div>
+ 	</div>
+ 	<div style="width:33%">&nbsp;</div>
+</div>		
+
+			</div>
+		</div>
+</script>
+
+<script id="restore-wizard-buttons-template" type="text/html">
+		<div class="block" style="margin-bottom:2px">
+			<div class="body" style="height:26px; padding:0px">
+				<a class="wizard-button wizard-button-cancel" data-i18n="button.wizard.cancel">Cancel</a>
+				<a class="wizard-button-restore wizard-button" data-i18n="button.wizard.restore">Restore</a>
+</div>
+		</div>
+</script>
+
+<script id="restore-wizard-header-template" type="text/html">
+		<div class="block">
+ 			<div class="title" data-i18n="title.restore.wizard">Restore Wizard</div>
+		</div>
+</script>
+
+<script id="altHold-help" type="text/html">
+	Select AUX channel that activates Altitude Hold mode.<br>
+</script> 
+
+<script id="ahP-help" type="text/html">
+	The P term for altitude hold.<br>
+</script>
+
+<script id="ahI-help" type="text/html">
+	The I term for altitude hold.<br>
+</script>
+
+<script id="ahD-help" type="text/html">
+	The D term for altitude hold.<br>
+</script>
+
+ <script id="ahP-help" type="text/html">
+	The P term for altitude hold.<br>
+</script>
+
+ <script id="led-mode-help" type="text/html">
+	RGB: Any WS2812 addressable leds.<br>
+	You can control color and brightness using AUX switches and knobs.<br><br>
+	PWM: Any PWM (Servo) controlled leds.<br>
+	You can control only brightness using AUX switch or knob.<br><br>
+	ON/OFF and OFF/ON: Any device with PINIO mode. You can turn it<br>
+	ON and OFF using AUX switch or knob.<br><br>
+	<font color="red">WARNING: Voltage on the LED pad should NEVER exceed 5 volt!</font>
+</script>
+
+<script id="fastTelemetry-help" type="text/html">
+	If you have VOLTARA or AM32 ESC you can<br>
+	enable Fast DSHOT Telemetry. RPM ASSIST<br>
+	will benefit from faster RPM updates.<br>
+</script>
+
+
+<script id="direction-help" type="text/html">
+	Sets your motor rotation direction.
+</script>
+
+<script id="start-help" type="text/html">
+	If enabled, your motors will start<br>
+	slow. Works best with Ultra soft arm.
+</script>
+
+<script id="currentLimit-help" type="text/html">
+	Software current limit.
+</script>
+
+<script id="tempLimit-help" type="text/html">
+	Software temperature limit.
+</script>
+
+<script id="currentCalib-help" type="text/html">
+	Current calibration in percent.
+</script>
+
+<script id="voltageCalib-help" type="text/html">
+	Voltage calibration in percent.
+</script>
+
+<script id="beeperVolume-help" type="text/html">
+	Beeper volume in percent.
+</script>
+
+<script id="beaconDelay-help" type="text/html">
+	Beacon delay in minutes.
+</script>
+
+<script id="rampupPower-help" type="text/html">
+	ESC ramping up power. 
+</script>
+
+
+<script id="configMode-help" type="text/html">
+	In multiple esc config, most of the<br>
+	parameters will be applied automatically to<br>
+	all escs. In single esc config you<br>
+	can change each esc individually.
+</script>
+
+<script id="help-help" type="text/html">
+	Turn help system on and off<br><br>
+	When help system is on, ultra will<br>
+	explain you all parameters when you<br>
+	move your mouse over them.
+</script>

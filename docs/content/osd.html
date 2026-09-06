@@ -1,24 +1,35 @@
 <div class="flex-container">
-	<div class="column column-left" style="width: 380px; height: 330px">
-		<div class="block" id="osd_block">
-			<div class="title" data-i18n="title.osd-mirror">OSD Mirror</div>
+	<div id="osd_column" class="column column-left" style="width: 380px; height: 330px">
+		<div class="block" id="osd_block" style="overflow:hidden">
+			<div id="osdtitle" class="title" data-i18n="title.osd-mirror">OSD Mirror</div>
 			<div class="body" style="width: 382px; height: 299px">
 				<div class="osd">
 
-					<div style="width: 370px">
+					<div id="osd_outer" style="width: 370px">
 
 						<div id="osd_mirror">
 							<div id="osd_screen" class="osd_screen"></div>
 
-							<div id="osdframe">
-								<canvas id="osd" width="370" height="288"></canvas>
+							<div id="osdframe" style="overflow:hidden">
+								<!-- <canvas id="osd" width="370" height="288"></canvas> -->
+								<canvas id="osd" width="720" height="396"></canvas>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+		
+		<div id="osdnav" class="block" style="display:none">
+			<div class="body">
+				<a id="osdleft" class="u-button" data="37"  style="margin-bottom: 5px; margin-top: 5px; padding: 0px" data-help="osdLeft">&larr;</a>
+				<a id="osdcontext" class="u-button"   style="margin-bottom: 5px; margin-top: 5px; margin-right:5px;"data-help="osdContext">&#x2630;</a>
+				<a id="osdground" class="u-button"   style="margin-bottom: 5px; margin-top: 5px; margin-right:5px; float:right" data-help="osdMenu">Menu</a>
+			</div>
+		</div>
 	</div>
+	
+	
 	<div class="column column-100">
 
 		<div class="block">
@@ -39,12 +50,25 @@
 				Numbers - Throttle<br/>
 			</div>
 		</div>
+		
+		<div id="osdmc" class="block" style="display:none">
+			<div class="title">Mouse Controls</div>
+			<div class="body">
+				You can use your mouse to control your Ultra OSD.
+			</div>
+		</div>
+		
+		<div id="osd43" class="block" style="display:none">
+			<div class="title">HD Camera Ratio</div>
+			<div class="body">
+				<a id="ratio169" class="u-button"  title="16 : 9" data-help="osd169">16 : 9</a>
+				<a id="ratio43" class="u-button inactive" style="margin-bottom: 5px" title="4 : 3" data-help="osd43">4 : 3</a>
+			</div>
+		</div>
 	</div>
 	
 	<div class="footer">
-		<a id="backup" 	class="u-button" href="#" title="Backup to file" data-i18n="button.backup">Backup</a>&nbsp;
-		<a id="restore" class="u-button" href="#" title="Restore from file" data-i18n="button.restore" style="margin-right:10px">Restore</a>&nbsp;
-		<!--  a id="save" 	class="u-button" href="#" title="Save Settings to EEPROM" data-i18n="button.save" style="margin-right:10px">Save</a>&nbsp; -->
+		<a id="hints" 	class="u-button u-button-help inactive" data-help="help,left">Help</a>&nbsp;
 	</div>
 		
 </div>

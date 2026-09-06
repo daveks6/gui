@@ -22,9 +22,16 @@ CONTENT.tpa.initialize = function (callback) {
     });
 
     function contentChange(mode) {
-        if (self.settingsFilled && mode) {
-            $('#save').addClass("important saveAct");
+      	if (mode) {
+			$('#save').removeAttr("data-i18n");
+        	$('#save').attr('data-i18n', 'button.save');
+        	$('#save').text($.i18n("button.save"));
+      
+        	if (self.settingsFilled) {
+            	$('#save').addClass("saveAct");
+        	}
         }
+        
         var rowNames = ['roll', 'pitch', 'yaw'];
         var precision = [2, 3, 2];
         var breakpoints = [
@@ -60,6 +67,8 @@ CONTENT.tpa.initialize = function (callback) {
         $("#simulatedBatteryInfluence").text(tmp.toFixed(0) + '%');
 
         $("#tpa_chart").kissTPAChart('setBreakpoints', breakpoints);
+        $("#tpa_chart").kissTPAChart('setCustom', $('input[name="UCTI"]').prop('checked'));
+        
         var influence = $("#tpa_chart").kissTPAChart('getInfluence');
         var tpa = [parseFloat($('tr.TPA input').eq(0).val()), parseFloat($('tr.TPA input').eq(1).val()), parseFloat($('tr.TPA input').eq(2).val())];
         for (var x = 0; x < 3; x++) {
@@ -259,57 +268,29 @@ CONTENT.tpa.initialize = function (callback) {
         $('input[name="BPI3"]').val(data['TPABPI3']);
         $('input[name="BPI4"]').val(data['TPABPI4']);
 
-
-        if (data['ver'] < 109) {
-
-            $('input[name="UVPID"]').on('change', function () {
-                contentChange(true);
-                if (parseInt($('input[name="UVPID"]').prop('checked') ? 1 : 0) == 1) {
-                    $('input[name^="LV"]').removeAttr("disabled");
-                } else {
-                    $('input[name^="LV"]').attr('disabled', 'true');
-                }
-            });
-
-            $('input[name="UVPID"]').prop('checked', data['BatteryInfluence']);
-            if (data['BatteryInfluence']) {
-                $('input[name^="LV"]').removeAttr("disabled");
-            }
-            $('input[name="LV1"]').val(data['voltage1']);
-            $('input[name="LV2"]').val(data['voltage2']);
-            $('input[name="LV3"]').val(data['voltage3']);
-            $('input[name="LVP1"]').val(data['voltgePercent1']);
-            $('input[name="LVP2"]').val(data['voltgePercent2']);
-            $('input[name="LVP3"]').val(data['voltgePercent3']);
-
-            if (data['BatteryInfluence'] || data['CustomTPAInfluence']) {
-                document.body.style.overflow = "scroll";
-            }
-
-            $('input[name^="BP"]').on("input", function () {
-                contentChange(true);
-            });
-
-            $('input[name^="LV"]').on("input", function () {
-                contentChange(true);
-            });
-
-            $('#simulatedVoltage').on('change', function () {
-                contentChange(false);
-            });
-        }
+      
         $('#tpa_chart').kissTPAChart();
 
         $(window).on('resize', self.resizeChart).resize();
 
         fastDataPoll();
 
+
+
         $('#save').click(function () {
             grabData();
             $('#save').removeClass("saveAct");
+            $('#save').html($.i18n("button.saving"));
+            $('#save').removeClass("saveAct");
             kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]));
+            kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
+				console.log("Saved!");
+				$('#save').removeAttr("data-i18n");
+                $('#save').html($.i18n("button.saved"));
+			});
         });
         
+                
         scrollTop();
     }
 };

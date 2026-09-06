@@ -7,8 +7,6 @@ CONTENT.configuration = {
 };
 
 
-
-
 CONTENT.configuration.initialize = function (callback) {
     var self = this;
     
@@ -17,15 +15,39 @@ CONTENT.configuration.initialize = function (callback) {
     self.telemetry = {};
     self.telemetryTimeout = 0;;
     self.motorWizardEnabled = false;
-    
-
-    self.UpdateMixerImage = function(Type, ESCOrientation, Reverse) {
+    self.boardId = 0;
+    self.auxes = [0, 0, 0, 0, 0, 0 , 0]; // 7 auxes
+    CONTENT.configuration.fcType = "u1";
+	self.needsMigration = false;
+	self.auxChannel = -1;
+	self.auxValue = -1;
+	self.mcuid = '';
+	
+	self.UpdateMixerImage = function(Type, ESCOrientation, Reverse) {
         if (typeof ESCOrientation == 'undefined') ESCOrientation = 0;
         console.log("Updating mixer image: Type=" + Type + " ESCOrientation=" + ESCOrientation + " Reverse=" + Reverse);
 
         $('.mixerPreview img.main-mixer').attr('src', './images/mixer/' + Type + (ESCOrientation > 0 && (Type == 1 || Type == 2) ? '_' + ESCOrientation : '') + (Reverse == 0 ? '' : '_inv') + ".png");
     };
 
+    self.fcTypePrefix = function() {
+    	if (kissProtocol.data[kissProtocol.GET_HARDWARE_INFO] != undefined) {
+    		var info = kissProtocol.data[kissProtocol.GET_HARDWARE_INFO];
+    		var brd = (info.hardwareVersion & 0xFF00) >> 8;
+    		if (brd == 1) {
+    			return "u1";
+    		} else if (brd == 2) {
+    			return "mu1";
+    		} else if (brd == 3) {
+    			return "u2";
+    		} else if (brd == 4) {
+    			return "mu2";
+    		} else if (brd == 5) {
+    			return "u3";
+    		} 
+    	} 
+    	return "u1";
+    } 
     
     self.checkMotorWizard = function() {
     	var show = true;
@@ -33,8 +55,7 @@ CONTENT.configuration.initialize = function (callback) {
     	if ((+$("#ESCOutputLayout").val()) != 0) show = false;
     	if ((+$("select[name='mixer']").val()) != 2) show = false; 
     	if ((+$("#outputMode").val()) == 8) show = false;
-    	if ($(".unsafe_active").length == 0) show = false;
-    	
+    	    	
     	if (show) {
     		$("#motor-wizard-button").removeClass("motor-wizard-button-disabled");
     	} else {
@@ -47,10 +68,14 @@ CONTENT.configuration.initialize = function (callback) {
     	var is4Motors = false;
     	if (kissProtocol.data[kissProtocol.GET_HARDWARE_INFO] != undefined) {
       	  var info = kissProtocol.data[kissProtocol.GET_HARDWARE_INFO];
+      	  
+      	  CONTENT.configuration.fcType = self.fcTypePrefix();
+          $("select[name='mixer']").data("help", "mixer-" +   CONTENT.configuration.fcType);
+          
       	  var tmp = info.hardwareVersion;
             var rev = tmp & 255;
             var brd = tmp >> 8;
-            if (brd == 2) {
+            if (brd == 2 || brd == 4) {
             	is4Motors = true;
             }
     	}
@@ -76,6 +101,64 @@ CONTENT.configuration.initialize = function (callback) {
     	}
     }
     
+    
+    function showNewVersion(version) {
+		$("#newVersion").text("⚡ " + version).show().click(function() {
+			CONTENT.fc_flasher.goRemote = true;
+			CONTENT.fc_flasher.initialize(true);
+		});
+	}
+    
+    
+    function checkNewFirmware(currentVersion) {
+		
+		console.log("Current version is: " + currentVersion);
+		
+		if (CONTENT.configuration.lastRelease === undefined) {
+			var repoArray = [];
+			loadGithubReleases("https://api.github.com/repos/KissUltra/firmware/releases").then(function (data) {
+        			$.each(data, function (index, release) {
+						if (!release.prerelease) {
+							var repoVersion =  release.name;
+							if (repoVersion !== undefined && repoVersion != '') {
+								repoArray.push(repoVersion);
+							}
+						}
+					});
+					
+					if (repoArray.length > 0) {
+						repoArray.sort().reverse();
+						CONTENT.configuration.lastRelease = repoArray[0];
+						console.log("Fetched latest release: " + CONTENT.configuration.lastRelease);
+						
+						if (currentVersion != ('KISS_ULTRA-' + CONTENT.configuration.lastRelease)) {
+							showNewVersion(CONTENT.configuration.lastRelease);
+						}
+						
+					}
+        		})
+        } else {
+			console.log("Cached latest release: " + CONTENT.configuration.lastRelease);
+			if (currentVersion != ('KISS_ULTRA-' + CONTENT.configuration.lastRelease)) {
+				showNewVersion(CONTENT.configuration.lastRelease);
+			}
+		}
+	}
+    
+    
+    function checkMigration() {
+		console.log("Checking migration");
+		
+		if (self.needsMigration && self.boardId != 0 && self.PRESETS !== undefined) {
+			console.log("Migration recommended, eeprom " + self.eeprom);
+			self.needsMigration = false;
+			CONTENT.configuration.legacyChecked = true;
+			
+			openRECWizard(0, self.boardId, self.eeprom);
+		}
+		
+	}
+    
     function updateInfo() {
     	if (kissProtocol.data[kissProtocol.GET_HARDWARE_INFO] != undefined) {
     	  var info = kissProtocol.data[kissProtocol.GET_HARDWARE_INFO];
@@ -88,7 +171,11 @@ CONTENT.configuration.initialize = function (callback) {
           	$("#hwversion").text("FCFC_ULTRA_MINI rev. " + rev);
           } else if (brd == 3) {
           	$("#hwversion").text("FCFC_ULTRA_2 rev. " + rev);
-          } else {
+          } else if (brd == 4) {
+          	$("#hwversion").text("FCFC_ULTRA_MINI2 rev. " + rev);
+          } else if (brd == 5) {
+          	$("#hwversion").text("FCFC_ULTRA_3 rev. " + rev);
+          }else {
           	$("#hwversion").text("UNKNOWN rev. " + rev);
           }
           var tmp = info.bootloaderVersion;
@@ -100,6 +187,9 @@ CONTENT.configuration.initialize = function (callback) {
     		$("#hwversion").text('...');
     	}
     	updateMixers();
+    	self.boardId = brd;	 
+
+    	checkMigration();
     } 
 
     GUI.switchContent('configuration', function () {
@@ -153,6 +243,75 @@ CONTENT.configuration.initialize = function (callback) {
         copyFrom.remove();
     }
 
+	// Make combined json config    
+    function makeBackupJson(fcConfig, osdConfig) {
+		var config = {  };
+		
+		if (osdConfig == undefined) {
+			config = fcConfig;
+		} else {
+			config.fc = fcConfig;
+			config.osd = osdConfig;
+			config.osd.kissultraosd = true;
+			config.osd.ver = +config.fc.ver;
+		}
+							
+		var json = JSON.stringify(config, function (k, v) {
+    			if (k === 'buffer' || k === 'isActive' || k === 'actKey' || k === 'SN' || k === 'lipoConnected' || k === 'dont_export_me' ) {
+    				return undefined;
+    			} else {
+    				return v;
+    			}
+    		}, 2);
+		return json;
+	}
+	
+	function saveBackupJsonWeb(json) {
+		var blob = new Blob([json], {
+			type: 'text/plain;charset=utf-8'
+		});
+		//Check the Browser.
+		var isIE = false || !!document.documentMode;
+		if (isIE) {
+			window.navigator.msSaveBlob(blob, "ultra-backup-"+self.mcuid+".txt");
+		} else {
+			var url = window.URL || window.webkitURL;
+			var link = url.createObjectURL(blob);
+			var a = $("<a />");
+			a.attr("download", "ultra-backup-"+self.mcuid+".txt");
+			a.attr("href", link);
+			$("body").append(a);
+			a[0].click();
+			a.remove();
+		}
+	}
+	
+	function saveBackupJsonNative(chosenFileEntry, json) {
+		var blob = new Blob([json], {
+			type: 'text/plain'
+		});
+
+		chosenFileEntry.createWriter(function(writer) {
+			writer.onerror = function(e) {
+				console.error(e);
+			};
+
+			var truncated = false;
+			writer.onwriteend = function() {
+				if (!truncated) {
+					truncated = true;
+					writer.truncate(blob.size);
+					return;
+				}
+				console.log('Config has been exported');
+			};
+
+			writer.write(blob);
+		}, function(e) {
+			console.error(e);
+		});
+	}
+
     function backupConfig() {
     	if (isNative()) {
     		var chosenFileEntry = null;
@@ -163,7 +322,7 @@ CONTENT.configuration.initialize = function (callback) {
 
     		chrome.fileSystem.chooseEntry({
     			type: 'saveFile',
-    			suggestedName: 'kissultra-backup',
+    			suggestedName: "ultra-backup-"+self.mcuid+".txt",
     			accepts: accepts
     		}, function (fileEntry) {
     			if (chrome.runtime.lastError) {
@@ -185,72 +344,38 @@ CONTENT.configuration.initialize = function (callback) {
     			chrome.fileSystem.getWritableEntry(chosenFileEntry, function (fileEntryWritable) {
 
     				chrome.fileSystem.isWritableEntry(fileEntryWritable, function (isWritable) {
-    					if (isWritable) {
-    						chosenFileEntry = fileEntryWritable;
-    						var config = kissProtocol.data[kissProtocol.GET_SETTINGS];
-    						var json = JSON.stringify(config, function (k, v) {
-    							if (k === 'buffer' || k === 'isActive' || k === 'actKey' || k === 'SN' || k === 'lipoConnected') {
-    								return undefined;
-    							} else {
-    								return v;
-    							}
-    						}, 2);
-    						var blob = new Blob([json], {
-    							type: 'text/plain'
-    						});
-
-    						chosenFileEntry.createWriter(function (writer) {
-    							writer.onerror = function (e) {
-    								console.error(e);
-    							};
-
-    							var truncated = false;
-    							writer.onwriteend = function () {
-    								if (!truncated) {
-    									truncated = true;
-    									writer.truncate(blob.size);
-    									return;
-    								}
-    								console.log('Config has been exported');
-    							};
-
-    							writer.write(blob);
-    						}, function (e) {
-    							console.error(e);
-    						});
-    					} else {
-    						console.log('Cannot write to read only file.');
-    					}
-    				});
+						if (isWritable) {
+							chosenFileEntry = fileEntryWritable;
+							if (+kissProtocol.data[kissProtocol.GET_SETTINGS]['ver'] > 129) {
+								var tmp = {
+									'buffer': new ArrayBuffer(1),
+									'chunk': 0
+								};
+								kissProtocol.send(kissProtocol.GET_OSD_CONFIG, kissProtocol.preparePacket(kissProtocol.GET_OSD_CONFIG, tmp), function() {
+									saveBackupJsonNative(chosenFileEntry, makeBackupJson(kissProtocol.data[kissProtocol.GET_SETTINGS], kissProtocol.data[kissProtocol.GET_OSD_CONFIG]));
+								});
+							} else {
+								saveBackupJsonNative(chosenFileEntry, makeBackupJson(kissProtocol.data[kissProtocol.GET_SETTINGS])); // old fw
+							}
+						} else {
+							console.log('Cannot write to read only file.');
+						}
+					});
     			});
     		});
     	} else {
     		// web
-    		var config = kissProtocol.data[kissProtocol.GET_SETTINGS];
-    		var json = JSON.stringify(config, function (k, v) {
-    			if (k === 'buffer' || k === 'isActive' || k === 'actKey' || k === 'SN' || k === 'lipoConnected' ) {
-    				return undefined;
-    			} else {
-    				return v;
-    			}
-    		}, 2);
-    		var blob = new Blob([json], {
-    			type: 'text/plain;charset=utf-8'
-    		});
-    		//Check the Browser.
-    		var isIE = false || !!document.documentMode;
-    		if (isIE) {
-    			window.navigator.msSaveBlob(blob, "kissultra-backup.txt");
-    		} else {
-    			var url = window.URL || window.webkitURL;
-    			var link = url.createObjectURL(blob);
-    			var a = $("<a />");
-    			a.attr("download", "kissultra-backup.txt");
-    			a.attr("href", link);
-    			$("body").append(a);
-    			a[0].click();
-    			a.remove();	
-    		}
+    		if (+kissProtocol.data[kissProtocol.GET_SETTINGS]['ver'] > 129) {
+				var tmp = {
+					'buffer': new ArrayBuffer(1),
+					'chunk': 0
+				};
+				kissProtocol.send(kissProtocol.GET_OSD_CONFIG, kissProtocol.preparePacket(kissProtocol.GET_OSD_CONFIG, tmp), function () {	
+					saveBackupJsonWeb(makeBackupJson(kissProtocol.data[kissProtocol.GET_SETTINGS], kissProtocol.data[kissProtocol.GET_OSD_CONFIG]));
+				});
+			} else {
+				saveBackupJsonWeb(makeBackupJson(kissProtocol.data[kissProtocol.GET_SETTINGS])); // old fw
+			}
     	}
     };
 
@@ -287,8 +412,8 @@ CONTENT.configuration.initialize = function (callback) {
     				var reader = new FileReader();
 
     				reader.onprogress = function (e) {
-    					if (e.total > 4096) {
-    						console.log('File limit (4 KB) exceeded, aborting');
+    					if (e.total > 16384) {
+    						console.log('File limit (16 KB) exceeded, aborting');
     						reader.abort();
     					}
     				};
@@ -297,25 +422,9 @@ CONTENT.configuration.initialize = function (callback) {
     					if (e.total != 0 && e.total == e.loaded) {
     						console.log('Read OK');
     						try {
-    							var json = JSON.parse(e.target.result);
-
-    							console.log(json);
-    							if (json.kissultra) {
-    								if (callback) callback(json);
-    							} else {
-    								console.log("Old kiss backup detected!");
-    								$(".modal-overlay").off('click');
-    								$(".modal-overlay").on('click', function() {
-    									hideModal();
-    								});
-    								$(".modal-body").html("<p class='header'>This backup is outdated.</p>For safety reasons, importing of the old backups is prohibited.");
-    								$(".modal-footer").html("");
-    								$(".modal-overlay").show();
-    								$(".modal").show();                            	
-    								return;
-    							}
+    							callback(JSON.parse(e.target.result));
     						} catch (e) {
-    							console.log('Wrong file');
+								console.log('Wrong file');
     							return;
     						}
     					}
@@ -336,13 +445,28 @@ CONTENT.configuration.initialize = function (callback) {
     		$(this).css("margin-left",  ($(this).closest(".meter-bar").width() / 2) - ($(this).width() / 2));
     	});
     };
+    
+    function fastDataPoll() {
+        if (self.requestTelemetry) {
+            kissProtocol.send(kissProtocol.GET_TELEMETRY, [kissProtocol.GET_TELEMETRY], function () {
+                if (GUI.activeContent == 'configuration') {
+                    self.telemetry = kissProtocol.data[kissProtocol.GET_TELEMETRY];
+                    self.updateTimeout = window.setTimeout(function () { updateWizard();  updateAUXWizard();}, 20);
+                }
+            });
+            
+            self.telemetryTimeout = window.setTimeout(function () { fastDataPoll(); }, 10);
+        }
+    }
+
   
     
     function updateWizard() {
+		if ($(".motor-wizard").is(":visible")) {
     	var data = self.telemetry;
     	// do label
     	$(".meter-bar .label, .meter-bar .fill .label").each(function(index) {
-    		 $(this).text(data['RXcommands'][0]);
+    		 $(this).text(data['RXcommands'][0].toFixed(0));
     	});
     	// do bar
     	$(".meter-bar .fill").each(function(index) {
@@ -358,20 +482,9 @@ CONTENT.configuration.initialize = function (callback) {
         	$(".motor-wizard .wizard-button").removeClass("wizard-button-disabled");
         	$(".motor-wizard-motor-indicator").removeClass("active");
         }
-    }
-    
-    function fastDataPoll() {
-        if (self.requestTelemetry) {
-            kissProtocol.send(kissProtocol.GET_TELEMETRY, [kissProtocol.GET_TELEMETRY], function () {
-                if (GUI.activeContent == 'configuration') {
-                    self.telemetry = kissProtocol.data[kissProtocol.GET_TELEMETRY];
-                    self.updateTimeout = window.setTimeout(function () { updateWizard(); }, 20);
-                }
-            });
-            
-            self.telemetryTimeout = window.setTimeout(function () { fastDataPoll(); }, 10);
         }
     }
+
     
     function closeMotorWizard() {
     	$(".modal-overlay").off("click");
@@ -380,7 +493,19 @@ CONTENT.configuration.initialize = function (callback) {
 	  	$(".modal-overlay").hide();
     	$(".motor-wizard").hide();
     	self.motorWizardEnabled = false;
+    	$(".motor-wizard-inner").kissWizard("destroy");
     	self.checkMotorWizard();
+    	
+
+	    console.log("For safety reasons, turning off the motors");
+	    var tmp = {
+	        'buffer': new ArrayBuffer(9),
+	        'motorTestEnabled': 0,
+	        'motorTest': [0, 0, 0, 0, 0, 0, 0, 0]
+	    };
+	    kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp), function() {
+				console.log("Motors turned off");
+		});
     }
     
     // wizard
@@ -435,6 +560,7 @@ CONTENT.configuration.initialize = function (callback) {
 		                    'motorTest': [0, 0, 0, 0, 0, 0, 0, 0]
 		            };
 				  	kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp));
+				  	$(".wizard-button-cancel").show();
 			}
 		}];
     	
@@ -467,9 +593,10 @@ CONTENT.configuration.initialize = function (callback) {
     			            };
     			            
     					  	tmp.motorTest[+step.dataProvider.motor - 1] = 1;
-    					  	
-    					  	console.log(tmp);
-    					  	
+      					  	console.log(tmp);
+      					  	  					  	
+    					  	$(".wizard-button-cancel").hide();
+    					  		
     					  	kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp));
 
     						$("#wizard-image", plugin).click(function(e) {
@@ -507,7 +634,6 @@ CONTENT.configuration.initialize = function (callback) {
     						}
     		
 						  $("#wizard-image", plugin).attr("src", pic);
-    				
     				}
     		}
     		steps.push(m1);
@@ -584,7 +710,7 @@ CONTENT.configuration.initialize = function (callback) {
 				  	
 				 	kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp));
 				  	
-
+ 					$(".wizard-button-cancel").hide();
 					$("#wizard-image-layout", plugin).click(function(e) {
 					 
 					  if (step.dataProvider.complete) {
@@ -670,6 +796,7 @@ CONTENT.configuration.initialize = function (callback) {
 							for (i=0; i<4; i++) {
 								tmp.escSettings[i] += (rightmap[i] != dirmap[i] ? 1 : 0);
 							}
+						
 							
 							if (reverseAll) {
 								tmp.motorLayout |= 0x80;
@@ -680,9 +807,14 @@ CONTENT.configuration.initialize = function (callback) {
 						 	$("#ESCOutputLayout").val(escOrientation);
 						    self.UpdateMixerImage(2, $("#ESCOutputLayout").val(), reverseAll);
 						    
+						    $("#save,#backup,#restore").addClass("disabled");
+						    window.setTimeout(function() {
+								 $("#save,#backup,#restore").removeClass("disabled");
+							}, escOrientation < 8 ? 1000 : 4000);
 						  	kissProtocol.send(kissProtocol.SET_MOTOR_WIZARD, kissProtocol.preparePacket(kissProtocol.SET_MOTOR_WIZARD, tmp), function() {
 						  		console.log("ESC Info saved");
 						  		console.log(tmp.escSettings);
+						  		self.checkMotorWizard();
 						  		// set new orientation and close the wizard
 						  	});
 						}
@@ -715,10 +847,169 @@ CONTENT.configuration.initialize = function (callback) {
     	self.requestTelemetry = true;
     	if (GUI.activeContent == 'configuration') self.telemetryTimeout = window.setTimeout(function () { fastDataPoll(); }, 10);
     	
-    	$(".modal-overlay").click(function() {
+    	$(".modal-overlay, .wizard-button-cancel").click(function() {
     		closeMotorWizard();
     	});
     }
+    
+    
+    ////// AUX Wizard
+    
+     function pwmToAuxRange(pwm) {
+		 var chanValue = (pwm - 1500) / 500;
+		 if (chanValue<-1) chanValue = -1;
+		 if (chanValue>1) chanValue = 1;
+		 if (chanValue < -0.5) return 1; // low
+		 if (chanValue < 0.5)  return 2; // medium
+		 if (chanValue > 0.5)  return 3; // high
+	 }
+    
+    
+     function updateAUXWizard() {
+		 if ($(".aux-wizard").is(":visible")) {
+    	var data = self.telemetry;
+    	var changedId = -1;
+    	var changedCount = 0;
+    	var zeroes = 0;
+    	for (var i=0; i<7; i++) {
+			var tmp = pwmToAuxRange(data.RXcommands[i + 4]);
+			if (tmp != self.auxes[i]) {
+				changedCount++;
+				changedId = i;
+			}
+			if (self.auxes[i] == 0) {
+				zeroes++;
+			}
+			self.auxes[i] = tmp;
+			
+		}
+		
+		if (changedCount == 1) {
+			console.log("Aux " + (changedId+1) + " changed to " + self.auxes[changedId]);
+			var ranges = ['','Low','Medium','High'];
+			for (var i=0; i<7; i++) {
+				var bar = $("#auxbars").children()[i];
+    			// do bar
+    			
+				if (i == changedId) {
+					$(bar).css('opacity',1);
+					$(bar).find(".label").text(ranges[self.auxes[i]]);
+					$(".active-aux-channel").text("AUX" + (i+1));
+					$(".active-aux-value").text(ranges[self.auxes[i]]);
+					$(".active-aux-message").show();
+					self.auxChannel = i;
+					self.auxValue = self.auxes[i];
+					$(".wizard-button-setaux").text("Set AUX" + (i+1) + " " + ranges[self.auxes[i]]).show();
+				} else {
+					$(bar).css('opacity',0.1);
+					$(bar).find(".label").text(data['RXcommands'][i+4].toFixed(0));
+				}
+				$(bar).find(".fill").first().css('width', ((data['RXcommands'][i+4] - 1000) / 10).clamp(0, 100) + '%');
+			}
+		} 
+		
+		if (zeroes == 7) {
+				for (var i=0; i<7; i++) {
+				var bar = $("#auxbars").children()[i];
+				$(bar).css('opacity',0.1);
+				$(bar).find(".label").text(data['RXcommands'][i+4].toFixed(0));
+				$(bar).find(".fill").first().css('width', ((data['RXcommands'][i+4] - 1000) / 10).clamp(0, 100) + '%');
+			}
+		}
+       
+        self.barResize(); 
+        }
+    }
+    
+    function closeAUXWizard() {
+    	$(".modal-overlay").off("click");
+	  	if (self.telemetryTimeout != 0) window.clearTimeout(self.telemetryTimeout);
+    	$(window).off('resize', self.barResize);
+	  	$(".modal-overlay").hide();
+    	$(".aux-wizard").hide();
+    	$(".aux-wizard-inner").kissWizard("destroy");
+    	
+    	kissProtocol.removePendingRequests();
+    }
+    
+
+    function openAUXWizard(funcId, funcName, stage) {
+    	  
+        $(window).on('resize', self.barResize).resize(); // trigger so labels
+      
+
+    	var config = kissProtocol.data[kissProtocol.GET_SETTINGS];
+   	 	self.wizardFuncId = funcId;
+   	 	self.wizardFuncName = funcName;
+    	self.wizardStage = stage; // 0 - intro; 1 - spin the motor
+    	self.auxChannel = -1;
+		self.auxValue = -1;
+    	
+    	var steps = [{ 
+			'template' : 'aux-wizard-welcome-template',
+			'type': 'welcome',
+			'dataProvider' : {
+				funcId: self.wizardFuncId,
+				funcName: self.wizardFuncName,
+			},
+			'preload': function(plugin, step) {
+
+			},
+			'postload' : function(plugin, step) {
+			    $(".wizard-button-setaux").hide();
+			    $(".wizard-button-setaux").on("click", function() {
+						closeAUXWizard();
+						
+						if (self.auxChannel != -1) {
+							var val = ((self.auxChannel + 1) & 0x0f) << 4;
+							if (self.auxValue == 1) val |= 1;
+							if (self.auxValue == 2) val |= 3;
+							if (self.auxValue == 3) val |= 5;
+						
+							$("#aux" + self.wizardFuncId).kissAux('setValue', val);
+						}
+				});
+		    	for (var i=0; i<7; i++) {
+					self.auxes[i] = 0;
+					var bar = $("#auxbars").children()[i];
+					$(bar).css('opacity',0.1);
+				}
+			}
+		}];
+    	
+    
+    	
+    // steps.push()';
+    	
+    	$(".aux-wizard-inner").kissWizard({
+    		'buttonsTemplate': 'aux-wizard-buttons-template',
+    		'headerTemplate': 'aux-wizard-header-template',
+    		steps: steps,
+    		name: "AUX Wizard",
+    		currentStep: 0
+    	});
+    	
+    
+    	
+    	self.auxWizardEnabled = true;
+    	
+    	$(".modal-overlay").show();
+    	$(".aux-wizard").show();
+    	
+    	self.barResize();
+    	
+    	self.requestTelemetry = true;
+    	if (GUI.activeContent == 'configuration') self.telemetryTimeout = window.setTimeout(function () { fastDataPoll(); }, 10);
+    	
+    	$(".modal-overlay, .wizard-button-cancel").click(function() {
+    		closeAUXWizard();
+    	});
+    	
+    }
+    
+    
+    ///// AUX Wizard End
+    
     
     
     function isLegacyDefaults(data) {
@@ -738,28 +1029,185 @@ CONTENT.configuration.initialize = function (callback) {
     	return false;
     }
     
-   
+    
+    ///// begin recommended wizard
+    
+     function closeRECWizard() {
+    	$(".modal-overlay").off("click");
+    	$(window).off('resize', self.barResize);
+	  	$(".modal-overlay").hide();
+    	$(".rec-wizard").hide();
+    	self.recWizardEnabled = false;
+    	$(".rec-wizard-inner").kissWizard("destroy");
+    	//self.checkRECWizard();
+    }
+    
+    // wizard
+    function openRECWizard(stage, boardId, eeprom) {
+    	 
+    	$(window).on('resize', self.barResize).resize(); // trigger so labels
+          
+        var ultra = 'u1';
+        if (boardId == 3 || boardId == 4) {
+			ultra = 'u2';
+		}  
+		
+		if (boardId == 5) {
+			ultra = 'u3';
+		}  
+		
+		if (eeprom < 138) { // B46 should be updated.
+			ultra = 'u2a';
+		}
+          
+    	var steps = [{ 
+			'template' : 'rec-wizard-welcome-template-' + ultra,
+			'type': 'welcome',
+			'dataProvider' : {
+				'boardId': boardId,
+				'ultra': ultra
+			},
+			'preload': function(plugin, step) {
+				if (ultra == 'u2a') {
+					$(".wizard-button-yes").hide();
+					$(".wizard-button-flash").show();
+					
+				}
+			},
+			'postload' : function(plugin, step) {
+				
+				$(".wizard-button-flash").click(function() {
+					closeRECWizard();
+					CONTENT.fc_flasher.goRemote = true;
+					CONTENT.fc_flasher.initialize();
+				});
+					
+				$(".wizard-button-no").click(function() {
+					closeRECWizard();
+				});
+				
+				$(".wizard-button-yes").click(function() {
+					
+					var preset = "default_ultra";
+					if ((ultra == 'u2') || (ultra == 'u3')) {
+						preset = 'default_ultra_v2_exp';
+					}
+					
+					var tmp = CONTENT.configuration.PRESETS[preset];
+					var data = kissProtocol.data[kissProtocol.GET_SETTINGS];
+					
+					data.G_P[0] = tmp.roll.p;
+					data.G_P[1] = tmp.pitch.p;
+					data.G_P[2] = tmp.yaw.p;
+					data.G_I[0] = tmp.roll.i;
+					data.G_I[1] = tmp.pitch.i;
+					data.G_I[2] = tmp.yaw.i;
+					data.G_D[0] = tmp.roll.d;
+					data.G_D[1] = tmp.pitch.d;
+					data.G_D[2] = tmp.yaw.d;
+					data.softarm_mode = 1;
+					data.throttleScaling = 1;
+					data.TPABP1 = 25;
+					data.TPABP2 = 25;
+					data.TPABPI1 = 0;
+					data.TPABPI2 = 0;
+					data.TPABPI3 = 0;
+					data.TPABPI4 = 100;
+					data.CustomTPAInfluence = 1;
+					
+					if ((ultra == 'u2') || (ultra == 'u3')) {
+						data.expMode = 1;
+					}
+
+					console.log("Applied recommendations");
+					console.log(kissProtocol.data[kissProtocol.GET_SETTINGS]);
+					
+					closeRECWizard();
+				
+				    kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]));
+                	kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
+                	GUI.load("./content/configuration.html", function () {
+                         htmlLoaded(kissProtocol.data[kissProtocol.GET_SETTINGS]);
+                         updateInfo();
+                     });
+                 });	
+
+				});
+			}
+		}];
+    
+    	
+    	
+    	$(".rec-wizard-inner").kissWizard({
+    		'buttonsTemplate': 'rec-wizard-buttons-template',
+    		'headerTemplate': 'rec-wizard-header-template',
+    		steps: steps,
+    		name: ultra != 'u2a' ? "Recommended Settings" : "",
+    		currentStep: 0
+    	});
+    	
+    	self.recWizardEnabled = true;
+    	
+    	$(".modal-overlay").show();
+    	$(".rec-wizard").show();
+    	
+    	self.barResize();
+    	
+    	
+    	$(".modal-overlay").click(function() {
+    		closeRECWizard();
+    	});
+    }
+    
+    
+    
+    ///// end recommended wizard
+    
+    
+    function isLevelPidsVisible(data) {
+		var visible = 0;
+		if (data['ver'] >= 145) {
+			if (data['AUX'][4] >> 4 != 0) visible++; // althold
+		}
+		if (data['AUX'][1] >> 4 != 0) visible ++; 	 // level
+		if (data['AUX'][13] >> 4 != 0) visible ++; 	 // rth
+		return visible > 0;
+	}
+	
+	function updateLevelModePids() {
+		var data = {};
+		data['AUX'] = [];
+		var visible = 0;
+		if ($("#aux4").is(":visible")) {
+			visible += +$("#aux4").find('select').first().val() << 4;
+		};
+		visible += +$("#aux1").find('select').first().val() << 4;
+		visible += +$("#aux13").find('select').first().val() << 4;
+		if (visible > 0) {
+			$(".level").show();
+		} else {
+			$(".level").hide();
+		}
+	}
+    
     function htmlLoaded(data) {
     	    	     	
         validateBounds('#content input[type="number"]');
         var settingsFilled = 0;
-
+        
+      
+        
         $('input[name="3dMode"]').removeAttr("disabled");
 
         kissProtocol.send(kissProtocol.GET_INFO, [kissProtocol.GET_INFO], function () {
             var info = kissProtocol.data[kissProtocol.GET_INFO];
-            $('#version').text(info.firmvareVersion);
-            if ((data['CopterType'] == 7 || data['CopterType'] == 8) && (info.firmvareVersion.indexOf("KISSFC") != -1 && info.firmvareVersion.indexOf("F7") == -1)) {
-                $('#pentaNoteFC').show();
-            }
-            if ((data['CopterType'] == 7 || data['CopterType'] == 8) && (info.firmvareVersion.indexOf("KISSCC") != -1)) {
-                $('#pentaNoteCC').show();
-            }
-            
-            
+            $('#version').text(info.firmvareVersion.substr('KISS_ULTRA-'.length));
+           
             if (!info.firmvareVersion.includes('ULTRA')) {
             	fcNotCompatible();
             }
+            
+            checkNewFirmware(info.firmvareVersion);
         });
 
         $("#presets").change(function() {
@@ -843,6 +1291,8 @@ CONTENT.configuration.initialize = function (callback) {
             if (data['SN'][i] < 16) MCUid += '0';
             MCUid += data['SN'][i].toString(16).toUpperCase();
         }
+        
+        self.mcuid = MCUid;
 
         var sntext = MCUid + ' (' + (data['isActive'] ? $.i18n('text.activated') : $.i18n('text.not-activated')) + ')';
         $('#SN').text(sntext);
@@ -881,10 +1331,25 @@ CONTENT.configuration.initialize = function (callback) {
         	
         	 if (data['ver'] >= 129) {
                           
-             	if ($('#rxType').val() == 17)  {
+             	if (+$('#rxType').val() == 17)  {
              		$('#gimbalPTMode').show();
+             		
+             		if (data['ver'] >= 143) {
+             			if (+$('#gimbalPTMode').val() == 0) {
+							$('#channelOrder').show();
+						} else {
+							$('#channelOrder').hide();
+						}
+					} else {
+						$('#channelOrder').hide();  
+					}
+
              	} else {
              		$('#gimbalPTMode').hide();
+             		
+             		if (data['ver'] >= 143) {
+						$('#channelOrder').show();  
+					}
              	}
              }
         	 
@@ -922,27 +1387,47 @@ CONTENT.configuration.initialize = function (callback) {
             contentChange();
         });
 
-        var outputMode = data['ESConeshot125'];
-
+        var outputMode = +data['ESConeshot125'];
+        
         $("#outputMode").val(outputMode);
+        if (data['ver'] >= 145) {
+			if (outputMode == 8) {
+				$("#fastTelemetry").hide();
+			} else {
+				$("#fastTelemetry").show();
+			}
+		}
+       
+        
         $("#outputMode").on('change', function () {
+			if (data['ver'] >= 145) {
+				if ($(this).val() == 8) {
+					$("#fastTelemetry").hide();
+				} else {
+					$("#fastTelemetry").show();
+				}
+			}
             contentChange();
             updateMixers();
         });
+        
+        
+        if (data['ver'] >= 145) {
+			$("input[name='fastTelemetry']").on('change', function () {
+            	contentChange();
+        	});
+        	
+        	if (+data['fastTelemetry'] == 1) {
+				$("input[name='fastTelemetry']").prop('checked', true);
+			}
+        };
 
         $('input[name="failsaveseconds"]').val(data['failsaveseconds']);
         $('input[name="failsaveseconds"]').on('input', function () {
             contentChange();
         });
-
-
-        $('input[name="3dMode"]').prop('checked', data['Active3DMode']);
-        if (data['Active3DMode']) $("#aux4").show(); else $("#aux4").hide();
-        $('input[name="3dMode"]').on('click', function () {
-            if ($(this).prop('checked')) $("#aux4").show(); else $("#aux4").hide();
-            contentChange();
-        });
-
+        
+     
         // pid and rates
         // roll
         $('tr.roll input').eq(0).val(data['G_P'][0]);
@@ -984,20 +1469,35 @@ CONTENT.configuration.initialize = function (callback) {
         }
 
         //TPA
-        $('tr.TPA input').eq(0).val(data['TPA'][0]);
+        /*$('tr.TPA input').eq(0).val(data['TPA'][0]);
         $('tr.TPA input').eq(1).val(data['TPA'][1]);
         $('tr.TPA input').eq(2).val(data['TPA'][2]);
         for (var i = 0; i < 3; i++) {
             $('tr.TPA input').eq(i).on('input', function () {
                 contentChange();
             });
-        }
+        }*/
 
         // level
         $('tr.level input').eq(0).val(data['A_P']);
         $('tr.level input').eq(1).val(data['A_I']);
         $('tr.level input').eq(2).val(data['A_D']);
         $('tr.level input').eq(3).val(Math.round(data['maxAng']));
+
+
+  		if (data['ver'] >= 145) {  // todo and althold on a switch
+   			// altHold
+        	$('tr.altHold input').eq(0).val(data['AH_P']);
+        	$('tr.altHold input').eq(1).val(data['AH_I']);
+        	$('tr.altHold input').eq(2).val(data['AH_D']);
+		}
+		
+		
+		if (isLevelPidsVisible(data)) {
+			$(".level").show();
+		} else {
+			$(".level").hide();
+		}
 
         for (var i = 0; i < 4; i++) {
             $('tr.level input').eq(i).on('input', function () {
@@ -1007,33 +1507,34 @@ CONTENT.configuration.initialize = function (callback) {
 
         $("#aux0").kissAux({
             name: $.i18n("column.arm"),
+            help: 'arm',
             change: function () { contentChange(); },
             value: data['AUX'][0]
         });
         $("#aux1").kissAux({
             name: $.i18n("column.level"),
-            change: function () { contentChange(); },
+            help: 'level',
+            change: function () { updateLevelModePids(); contentChange(); },
             value: data['AUX'][1]
         });
         $("#aux2").kissAux({
             name: $.i18n("column.buzzer"),
+            help: 'buzzer',
             change: function () { contentChange(); },
             value: data['AUX'][2]
         });
         $("#aux3").kissAux({
-            name: $.i18n("column.led"),
+            name: $.i18n("column.aux.led-color"),
+            help: 'led',
             change: function () { contentChange(); },
             knob: true,
             value: data['AUX'][3]
         });
-        $("#aux4").kissAux({
-            name: $.i18n("column.3d"),
-            change: function () { contentChange(); },
-            value: data['AUX'][4]
-        });
+      
 
         $("#aux5").kissAux({
             name: $.i18n("column.vtx-power"),
+            help: 'vtxPower',
             change: function () { contentChange(); },
             knob: true,
             value: data['AUX'][5]
@@ -1041,12 +1542,14 @@ CONTENT.configuration.initialize = function (callback) {
 
         $("#aux6").kissAux({
             name: $.i18n("column.vtx-band"),
+            help: 'vtxBand',
             change: function () { contentChange(); },
             value: data['AUX'][6]
         });
 
         $("#aux7").kissAux({
             name: $.i18n("column.vtx-channel"),
+            help: 'vtxChannel',
             change: function () { contentChange(); },
             value: data['AUX'][7]
         });
@@ -1054,6 +1557,7 @@ CONTENT.configuration.initialize = function (callback) {
 
             $("#aux8").kissAux({
                 name: $.i18n("column.turtle-mode"),
+                help: 'turtle',
                 change: function () { contentChange(); },
                 value: data['AUX'][8]
             }).show();
@@ -1065,27 +1569,66 @@ CONTENT.configuration.initialize = function (callback) {
 
             $("#aux9").kissAux({
                 name: $.i18n("column.runcam-split"),
+                help: 'runcam',
                 change: function () { contentChange(); },
                 value: data['AUX'][9]
             });
             
             $("#aux10").kissAux({
-                name: $.i18n("column.led-brightness"),
+                name: $.i18n("column.aux.led-brightness"),
+                help: 'ledBrightness',
                 change: function () { contentChange(); },
                 value: data['AUX'][10],
                 knob: true
             });
 
 
+			if (data['ver'] >= 145) {
+  				$("#aux4").kissAux({
+            		name: $.i18n("column.altHold"),
+            		help: 'altHold',
+            		change: function () { 
+					updateLevelModePids();
+					if (+$("#aux4").find('select').first().val() == 0) {
+            			$(".altHold").hide();
+            		} else {
+            			$(".altHold").show();
+            		}
+            
+					contentChange(); 
+						
+					},
+            		value: data['AUX'][4]
+        		});
+        		if ((+data['AUX'][4] >> 4) == 0) {
+					$(".altHold").hide();
+				} else {
+					$(".altHold").show();
+				}
+				if (+data['ESConeshot125'] != 8) {
+					$("#fastTelemetry").show();
+				} else {
+					$("#fastTelemetry").hide();
+				}
+        	} else {
+				$("#aux4").hide();
+				$(".altHold").hide();
+				$("#fastTelemetry").hide();
+			}
+
             $("#aux13").kissAux({
                 name: $.i18n("column.rth"),
-                change: function () { contentChange(); },
+                help: 'rth',
+                change: function () { updateLevelModePids(); contentChange(); },
                 value: data['AUX'][13]
             });
+            
+            
             
             if (data['ver'] >= 132) {
             	$("#aux14").kissAux({
             		name: $.i18n("column.prearm"),
+            		help: 'prearm',
             		change: function () { contentChange(); },
             		value: data['AUX'][14]
             	});
@@ -1093,7 +1636,7 @@ CONTENT.configuration.initialize = function (callback) {
             	$("#aux14").show();
             	
             	if (data['ver'] >= 134) {
-            		$("#aux14").find('select').on('input', function() {
+            		$("#aux14").find('select').on('change', function() {
             			if (+$(this).val() == 0) {
             				$("#prearm_mode_row").hide();
             			} else {
@@ -1112,7 +1655,7 @@ CONTENT.configuration.initialize = function (callback) {
             	}
             	
             	if (data['ver'] >= 135) {
-            		$("#aux0").append(" &nbsp;<input id='softarm_mode' class='unsafe' type='checkbox' /> <span class='softarm_mode' data-i18n='column.softarm-mode'>Soft</span>");
+            		$("#aux0").append(" &nbsp;<input id='softarm_mode' class='unsafe' type='checkbox' data-help='softArm,top'/> <span class='softarm_mode' data-i18n='column.softarm-mode'>Soft</span>");
             		
             		$('#softarm_mode').prop('checked', data['softarm_mode']);
             		
@@ -1128,6 +1671,7 @@ CONTENT.configuration.initialize = function (callback) {
             if (data['ver'] >= 136) { 
             	$("#aux11").kissAux({
             		name: $.i18n("column.inflight.action"),
+            		help: 'inflightAction',
             		change: function () { contentChange(); },
             		value: data['AUX'][11]
             	});
@@ -1136,6 +1680,7 @@ CONTENT.configuration.initialize = function (callback) {
             	
             	$("#aux12").kissAux({
             		name: $.i18n("column.inflight.value"),
+            		help: 'inflightValue',
             		change: function () { contentChange(); },
             		knobOnly: true,
             		value: data['AUX'][12]
@@ -1147,20 +1692,23 @@ CONTENT.configuration.initialize = function (callback) {
             	$("#aux12").hide();
             }
             
-  
-            if (data['LPF'] == data['DLpF'] && data['LPF'] == data['yawLpF']) {
-                $('select[name="lpf"]').val(data['LPF']);
-                $("select[name='lpf'] option[value='7']").prop("disabled", true);
+              if (data['ver'] >= 141) { 
+            	$("input[name='rxCenter']").val(data['rxCenter']);
+            	$("#rxCenter").show().on('change', function () {
+                 	contentChange();
+                });
             } else {
-                $('select[name="lpf"]').val(7);
+            	$("#rxCenter").hide();
             }
-      
-            $('select[name="lpf"]').on('change', function () {
-            	contentChange();
-            });
-
-            
           
+          
+          
+          	
+          
+          $("#aux_functions").on("detect_start", function(event, value) {
+			  console.log("Start detection for: " + JSON.stringify(value));
+			  openAUXWizard(value.funcId, value.funcName, 0);
+		  });
     
 
         // Temp fix
@@ -1169,11 +1717,13 @@ CONTENT.configuration.initialize = function (callback) {
             $('#restore').hide();
         }
 
-        if (data.lipoConnected == 1) {
-            $(".unsafe").addClass("unsafe_active");
-        } else {
-            $(".unsafe").removeClass("unsafe_active");
-        }
+//        if (data.lipoConnected == 1) {
+//            $(".unsafe").addClass("unsafe_active");
+//        } else {
+//            $(".unsafe").removeClass("unsafe_active");
+//        }
+        
+        GUI.processLipo(data.lipoConnected);
    
         // Begin Custom ESC Orientation
 
@@ -1196,9 +1746,22 @@ CONTENT.configuration.initialize = function (callback) {
             
             
             if (data['ver'] >= 129) {
-            	$('#gimbalPTMode').val(data['gimbalPTMode']);
+            	$('#gimbalPTMode').val(data['gimbalPTMode'] & 0x0f);
+            	
+            	if (data['ver'] >= 143) {
+            		if (+$('#gimbalPTMode').val() > 0) {
+						$("#channelOrder").val(1).hide();
+					}
+				}
             	
             	$('#gimbalPTMode').on('change', function () {
+					if (data['ver'] >= 143) {
+						if (+$('#gimbalPTMode').val() > 0) {
+							$("#channelOrder").val(1).hide();
+						} else {
+							$("#channelOrder").val(0).show();
+						}
+					}					
                     contentChange();
                 });
             
@@ -1218,6 +1781,35 @@ CONTENT.configuration.initialize = function (callback) {
             } else {
             	$('.scaling').hide();
             }
+            
+            if (data['ver'] >= 143) {
+			    $('#channelOrder').val((data['gimbalPTMode'] >> 4) & 0x0f);
+			    
+			    if (+$("#rxType").val() == 17) {
+			    	if (+$('#gimbalPTMode').val() > 0) {
+						$("#channelOrder").hide();
+					} else {
+						$("#channelOrder").show();
+					}
+				} else {
+					$("#channelOrder").show();
+				}
+				
+            	
+            	$('#channelOrder').on('change', function () {
+                    contentChange();
+                });
+			}
+            
+            
+            if (data['ver'] >= 145) {
+				var lm = data['ledMode'];
+				if (lm == 0) {
+					$("#aux3").show();
+				} else {
+					$("#aux3").hide();
+				}
+			}
             
             
        $(".unsafe_active").prop('disabled', true);
@@ -1305,55 +1897,12 @@ CONTENT.configuration.initialize = function (callback) {
         }  else if (isLegacyDefaults(data) && !CONTENT.configuration.legacyChecked) {
         	
         	$("#navigation").show();
+        	self.eeprom = data['ver'];
+        	self.needsMigration = true;
         	
-        	CONTENT.configuration.legacyChecked = true;
-        	   
-        	$(".modal-overlay").off('click');
-			$(".modal-overlay").on('click', function() {
-				hideModal();
-			});
-			$(".modal-body").html("<p class='header'>Information</p>You are using legacy <b>KISS</b> default PIDs. Would you like to switch to <b>ULTRA</b> default PIDs?");
-			$(".modal-footer").html("<a class='u-button' id='switch_to_ultra'>Yes</a>&nbsp;&nbsp;<a class='u-button' id='switch_to_kiss'>No</a>");
-			$(".modal-overlay").show();
-			
-			
-			$("#switch_to_ultra").click(function() {
-				// Switching to golden starting point
-				
-				var tmp = CONTENT.configuration.PRESETS['default_ultra'];
-						
-		        $('tr.roll input').eq(0).val(tmp.roll.p);
-		        $('tr.roll input').eq(1).val(tmp.roll.i);
-		        $('tr.roll input').eq(2).val(tmp.roll.d);
-		        
-		        $('tr.pitch input').eq(0).val(tmp.pitch.p);
-		        $('tr.pitch input').eq(1).val(tmp.pitch.i);
-		        $('tr.pitch input').eq(2).val(tmp.pitch.d);
-		        
-		        $('tr.yaw input').eq(0).val(tmp.yaw.p);
-		        $('tr.yaw input').eq(1).val(tmp.yaw.i);
-		        $('tr.yaw input').eq(2).val(tmp.yaw.d);
-				
-				contentChange();
-				
-				grabData();
-				
-			    kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]));
-                kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
-                	GUI.load("./content/configuration.html", function () {
-                         htmlLoaded(kissProtocol.data[kissProtocol.GET_SETTINGS]);
-                         updateInfo();
-                     });
-                 });
-
-				hideModal();
-			});
-			
-			$("#switch_to_kiss").click(function() {
-				hideModal();
-			});
-			
-			$(".modal").show();                 
+        	checkMigration();
+        	
+        
 			
         } else {
             $("#navigation").show();
@@ -1411,9 +1960,9 @@ CONTENT.configuration.initialize = function (callback) {
             data['RPY_Curve'][2] = parseFloat($('tr.yaw input').eq(5).val());
 
             // TPA
-            data['TPA'][0] = parseFloat($('tr.TPA input').eq(0).val());
+            /*data['TPA'][0] = parseFloat($('tr.TPA input').eq(0).val());
             data['TPA'][1] = parseFloat($('tr.TPA input').eq(1).val());
-            data['TPA'][2] = parseFloat($('tr.TPA input').eq(2).val());
+            data['TPA'][2] = parseFloat($('tr.TPA input').eq(2).val());*/
 
             // level
             data['A_P'] = parseFloat($('tr.level input').eq(0).val());
@@ -1421,21 +1970,10 @@ CONTENT.configuration.initialize = function (callback) {
             data['A_D'] = parseFloat($('tr.level input').eq(2).val());
             data['maxAng'] = parseFloat($('tr.level input').eq(3).val());
 
-            if (data['ver'] < 109) {
-                data['LPF'] = parseInt($('select[name="lpf"]').val());
-            } else {
-                if (parseInt($('select[name="lpf"]').val()) != 7) {
-                    data['LPF'] = parseInt($('select[name="lpf"]').val());
-                    data['yawLpF'] = parseInt($('select[name="lpf"]').val());
-                    data['DLpF'] = parseInt($('select[name="lpf"]').val());
-                }
-            }
-
             data['AUX'][0] = $("#aux0").kissAux('value');
             data['AUX'][1] = $("#aux1").kissAux('value');
             data['AUX'][2] = $("#aux2").kissAux('value');
             data['AUX'][3] = $("#aux3").kissAux('value');
-            data['AUX'][4] = data['Active3DMode'] ? $("#aux4").kissAux('value') : 0;
             data['AUX'][5] = $("#aux5").kissAux('value');
             data['AUX'][6] = $("#aux6").kissAux('value');
             data['AUX'][7] = $("#aux7").kissAux('value');
@@ -1461,6 +1999,7 @@ CONTENT.configuration.initialize = function (callback) {
             
             if (data['ver'] >= 129) {
                 data['throttleScaling'] = +$("input[name='throttleScaling']").prop('checked') ? 1 : 0;
+                data['gimbalPTMode'] = +$('#gimbalPTMode').val() & 0x0f;
             }
         
             if (data['ver'] >= 132) {
@@ -1479,9 +2018,24 @@ CONTENT.configuration.initialize = function (callback) {
         	  data['AUX'][11] = $("#aux11").kissAux('value');
         	  data['AUX'][12] = $("#aux12").kissAux('value');
             }
+            
+            if (data['ver'] >= 141) {
+            	 data['rxCenter'] = parseInt($('input[name="rxCenter"]').val());
+            }
+            
+            if (data['ver'] >= 143) {
+                data['gimbalPTMode'] |= ((+$('#channelOrder').val() << 4) & 0xf0);
+            }
+            
+            if (data['ver'] >= 145) {
+				data['AUX'][4] = $("#aux4").kissAux('value');
+                data['AH_P'] = parseFloat($('tr.altHold input').eq(0).val());
+            	data['AH_I'] = parseFloat($('tr.altHold input').eq(1).val());
+            	data['AH_D'] = parseFloat($('tr.altHold input').eq(2).val());
+            	data["fastTelemetry"] = +$("input[name='fastTelemetry']").prop('checked') ? 1 : 0;
+            }
         }
         settingsFilled = 1;
-
 
         function contentChange() {
             $('#save').removeAttr("data-i18n");
@@ -1492,6 +2046,157 @@ CONTENT.configuration.initialize = function (callback) {
             }
             self.checkMotorWizard();
         }
+        
+        function processBackupRestore(fc, osd, callback) {
+			if (fc) {
+				// save fc, and if saved save osd		
+				GUI.load("./content/configuration.html", function () {
+        			var v = +kissProtocol.data[kissProtocol.GET_SETTINGS]['ver'];
+        			var tmp = $.extend({}, kissProtocol.data[kissProtocol.GET_SETTINGS], self.restore.fc);
+        			tmp.ver = v; // fix version to one we get from FCs
+        			kissProtocol.data[kissProtocol.GET_SETTINGS] = tmp;
+        			htmlLoaded(kissProtocol.data[kissProtocol.GET_SETTINGS]);
+        			updateInfo();
+        			console.log("Saving FC...");
+        			$('#save').click();
+        			contentChange();
+        			
+        			if (osd) {
+						console.log("Saving OSD...");
+						kissProtocol.sendChunked(kissProtocol.SET_OSD_CONFIG, self.restore.osd, 0,  function() {
+							console.log("OSD saved complete!");
+							callback();
+						});
+					} else {
+						callback();
+					}
+        		});		
+			} else {
+				if (osd) {
+					console.log("Saving OSD...");
+					kissProtocol.sendChunked(kissProtocol.SET_OSD_CONFIG, self.restore.osd, 0,  function() {
+						console.log("OSD saved complete!");
+						callback();
+					});
+				}
+			}
+		}
+        
+		function closeRestoreWizard() {
+			console.log("Closing restore wizard");
+			$(".modal-overlay").off("click");
+			$(".modal-overlay").hide();
+			$(".restore-wizard").hide();
+			$(".restore-wizard-inner").kissWizard("destroy");
+		}
+        
+		function openRestoreWizard() {
+
+			var steps = [{
+				'template': 'restore-wizard-welcome-template',
+				'type': 'welcome',
+				'dataProvider': {
+					'config': self.restore
+				},
+				'preload': function(plugin, step) {
+					
+				},
+				'postload': function(plugin, step) {
+
+					if (self.restore.fc !== undefined) {
+						$("#restore-fc").prop("checked", true).removeAttr("disabled");
+					} else {
+						$("#restore-fc").prop("checked", false).attr("disabled", "disabled");
+					}
+					if (self.restore.osd !== undefined) {
+						$("#restore-osd").prop("checked", true).removeAttr("disabled");
+					} else {
+						$("#restore-osd").prop("checked", false).attr("disabled", "disabled");
+					}
+					
+					if ($("#restore-fc").is(":checked") || $("#restore-osd").is(":checked")) {
+						$(".wizard-button-restore").removeClass("wizard-button-disabled");
+					} else {
+						$(".wizard-button-restore").addClass("wizard-button-disabled");
+					}
+				
+					$(".restore_checkbox").on("change", function() {
+						console.log("checkbock changed");
+						if ($("#restore-fc").is(":checked") || $("#restore-osd").is(":checked")) {
+							$(".wizard-button-restore").removeClass("wizard-button-disabled");
+						} else {
+							$(".wizard-button-restore").addClass("wizard-button-disabled");
+						}
+					});
+				
+					$(".wizard-button-cancel").click(function() {
+						closeRestoreWizard();
+					});
+
+					$(".wizard-button-restore").click(function() {
+						if (!$(".wizard-button-restore").hasClass("wizard-button-disabled")) {
+							console.log("Restoring backup");
+							$(".wizard-button-restore").addClass("wizard-button-disabled");
+							processBackupRestore($("#restore-fc").is(":checked"), $("#restore-osd").is(":checked"), function() {
+								closeRestoreWizard();
+							});
+						}
+					});
+				}
+			}];
+
+			$(".restore-wizard-inner").kissWizard({
+				'buttonsTemplate': 'restore-wizard-buttons-template',
+				'headerTemplate': 'restore-wizard-header-template',
+				steps: steps,
+				name: "Restore wizard",
+				currentStep: 0
+			});
+
+			$(".modal-overlay").show();
+			$(".restore-wizard").show();
+
+		
+			$(".modal-overlay").click(function() {
+				closeRestoreWizard();
+			});
+		}
+        
+        
+        function processRestore(json) {
+			console.log("Restoring json: " + JSON.stringify(json));
+			
+			if (json.kissultraosd !== undefined || json.kissultra !== undefined || json.osd !== undefined || json.fc !== undefined) {
+				// good backup
+				if (json.kissultra !== undefined) {
+					console.log("restore ultra backup");
+					self.restore =  { "fc" : json };
+				} else if (json.kissultraosd !== undefined) {
+					console.log("restore osd backup");
+					self.restore =  { "osd" : json };
+				} else {
+					console.log("restore full backup");
+					self.restore = json;
+				}
+
+				openRestoreWizard();
+			
+				return;
+
+			} else {
+				console.log("Invalid kiss backup detected!");
+				$(".modal-overlay").off('click');
+				$(".modal-overlay").on('click', function() {
+					hideModal();
+				});
+				$(".modal-body").html("<p class='header'>This backup is not valid.</p>For safety reasons, importing is prohibited.");
+				$(".modal-footer").html("");
+				$(".modal-overlay").show();
+				$(".modal").show();
+				return;
+			}
+		}
+        
 
         function handleFileSelect(evt) {
         	var files = evt.target.files; 
@@ -1499,39 +2204,16 @@ CONTENT.configuration.initialize = function (callback) {
         		var reader = new FileReader();
         		reader.onload = (function(theFile) {
         			return function(e) {
-        				var json = JSON.parse(e.target.result);
-        				console.log(json);
-        				if (json.kissultra) {
-        					GUI.load("./content/configuration.html", function () {
-        						var v = +kissProtocol.data[kissProtocol.GET_SETTINGS]['ver'];
-        						var tmp = $.extend({}, kissProtocol.data[kissProtocol.GET_SETTINGS], json);
-        						tmp.ver = v; // fix version to one we get from FCs
-        						kissProtocol.data[kissProtocol.GET_SETTINGS] = tmp;
-        						htmlLoaded(kissProtocol.data[kissProtocol.GET_SETTINGS]);
-        						updateInfo();
-        						contentChange();
-        					});
-        				} else {
-        					console.log("Old kiss backup detected!");
-        					$(".modal-overlay").off('click');
-        					$(".modal-overlay").on('click', function() {
-        						hideModal();
-        					});
-        					$(".modal-body").html("<p class='header'>This backup is invalid.</p>For safety reasons, import of invalid backups is prohibited.");
-        					$(".modal-footer").html("");
-        					$(".modal-overlay").show();
-        					$(".modal").show();                            	
-        					return;
-        				}
+        				processRestore(JSON.parse(e.target.result));
         			};
         		})(f);
         		reader.readAsText(f);
         	}
         }
 
-       
+       var url = isNative() ? 'https://kiss-ultra.com/presets.json' : '/presets.json';
         $.ajax({
-            url: 'https://kiss-ultra.com/gui/presets.json',
+            url: url,
             cache: true,
             dataType: 'json',
             success: function (pdata) {
@@ -1559,6 +2241,7 @@ CONTENT.configuration.initialize = function (callback) {
                 	 presets.append('<option value="' + key + '" ' + selected + '>' + value.name + '</option>');
                 });
                 $('.presets').show();
+                checkMigration();
             },
             error: function () {
                 console.log('presetPIDs request failed');
@@ -1607,113 +2290,49 @@ CONTENT.configuration.initialize = function (callback) {
         $('#userSel').change(function () {
             shareButton.innerHTML = 'use';
         });
-
-        $('#shareButton').click(function () {
-            if (document.getElementById('shareButton').innerHTML == 'use') {
-                var useVals = [];
-                if (document.getElementById('prePID').value == 'preset') {
-                    useVals = self.PRESET_PIDs[parseInt(document.getElementById('presetSel').value)];
-                } else {
-                    useVals = self.USER_PIDs[parseInt(document.getElementById('userSel').value)];
-                }
-
-                // roll
-                $('tr.roll input').eq(0).val(useVals.PR);
-                $('tr.roll input').eq(1).val(useVals.IR);
-                $('tr.roll input').eq(2).val(useVals.DR);
-
-                // pitch
-                $('tr.pitch input').eq(0).val(useVals.PP);
-                $('tr.pitch input').eq(1).val(useVals.IP);
-                $('tr.pitch input').eq(2).val(useVals.DP);
-
-                // yaw
-                $('tr.yaw input').eq(0).val(useVals.PY);
-                $('tr.yaw input').eq(1).val(useVals.IY);
-                $('tr.yaw input').eq(2).val(useVals.DY);
-
-                //TPA
-                $('tr.TPA input').eq(0).val(useVals.TP);
-                $('tr.TPA input').eq(1).val(useVals.TI);
-                $('tr.TPA input').eq(2).val(useVals.TD);
-
-                // level
-                $('tr.level input').eq(0).val(useVals.LP);
-                $('tr.level input').eq(1).val(useVals.LI);
-                $('tr.level input').eq(2).val(useVals.LD);
-
-                $('select[name="lpf"]').val(useVals.LPF);
-                contentChange();
-            } else {
-                var GET_PIDdatas = '[name,';
-
-                GET_PIDdatas += 'PR:' + parseFloat($('tr.roll input').eq(0).val()) + ',';
-                GET_PIDdatas += 'PP:' + parseFloat($('tr.pitch input').eq(0).val()) + ',';
-                GET_PIDdatas += 'PY:' + parseFloat($('tr.yaw input').eq(0).val()) + ',';
-
-                GET_PIDdatas += 'IR:' + parseFloat($('tr.roll input').eq(1).val()) + ',';
-                GET_PIDdatas += 'IP:' + parseFloat($('tr.pitch input').eq(1).val()) + ',';
-                GET_PIDdatas += 'IY:' + parseFloat($('tr.yaw input').eq(1).val()) + ',';
-
-                GET_PIDdatas += 'DR:' + parseFloat($('tr.roll input').eq(2).val()) + ',';
-                GET_PIDdatas += 'DP:' + parseFloat($('tr.pitch input').eq(2).val()) + ',';
-                GET_PIDdatas += 'DY:' + parseFloat($('tr.yaw input').eq(2).val()) + ',';
-
-                GET_PIDdatas += 'LP:' + parseFloat($('tr.level input').eq(0).val()) + ',';
-                GET_PIDdatas += 'LI:' + parseFloat($('tr.level input').eq(1).val()) + ',';
-                GET_PIDdatas += 'LD:' + parseFloat($('tr.level input').eq(2).val()) + ',';
-
-                GET_PIDdatas += 'TP:' + parseFloat($('tr.TPA input').eq(0).val()) + ',';
-                GET_PIDdatas += 'TI:' + parseFloat($('tr.TPA input').eq(1).val()) + ',';
-                GET_PIDdatas += 'TD:' + parseFloat($('tr.TPA input').eq(2).val()) + ',';
-
-                GET_PIDdatas += 'LPF:' + parseInt($('select[name="lpf"]').val()) + ',';
-
-                GET_PIDdatas += ']';
-                window.open('http://ultraesc.de/PREPID/index.php?setPIDs=' + GET_PIDdatas, '_blank');
-
-            }
+        
+        $(".warning-button").on("click", function () {
+            $("#restore-disclaimer").hide();
         });
+       
+		$('#save').on('click', function() {
+			if (!$(this).hasClass("disabled")) {
+				console.log("Save clicked");
+				grabData();
+				$('#save').removeClass("saveAct");
+				$('#save').html($.i18n("button.saving"));
+				kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]));
+				kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function() {
+					GUI.load("./content/configuration.html", function() {
+						htmlLoaded(kissProtocol.data[kissProtocol.GET_SETTINGS]);
+						updateInfo();
+						$('#save').removeAttr("data-i18n");
+						$('#save').attr('data-i18n', 'button.saved');
 
-        $('#save').on('click', function () {
-            grabData();
-            $('#save').removeClass("saveAct");
-            $('#save').html($.i18n("button.saving"));
-            kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]));
-            kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
-                GUI.load("./content/configuration.html", function () {
-                    htmlLoaded(kissProtocol.data[kissProtocol.GET_SETTINGS]);
-                    updateInfo();
-                    $('#save').removeAttr("data-i18n");
-                    $('#save').attr('data-i18n', 'button.saved');
+					});
+				});
+			}
+		});
 
-                });
-            });
-        });
+		$('#backup').on('click', function() {
+			if (!$(this).hasClass("disabled")) {
+				grabData();
+				backupConfig();
+			}
+		});
 
-        $('#backup').on('click', function () {
-            grabData();
-            backupConfig();
-        });
-
-        $('#restore').on('click', function () {
-        	if (isNative()) {
-        		restoreConfig(function (config) {
-        			GUI.load("./content/configuration.html", function () {
-        				var v = +kissProtocol.data[kissProtocol.GET_SETTINGS]['ver'];
-        				var tmp = $.extend({}, kissProtocol.data[kissProtocol.GET_SETTINGS], config);
-        				tmp.ver = v; // fix version to one we get from FCs
-        				kissProtocol.data[kissProtocol.GET_SETTINGS] = tmp;
-        				htmlLoaded(kissProtocol.data[kissProtocol.GET_SETTINGS]);
-        				updateInfo();
-        				contentChange();
-        			});
-        		});
-        	} else {
-        		document.getElementById('files').files = new DataTransfer().files;
-        		$("#files").click();
-        	}
-        });
+		$('#restore').on('click', function() {
+			if (!$(this).hasClass("disabled")) {
+				if (isNative()) {
+					restoreConfig(function(config) {
+						processRestore(config);
+					});
+				} else {
+					document.getElementById('files').files = new DataTransfer().files;
+					$("#files").click();
+				}
+			}
+		});
         
         if (!isNative()) {
             document.getElementById('files').addEventListener('change', handleFileSelect, false);
@@ -1723,6 +2342,10 @@ CONTENT.configuration.initialize = function (callback) {
         	if (!$(this).hasClass("motor-wizard-button-disabled")) {
         		openMotorWizard(1, 0);
         	}
+        });
+        
+        $("#rec-wizard-button").click(function() {
+        		openRECWizard(0);
         });
         
         scrollTop();
@@ -1736,16 +2359,19 @@ CONTENT.configuration.cleanup = function (callback) {
 	$(window).off('resize', this.barResize);
 
 	    if (this.motorWizardEnabled) {
+			kissProtocol.removePendingRequests();
 	        console.log("For safety reasons, turning off the motors");
 	        var tmp = {
 	            'buffer': new ArrayBuffer(9),
 	            'motorTestEnabled': 0,
 	            'motorTest': [0, 0, 0, 0, 0, 0, 0, 0]
 	        };
-	        kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp))
-	    }
-
-	
-	
-    if (callback) callback();
+	        kissProtocol.send(kissProtocol.MOTOR_TEST, kissProtocol.preparePacket(kissProtocol.MOTOR_TEST, tmp), function() {
+				console.log("Motors turned off");
+				this.motorWizardEnabled = false;
+				if (callback) callback();
+			});
+	    } else {
+			 if (callback) callback();
+		}
 };

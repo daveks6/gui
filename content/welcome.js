@@ -6,7 +6,7 @@ CONTENT.welcome.initialize = function (callback) {
     var self = this;
     
     self.curPic = 0;
-    self.picCnt = 3;
+    self.picCnt = 5;
     self.timeout;
 
     GUI.switchContent('welcome', function () {
@@ -34,15 +34,17 @@ CONTENT.welcome.initialize = function (callback) {
     	if (isNative()) {
     		$("#web_gui").show();
     		$("#native_gui").hide();
+    		$("#port").show();
     	} else {
     		$("#web_gui").hide();
     		$("#native_gui").show();
+			$("#port").hide();
     	}
         $("#language").val($.i18n.locale);
         $("#portArea").show();
         $('#menu').show();
         $(".navigation-menu-button").css("display", "");
-        
+        $(".portSelector").removeClass("flashing-in-progress");
         if (isNative()) {
         	$('#gui_version').text("v"+chrome.runtime.getManifest().version);
         } else {

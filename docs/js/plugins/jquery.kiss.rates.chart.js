@@ -130,7 +130,7 @@
                 var maxRotationText = $.i18n('text.rates-max') + " " + Math.round(maxRotation) + " °/" + $.i18n('text.rates-sec');
                 context.fillText(maxRotationText, 2, height - 2);
 
-                if (Math.abs(maxRotation) >= 2000) {
+                if (Math.abs(maxRotation) > 2000) {
                     context.fillStyle = "rgba(80,0,0,0.8)";
                     context.fillRect(0, 0, width, height);
                     var text3 = $.i18n('text.rates-max-rotation'); //"Max rotation > 2000 °/sec!";

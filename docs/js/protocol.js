@@ -63,6 +63,9 @@ var kissProtocol = {
 	GET_OSD_CONFIG: 0x76, // chunked
 	SET_OSD_CONFIG: 0x77, // chunked
 	SET_MOTOR_WIZARD: 0x78,
+	FACTORY_RESET: 0x79, // factory reset
+	ESC_CONFIG_MODE: 0x80, // esc config mode
+	ESC_RESQUE_MODE: 0x81, // esc resque mode
 
     block: false,
     ready: false,
@@ -94,7 +97,7 @@ kissProtocol.read = function (readInfo) {
             switch (this.state) {
                 case 0:
                     // wait for start byte
-                    if ((data[i] == 5) || (data[i] == kissProtocol.GET_GPS) || (data[i] == kissProtocol.GET_HARDWARE_INFO) || (data[i] == kissProtocol.GET_HOME_INFO) || (data[i] == kissProtocol.GET_OSD) || (data[i] == kissProtocol.GET_OSD_CONFIG)|| (data[i] == kissProtocol.SET_OSD_CONFIG)) this.state++;
+                    if ((data[i] == 5) || (data[i] == kissProtocol.GET_GPS) || (data[i] == kissProtocol.ESC_RESQUE_MODE) || (data[i] == kissProtocol.GET_HARDWARE_INFO) || (data[i] == kissProtocol.GET_HOME_INFO) || (data[i] == kissProtocol.GET_OSD) || (data[i] == kissProtocol.GET_OSD_CONFIG)|| (data[i] == kissProtocol.SET_OSD_CONFIG)) this.state++;
                     else this.state = 0;
                     this.errCase++;
                     if (this.errCase > 3) {
@@ -192,6 +195,7 @@ kissProtocol.init = function () {
     this.RequestInterval = 0;
     this.RequestTimeout = 0;
     this.ready = false;
+    this.packetBytesReceived = 0;
 }
 
 kissProtocol.removeRequests = function (reqId) {
@@ -201,6 +205,10 @@ kissProtocol.removeRequests = function (reqId) {
 
 kissProtocol.removePendingRequests = function () {
     this.requests = [];
+}
+
+kissProtocol.requestsLength = function () {
+    return this.requests.length;
 }
 
 kissProtocol.clearPendingRequests = function (callback) {
@@ -268,12 +276,28 @@ kissProtocol.processPacket = function (code, obj) {
                 obj.ESC_Telemetrie3 = [];
                 obj.ESC_Telemetrie4 = [];
                 obj.ESC_Telemetrie5 = [];
-                	obj.ESC_Telemetrie6 = [];// TODO
-                	obj.ESC_Telemetrie7 = [];// TODO
+                obj.ESC_Telemetrie6 = [];
+                obj.ESC_Telemetrie7 = [];
                 obj.ESC_TelemetrieStats = [];
                 obj.adaptiveFilter = 0;
                 obj.RXStats = undefined;
             }
+            
+           	// cleanup
+			for (var n=0; n<5; n++) {
+				obj.ESC_Telemetrie0[n] = 0;
+				obj.ESC_Telemetrie1[n] = 0;
+				obj.ESC_Telemetrie2[n] = 0;
+				obj.ESC_Telemetrie3[n] = 0;
+				obj.ESC_Telemetrie4[n] = 0;
+				obj.ESC_Telemetrie5[n] = 0;
+				obj.ESC_Telemetrie6[n] = 0;
+				obj.ESC_Telemetrie7[n] = 0;
+			} 
+				
+			for (var m=0; m<6; m++) {
+				obj.ESC_TelemetrieStats[m] = 0;
+			}
 
             obj.RXcommands[0] = 1000 + ((data.getInt16(0, 0) / 1000) * 1000);
             obj.RXcommands[1] = 1500 + ((data.getInt16(2, 0) / 1000) * 500);
@@ -291,13 +315,22 @@ kissProtocol.processPacket = function (code, obj) {
             obj.ACCXYZ[0] = data.getInt16(25, 0);
             obj.ACCXYZ[1] = data.getInt16(27, 0);
             obj.ACCXYZ[2] = data.getInt16(29, 0);
-            obj.angle[0] = data.getInt16(31, 0) / 1000;
-            obj.angle[1] = data.getInt16(33, 0) / 1000;
-            obj.angle[2] = data.getInt16(35, 0) / 1000;
-            obj.I2C_Errors = data.getInt16(37, 0);
+      
+            obj.flags = data.getInt16(37, 0);
+            
+            if (obj.flags & 0x01 == 0x01) {
+				obj.angle[0] = data.getInt16(31, 0) / 500;
+            	obj.angle[1] = data.getInt16(33, 0) / 500;
+            	obj.angle[2] = data.getInt16(35, 0) / 500;
+			} else {
+				obj.angle[0] = data.getInt16(31, 0) / 1000;
+            	obj.angle[1] = data.getInt16(33, 0) / 1000;
+            	obj.angle[2] = data.getInt16(35, 0) / 1000;
+			}
+            
             obj.calibGyroDone = data.getInt16(39, 0);
             obj.failsave = data.getUint8(41);
-            obj.debug = data.getUint16(42, 0) / 1000;
+            obj.LiPoAmp = data.getUint16(42, 0) / 1000; // was debug
             obj.foundRX = data.getUint8(44);
 
             obj.GyroRaw[0] = data.getInt16(45, 0) / 1000;
@@ -358,17 +391,7 @@ kissProtocol.processPacket = function (code, obj) {
             obj.ESC_Telemetrie5[3] = data.getInt16(139, 0);
             obj.ESC_Telemetrie5[4] = data.getInt16(141, 0);
              
-            	obj.ESC_Telemetrie6[0] = 0;// TODO
-            	obj.ESC_Telemetrie6[1] = 0;// TODO
-            	obj.ESC_Telemetrie6[2] = 0;// TODO
-            	obj.ESC_Telemetrie6[3] = 0;// TODO
-            	obj.ESC_Telemetrie6[4] = 0;// TODO
-            	
-            	obj.ESC_Telemetrie7[0] = 0;// TODO
-            	obj.ESC_Telemetrie7[1] = 0;// TODO
-            	obj.ESC_Telemetrie7[2] = 0;// TODO
-            	obj.ESC_Telemetrie7[3] = 0;// TODO
-            	obj.ESC_Telemetrie7[4] = 0;// TODO
+            
 
             obj.ESC_TelemetrieStats[0] = data.getInt16(142, 0);
             obj.ESC_TelemetrieStats[1] = data.getInt16(144, 0);
@@ -377,9 +400,6 @@ kissProtocol.processPacket = function (code, obj) {
             obj.ESC_TelemetrieStats[4] = data.getInt16(150, 0);
             obj.ESC_TelemetrieStats[5] = data.getInt16(152, 0);
             
-            	obj.ESC_TelemetrieStats[6] = 0;// TODO
-            	obj.ESC_TelemetrieStats[7] = 0;// TODO
-
             obj.RXcommands[8] = 1500 + ((data.getInt16(154, 0) / 1000) * 500);
             obj.RXcommands[9] = 1500 + ((data.getInt16(156, 0) / 1000) * 500);
             obj.RXcommands[10] = 1500 + ((data.getInt16(158, 0) / 1000) * 500);
@@ -400,7 +420,31 @@ kissProtocol.processPacket = function (code, obj) {
             obj.PWMOutVals[6] = data.getInt16(170, 0);
             obj.PWMOutVals[7] = data.getInt16(172, 0);
             
-            // TODO: Add here extra ESC telemetry!
+            try {
+           	 	obj.ESC_Telemetrie6[0] = data.getInt16(174, 0);
+            	obj.ESC_Telemetrie6[1] = data.getInt16(176, 0);
+           	 	obj.ESC_Telemetrie6[2] = data.getInt16(178, 0);
+            	obj.ESC_Telemetrie6[3] = data.getInt16(180, 0);
+            	obj.ESC_Telemetrie6[4] = data.getInt16(182, 0);
+
+            	obj.ESC_Telemetrie7[0] = data.getInt16(184, 0);
+            	obj.ESC_Telemetrie7[1] = data.getInt16(186, 0);
+           	 	obj.ESC_Telemetrie7[2] = data.getInt16(188, 0);
+            	obj.ESC_Telemetrie7[3] = data.getInt16(190, 0);
+            	obj.ESC_Telemetrie7[4] = data.getInt16(192, 0);
+            } catch (e) {
+				obj.ESC_Telemetrie6[0] = 0;
+            	obj.ESC_Telemetrie6[1] = 0;
+            	obj.ESC_Telemetrie6[2] = 0;
+            	obj.ESC_Telemetrie6[3] = 0;
+            	obj.ESC_Telemetrie6[4] = 0;
+
+            	obj.ESC_Telemetrie7[0] = 0;
+            	obj.ESC_Telemetrie7[1] = 0;
+            	obj.ESC_Telemetrie7[2] = 0;
+            	obj.ESC_Telemetrie7[3] = 0;
+            	obj.ESC_Telemetrie7[4] = 0;
+			}
             
             break;
         case this.GET_SETTINGS:
@@ -427,6 +471,10 @@ kissProtocol.processPacket = function (code, obj) {
                 obj.launchMode = 0;
                 obj.dshotMapping = [0, 1, 2, 3, 4, 5, 6, 7];
                 obj.altLimit = 0;
+                obj.sensors = 0;
+                obj.rxCenter = 1500;
+                obj.cellCount = 0;
+                obj.magnets = 14;
             }
 
             obj.G_P[0] = data.getUint16(0, 0) / 1000;
@@ -643,8 +691,30 @@ kissProtocol.processPacket = function (code, obj) {
                 	obj.softarm_mode = data.getUint8(223, 0);
                 }
                 
-                // ??? blen = 208;
-                // next free 200
+                if (obj.ver >= 138) {
+                	obj.expMode = data.getUint8(224, 0);
+                	obj.mspBaud = data.getUint8(225, 0);
+                	obj.accFactor = data.getUint8(226, 0);
+                }
+                
+                if (obj.ver >= 141) {
+                	obj.sensors = data.getUint8(227, 0);
+                	obj.rxCenter = data.getUint16(228, 0);
+                }
+                
+                if (obj.ver >= 144) {
+					obj.cellCount = data.getUint8(230, 0);
+					obj.magnets = data.getUint8(231, 0);
+				}
+
+   				if (obj.ver >= 145) {
+					obj.fastTelemetry = data.getUint8(232, 0);
+  				    obj.AH_P = data.getUint16(233, 0) / 1000;
+            	    obj.AH_I = data.getUint16(235, 0) / 1000;
+            	    obj.AH_D = data.getUint16(237, 0) / 1000;
+					obj.ledMode = data.getUint8(239, 0);
+				}
+
             } catch (Exception) {
                 console.log("Exception while reading packet");
                 console.log(Exception);
@@ -661,6 +731,10 @@ kissProtocol.processPacket = function (code, obj) {
 
         case this.MOTOR_TEST:
             console.log('Motor test');
+            break;
+            
+        case this.FACTORY_RESET:
+            console.log('Facotry reset');
             break;
 
         case this.GET_INFO:
@@ -695,12 +769,17 @@ kissProtocol.processPacket = function (code, obj) {
                     info.SN = CPUID;
                     
                     var v1 =  data.getUint8(p++);
-                    info.version = v1 / 100;
-                    var found = info.version != 0;
+                    var found = v1 != 0;
+                    info.version = Math.floor(v1 / 100);
+                    var vt = v1 % 100;
+                    if (vt < 10) vt = "0" + vt;
+                    info.version += "." + vt;
+                 
                     var v2 = data.getUint8(p++);
                     info.version += String.fromCharCode(v2);
                     
                     var type = +data.getUint8(p++);
+                    info.fullType = "";
                     if (type == 1) {
                         info.type = 'KISS 8A';
                     } else if (type == 2) {
@@ -717,6 +796,17 @@ kissProtocol.processPacket = function (code, obj) {
                         info.type = 'KISS 50A';
                     } else if (type == 21) {
                         info.type = 'KISS MINI 40A';
+                    } else if ((type == 22) || (type == 23) || (type == 24)) {
+                        info.type = 'VOLTARA';
+                        if (type==22) {
+							info.fullType = info.type + " 70A";
+						} else if (type==23) {
+							info.fullType = info.type + " MINI 50A";
+						} else if (type==24) {
+							info.fullType = info.type + " SINGLE 50A";
+						} 
+                    } else if ((type == 100)) {
+                        info.type = 'ULTRAESC';
                     } else if (type == 254) {
                         info.type = 'BLHELI32';
                         if (v2 % 10 == 0) v2/=10;
@@ -724,6 +814,11 @@ kissProtocol.processPacket = function (code, obj) {
                     } else {
                         info.type = 'ESC ID: ' + type;
                     }
+                    
+                    if (info.fullType == '') {
+						info.fullType = info.type;
+					}
+                    
                     if (data.byteLength / 6 > 15) { // check if we got the new protocol
                         for (var r = 0; r < 4; r++) info.Settings[r] = data.getUint8(p++);
                     }
@@ -738,6 +833,12 @@ kissProtocol.processPacket = function (code, obj) {
 
         case this.ESC_INFO:
             break;
+            
+        case this.ESC_RESQUE_MODE: 
+            obj.LiPoVolt = data.getUint16(0, 0) / 1000;
+            console.log("Got esc resque");
+            console.log(obj);
+        	break;
             
         case this.GET_GPS:
         	obj.latitude =  data.getInt32(0, 0) / 10000000;  
@@ -765,6 +866,9 @@ kissProtocol.processPacket = function (code, obj) {
         	
         case this.GET_OSD:
         	break;
+        	
+        case this.SET_MOTOR_WIZARD:
+			break;
         	
         case this.GET_OSD_CONFIG:
             try {
@@ -862,6 +966,34 @@ kissProtocol.processPacket = function (code, obj) {
             			}
             			
             			obj.stickOverlay = chunkData.getUint8(p, 0);  p+=1;
+            			
+            			if (+(obj.eepromVersion) > 1) {
+            				// flight path
+            				var sensor = {};
+            				sensor.x =  chunkData.getUint16(p, 0); p+=2;
+            				sensor.y =  chunkData.getUint16(p, 0); p+=2;
+            				sensor.visible =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.align =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.font =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.proportional =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.style =  chunkData.getUint8(p, 0);  p+=1;
+            				obj.customLayout.push(sensor);
+            				// point of no return
+            				obj.pnrWarning = chunkData.getUint8(p, 0);  p+=1;
+            			}
+            			
+            			if (+(obj.eepromVersion) > 2) {
+            				// flight path
+            				var sensor = {};
+            				sensor.x =  chunkData.getUint16(p, 0); p+=2;
+            				sensor.y =  chunkData.getUint16(p, 0); p+=2;
+            				sensor.visible =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.align =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.font =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.proportional =  chunkData.getUint8(p, 0);  p+=1;
+            				sensor.style =  chunkData.getUint8(p, 0);  p+=1;
+            				obj.customLayout.push(sensor);
+            			}
 
             			// end parsing
             			obj.callback = obj.delayedCallback;
@@ -942,6 +1074,22 @@ kissProtocol.preparePacket = function (code, obj) {
     	case this.GET_OSD_CONFIG:
     		data.setUint8(0, obj.chunk, 0);
     		blen = 1;
+    	break;
+    	
+    	case this.ESC_RESQUE_MODE:
+    		data.setUint8(0, obj.command, 0);
+    		blen = 1;
+    	break;
+    	
+    	
+    	case this.ESC_CONFIG_MODE: // 43 4f 4e 46 49 47
+    		data.setUint8(0, 0x43, 0);
+    		data.setUint8(1, 0x4f, 0);
+    		data.setUint8(2, 0x4e, 0);
+    		data.setUint8(3, 0x46, 0);
+    		data.setUint8(4, 0x49, 0);
+    		data.setUint8(5, 0x47, 0);
+    		blen = 6;
     	break;
 
   
@@ -1175,6 +1323,34 @@ kissProtocol.preparePacket = function (code, obj) {
             	data.setUint8(212,  obj.softarm_mode);
             	blen = 221;
             }
+            
+            if (obj.ver >= 138) {
+            	data.setUint8(213,  obj.expMode);
+            	data.setUint8(214,  obj.mspBaud);
+            	data.setUint8(215,  obj.accFactor);
+            	blen = 224;
+            }
+            
+            if (obj.ver >= 141) {
+            	data.setUint8(216,  obj.sensors);
+            	data.setUint16(217,  obj.rxCenter);
+            	blen = 227;
+            }
+            
+            if (obj.ver >= 144) {
+            	data.setUint8(219,  obj.cellCount);
+            	data.setUint8(220,  obj.magnets);
+            	blen = 229;
+            }
+            
+            if (obj.ver >= 145) {
+				data.setUint8(221, obj.fastTelemetry);
+			  	data.setUint16(222, obj.AH_P * 1000, 0);
+				data.setUint16(224, obj.AH_I * 1000, 0);
+				data.setUint16(226, obj.AH_D * 1000, 0);
+  				data.setUint8(228, obj.ledMode);
+				blen = 237;
+			}
 
             break;
 
@@ -1194,6 +1370,20 @@ kissProtocol.preparePacket = function (code, obj) {
                 data.setUint8(8, obj.motorTest[7], 0);
                 blen = 9;
             } 
+            break;
+            
+        case this.FACTORY_RESET:
+            data.setUint8(0, obj.code[0], 0);
+            data.setUint8(1, obj.code[1], 0);
+            data.setUint8(2, obj.code[2], 0);
+            data.setUint8(3, obj.code[3], 0);
+            data.setUint8(4, obj.code[4], 0);
+            data.setUint8(5, obj.code[5], 0);
+            data.setUint8(6, obj.code[6], 0);
+            data.setUint8(7, obj.code[7], 0);
+            data.setUint8(8, obj.code[8], 0);
+            data.setUint8(9, obj.code[9], 0);
+            blen = 10;
             break;
 
         case this.SET_ESC_SETTINGS:
@@ -1320,6 +1510,33 @@ kissProtocol.prepareChunkedPacket = function (code, obj, chunk) {
     	}
     	
     	data.setUint8(p, obj.stickOverlay, 0); p+=1;
+    	
+    	if (+(obj.eepromVersion) > 1) {
+			// flight path
+    		var sensor = obj.customLayout[28];
+    		data.setUint16(p, sensor.x, 0); p+=2;
+    		data.setUint16(p, sensor.y, 0); p+=2;
+    		data.setUint8(p, sensor.visible, 0); p+=1;
+    		data.setUint8(p, sensor.align, 0); p+=1;
+    		data.setUint8(p, sensor.font, 0); p+=1;
+    		data.setUint8(p, sensor.proportional, 0); p+=1;
+    		data.setUint8(p, sensor.style, 0); p+=1;
+			// point of no return
+    		data.setUint8(p, obj.pnrWarning, 0); p+=1;
+		}
+		
+		if (+(obj.eepromVersion) > 2) {
+			// flight path
+    		var sensor = obj.customLayout[29];
+    		data.setUint16(p, sensor.x, 0); p+=2;
+    		data.setUint16(p, sensor.y, 0); p+=2;
+    		data.setUint8(p, sensor.visible, 0); p+=1;
+    		data.setUint8(p, sensor.align, 0); p+=1;
+    		data.setUint8(p, sensor.font, 0); p+=1;
+    		data.setUint8(p, sensor.proportional, 0); p+=1;
+    		data.setUint8(p, sensor.style, 0); p+=1;
+		}
+		
 
     	// all crc
     	var allcrc = 0;

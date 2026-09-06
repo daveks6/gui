@@ -12,6 +12,7 @@ CONTENT.rates.initialize = function (callback) {
     self.settingsFilled = 0;
     self.hasInput = false;
     self.lastTimestamp = null;
+    self.angle = {roll:0, pitch:0, yaw:0};
 
     GUI.switchContent('rates', function () {
         kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
@@ -38,9 +39,14 @@ CONTENT.rates.initialize = function (callback) {
                 var axisRate = { 'roll': 0, 'pitch': 0, 'yaw': 0 };
                 if (self.hasInput) {
                     for (var i = 0; i < 3; i++) {
-                        axisRate[rowNames[i]] = -Math.PI * 2 * $("#rates_chart_" + rowNames[i]).kissRatesChart('axisRate') / freq;
+                        axisRate[rowNames[i]] = Math.PI * 2 * $("#rates_chart_" + rowNames[i]).kissRatesChart('axisRate') / freq;
                     }
                 }
+                var data = kissProtocol.data[kissProtocol.GET_TELEMETRY];
+                var th = (data['RXcommands'][0] - 1000) / 1000;
+                if (th < 0) th = 0;
+                if (th > 1) th = 1;
+                $("#model").kissModel('updateSpeed', th );
                 $("#model").kissModel('updateRate', axisRate);
                 $("#model").kissModel('refresh');
             }
@@ -48,8 +54,12 @@ CONTENT.rates.initialize = function (callback) {
     }
 
     function contentChange() {
+		
+		$('#save').removeAttr("data-i18n");
+        $('#save').attr('data-i18n', 'button.save');
+        $('#save').text($.i18n("button.save"));
         if (self.settingsFilled) {
-            $('#save').addClass("important saveAct");
+            $('#save').addClass("saveAct");
         }
         var rowNames = ['roll', 'pitch', 'yaw']
         for (var i = 0; i < 3; i++) {
@@ -140,7 +150,7 @@ CONTENT.rates.initialize = function (callback) {
                     hi = true;
                 }
                 receiverFillArray[i].css('width', ((telem['RXcommands'][channel] - meterScale.min) / (meterScale.max - meterScale.min) * 100).clamp(0, 100) + '%');
-                receiverLabelArray[i].text(telem['RXcommands'][channel]);
+                receiverLabelArray[i].text(telem['RXcommands'][channel].toFixed(0));
                 // redraw charts if needed
                 $(chartDivSelectors[i]).kissRatesChart('updateRcInput', (telem['RXcommands'][channel] - 1500) / 500);
             }
@@ -214,7 +224,8 @@ CONTENT.rates.initialize = function (callback) {
         }
 
         $("#model").kissModel({
-            'mixer': data['CopterType']
+            'mixer': data['CopterType'],
+            'reverse': data['reverseMotors'] == 1
         })
 
         animateModel();
@@ -224,7 +235,14 @@ CONTENT.rates.initialize = function (callback) {
         $('#save').click(function () {
             grabData();
             $('#save').removeClass("saveAct");
+            $('#save').html($.i18n("button.saving"));
+            $('#save').removeClass("saveAct");
             kissProtocol.send(kissProtocol.SET_SETTINGS, kissProtocol.preparePacket(kissProtocol.SET_SETTINGS, kissProtocol.data[kissProtocol.GET_SETTINGS]));
+            kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
+				console.log("Saved!");
+				$('#save').removeAttr("data-i18n");
+                $('#save').html($.i18n("button.saved"));
+			});
         });
         
         scrollTop();
@@ -235,8 +253,10 @@ CONTENT.rates.initialize = function (callback) {
 CONTENT.rates.resizeCanvas = function () { }
 
 CONTENT.rates.cleanup = function (callback) {
+	$("#model").kissModel('destroy');
     $(window).off('resize', this.barResize);
     $(window).off('resize', this.resizeCanvas);
     window.clearTimeout(this.updateTimeout);
     if (callback) callback();
 };
+

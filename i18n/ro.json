@@ -233,8 +233,9 @@
     "telemetry.1": "Temperaturi ESC",
     "telemetry.2": "Voltaje ESC",
     "telemetry.3": "Intensitati ESC",
-    "telemetry.4": "ESC utilizare A/h",
+    "telemetry.4": "ESC utilizare mAh",
     "telemetry.5": "ESC E-RpM / 1000",
+    "telemetry.5.1": "ESC RPM",
     "telemetry.6": "ESC TLM Stat",
     "text.3d": "3D",
     "text.acro": "Acro",
@@ -244,12 +245,12 @@
     "text.disarmed": "Dezarmat",
     "text.eeprom-version": "Eeprom version:",
     "text.enable-motor-test": "Permite Testul Motoarelor ",
-    "text.esc-flasher-complete": "<br/><br/> <br/><br/>Pentru motive de siguranta, comunicarea cu KISS FC a fost terminata.<br/><br/>Deconecteaza bateria, si reconecteaza KISS FC.<br/><br/>",
+    "text.esc-flasher-complete": "<br/><br/> <br/><br/>Pentru motive de siguranta, comunicarea cu ULTRA a fost terminata.<br/><br/>Deconecteaza bateria, si reconecteaza ULTRA.<br/><br/>",
     "text.esc-flasher-invalid-firmware": "Fisierul de firmware ESC care a fost selectat nu este potrivit pentru scriere.",
     "text.esc-flasher-loaded": "Incarcate $1 blocuri din $2",
     "text.esc-flasher-progress": "Progres $1%",
     "text.esc-flasher-success": "SUCCES!",
-    "text.esc-flasher-warning": "Atentie - periculos!<br/><br/>Inscrierea de ESC functioneaza DOAR daca ai KISS ESC<br> cu <b>incarcator de boot</b> (versiunea 1.02 sau mai recenta)!<br/><br/>Ia jos elicele inainte de a inscrie ESC!<br/><br/>Foloseste aceasta capabilitate pe risc propriu.<br/><br/>Va trebui sa reconectati KISSFC la putere dupa inscriere!<br/><br/>",
+    "text.esc-flasher-warning": "Atentie - periculos!<br/><br/>Inscrierea de ESC functioneaza DOAR daca ai ULTRA / KISS / VOLTARA ESC!<br/><br/>Ia jos elicele inainte de a inscrie ESC!<br/><br/>Foloseste aceasta capabilitate pe risc propriu.<br/><br/>Va trebui sa reconectati ULTRA la putere dupa inscriere!<br/><br/>",
     "text.esc-type": "ESC type",
     "text.fc-flasher-complete": "Scriere completa!!!",
     "text.fc-flasher-failure": "ESUARE: $1",
@@ -292,11 +293,11 @@
     "title.charts": "Diagrame",
     "title.custom-esc-orientation": "Motor output mapping",
     "title.custom-orientation": "Orientare FC personalizata",
-    "title.esc-flasher": "Scriere KISS ESC",
+    "title.esc-flasher": "Scriere ESC",
     "title.esc-flasher-complete": "SCRIERE ESC COMPLETA!!!",
-    "title.esc-info": "Info KISS ESC",
-    "title.esc-settings": "KISS ESC settings",
-    "title.fc-flasher": "Scriere KISS FC",
+    "title.esc-info": "Info ESC",
+    "title.esc-settings": "ESC settings",
+    "title.fc-flasher": "Scriere ULTRA",
     "title.filter": "Filtru",
     "title.general-settings": "Setari generale",
     "title.kiss": "ULTRA FCFC Interfata la Control de Zbor",
@@ -482,7 +483,51 @@
 	"title.motor.wizard": "Motor Wizard",
 	"button.wizard.next": "Next",
 	"button.wizard.prev": "Back",
-	"button.wizard.save": "Save"
-    
-    
+	"button.wizard.save": "Save",
+	
+	"column.acc-factor": "Acceleration factor (%)",
+	"column.exp-mode": "Experimental mode",
+	"column.experimental": "Enable",
+	"column.msp.baudrate": "Serial Baudrate",
+	
+	"button.factory-reset": "FACTORY RESET",
+	
+	"column.voltage.source": "Voltage source",
+	"column.current.source": "Current source",
+	"column.battery.type": "Battery type",
+	"title.voltage-current": "Voltage and current",
+	"column.lipo-volts": "Voltage is less than alarm (V)",
+	"column.lipo-mah": "MAh is greater than alarm (mAh)",
+	
+	"text.rx-center": "Stick center",
+	"button.calibrate-radio": "Calibrate stick center",
+	"legend.31": "Current",
+	
+	"title.rec.wizard": "Recommended settings",
+	"button.wizard.no": "No",
+	"button.wizard.yes": "Yes",
+	"button.wizard.flash": "FC Flasher",
+	"text.restore-warning": "Caution - potentially dangerous!<br/><br/>Restoring backup from the craft with <b>different FC orientation</b> or <b>different ESC layout</b><br/><br/>or <b>different propellers direction</b> can be <b>DANGEROUS!!!!</b><br/><br/><b>CHECK EVERYTHING</b> without propellers <b>BEFORE ARMING</b> this craft!<br/><br/>",
+	
+	"button.esc-reload": "RELOAD ESC",
+	
+	"column.altHold": "Alt Hold",
+	"column.led-mode": "Type",
+	
+	"led.rgb": "RGB",
+	"led.pwm": "PWM",
+	"led.gpio": "ON/OFF",
+	"led.inv-gpio": "OFF/ON",
+	"column.aux.led-brightness": "Led Brightness",
+	"column.aux.led-color": "Led Color",
+	"column.fast-telemetry": "Fast Telemetry",
+	"button.advanced.esc.config": "ULTRA ESC CONFIG",
+	"title.ultra-esc-config": "ULTRA ESC Config",
+	"column.config-mode": "Configuration mode",
+	"configMode.0": "Multiple ESC config",
+	"configMode.1": "Single ESC config",
+	"button.esc-saveall": "Save All",
+	"button.esc-reloadall": "Reload All"
+	
+			
 }

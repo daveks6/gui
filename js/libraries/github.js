@@ -1,10 +1,10 @@
 /**
  * Github interface library.
  */
-function loadGithubReleases(url, callback) {
-    // alert(request.getResponseHeader('some_header'));
-    // Link: <https://api.github.com/resource?page=2>; rel="next",
-    // <https://api.github.com/resource?page=5>; rel="last"
+function loadGithubReleases(url) {
+    
+    var dfd = $.Deferred();
+     
     $.ajax({
         dataType : "json",
         url : url,
@@ -13,11 +13,18 @@ function loadGithubReleases(url, callback) {
             var link = request.getResponseHeader('Link');
             Array.prototype.push.apply(temp, data);
             if (link == null) {
-                callback(temp);
+               //callback(temp);
             } else {
                 console.log("TODO: Paging!");
-                callback(temp);
+               //callback(temp);
             }
-        }
+            dfd.resolve(temp);
+        },
+        error: function(data) {
+			console.log("Error loading " + url);
+			dfd.resolve([]);
+		}
     });
+    
+    return dfd.promise();
 }

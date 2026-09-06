@@ -137,7 +137,7 @@ GUI.contentSwitchCleanup = function (callback) {
 	console.log("GUI.contentSwitchCleanup");
     GUI.intervalKillAll(); // all intervals (mostly data pulling) needs to be
     // removed on tab switch
-
+    GUI.removeHints();
     CONTENT[this.activeContent].cleanup(callback);
 };
 
@@ -145,6 +145,7 @@ GUI.switchContent = function (newContent, callback) {
 	console.log("GUI.switchContent");
     if (GUI.activeContent != newContent) {
         console.log('Switching active content to ' + newContent);
+        GUI.removeHints();
         
         $("#navigation button").removeClass("active-menu");
 
@@ -156,10 +157,149 @@ GUI.switchContent = function (newContent, callback) {
         	console.log("Requests cleared");
             callback();
         });
+        
+        GUI.hints();
+        
     } else {
     	console.log("Just a callback");
         callback();
+        GUI.rebuildHints();
     }
+}
+
+GUI.addHints = function() {
+	GUI.jbox = new jBox('Tooltip', {
+		attach: '*[data-help]',
+		trigger: 'mouseenter',
+		position: { x: 'center', y: 'top' },
+	
+		onOpen: function () {
+			var arr = this.source.data("help").split(',');
+			var model = {'help' : arr[0]};
+			
+			if (CONTENT.advanced !== undefined) {
+				model.fcType = CONTENT.advanced.fcType;
+			}
+			
+			if (CONTENT.configuration !== undefined) {
+				model.fcType = CONTENT.configuration.fcType;
+			}
+				
+			var content = $.Mustache.render(arr[0]+"-help",  model);
+			if (content == "") {
+				content = "Missing: " + arr[0]+"-help";
+			}
+
+			if (this.source.hasClass("unsafe_active")) {
+				content += $.Mustache.render("unsafe-help",  model);
+			}
+
+			this.setContent(content);
+		},
+	});
+}
+
+GUI.removeHints = function() {
+	console.log("Removing hints");
+	if (GUI.jbox !== undefined) {
+		GUI.jbox.destroy();
+		
+	}
+	// attach to help button
+	console.log("Add hint to help button only");
+		GUI.jbox = new jBox('Tooltip', {
+					attach: '#hints',
+					trigger: 'mouseenter',
+					position: { x: 'center', y: 'top' },
+				
+					onOpen: function () {
+						var arr = this.source.data("help").split(',');
+						var model = {'help' : arr[0]};
+						var content = $.Mustache.render(arr[0]+"-help",  model);
+						if (content == "") {
+							content = "Missing: " + arr[0]+"-help";
+						}
+						if (this.source.hasClass("unsafe_active")) {
+							content += $.Mustache.render("unsafe-help",  model);
+						}
+						this.setContent(content);
+					},
+				});
+}
+
+GUI.rebuildHints = function() {
+	console.log("Rebuilding hints");
+	GUI.removeHints();
+	GUI.hints();
+}
+
+GUI.processLipo = function(status) {
+	if (status == 1) {
+	    $(".unsafe").each(function(index, elem) {
+	    	$(elem).addClass("unsafe_active").wrap("<div class='unsafe unsafe_active' style='display:inline-block;'></div>");
+	    	$(elem).attr('disabled', 'disabled');
+	    	if ($(elem).attr('data-help')) {
+	    		$(elem).parent().attr('data-help', $(elem).attr('data-help'));
+	    		//$(elem).removeAttr('data-help');
+	    		//$(elem).attr('disabled', 'disabled');
+	    	}
+	    });
+	} else {
+	    $(".unsafe").removeClass("unsafe_active");
+	}	 
+}
+
+GUI.hints = function() {
+	console.log("Adding hints");
+	getHints(function(hints) {
+		if (hints !== "off") {
+			GUI.addHints();
+			$(".u-button-help").removeClass("inactive");
+		} else {
+			GUI.removeHints();
+			$(".u-button-help").addClass("inactive");
+		}
+	});
+	
+	$(".u-button-help").off("click", null).on("click", function() {
+		console.log("Clicked");
+	
+		$(".u-button-help").toggleClass("inactive");
+		if ($(".u-button-help").hasClass("inactive")) {
+			setHints("off");
+			GUI.removeHints();
+		} else {
+			setHints("on");
+			GUI.addHints();
+		}
+	});
+}
+
+function setHints(hints) {
+	if (window.localStorage) {
+		window.localStorage.setItem('hints', hints);
+	} else {
+		chrome.storage.local.set({'hints': hints});
+	}
+}
+
+function getHints(callback) {
+	if (window.localStorage) {
+		var result = window.localStorage.getItem('hints');
+		if ((result != null)) {
+            callback(result);
+        } else {
+            callback("on");
+        }
+	} else {
+	  chrome.storage.local.get('hints', function (result) {
+          if ((result !== undefined) && (result.hints !== undefined)) {
+              callback(result.hints);
+          } else {
+              callback("on");
+          }
+      });
+	}
 }
 
 GUI.load = function (url, callback) {
@@ -168,6 +308,7 @@ GUI.load = function (url, callback) {
         callback();
     	$("#content").scrollTop(0);
         $("*", "#content").i18n();
+        GUI.hints();
     });
 }
 
@@ -189,6 +330,7 @@ GUI.switchToConnecting = function () {
     $('#port').prop('disabled', true);
     $('a.connect').text($.i18n("menu.connecting"));
     GUI.state = "CONNECTING";
+    GUI.removeHints();
 }
 
 GUI.switchToDisconnect = function () {
@@ -197,4 +339,5 @@ GUI.switchToDisconnect = function () {
     $('#navigation button').addClass('unlocked');
     hideModal();
     GUI.state = "DISCONNECT";
+    GUI.removeHints();
 }

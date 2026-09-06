@@ -59,6 +59,9 @@ var chromeSerial = {
                 self.onReceiveError.addListener(function watchForOnReceiveErrors(info) {
                     console.log(info);
 
+					//alert(JSON.stringify(info));
+
+
                     switch (info.error) {
                         case 'system_error': // we might be able to recover from this one
                             if (!self.failed++) {
@@ -67,11 +70,9 @@ var chromeSerial = {
                                         if (info) {
                                             if (!info.paused) {
                                                 console.log('SERIAL: Connection recovered from last onReceiveError');
-
                                                 self.failed = 0;
                                             } else {
                                                 console.log('SERIAL: Connection did not recover from last onReceiveError, disconnecting');
-
                                                 if (GUI.connectedTo || GUI.connectingTo) {
                                                     $('a.connect').click();
                                                 } else {
@@ -89,11 +90,20 @@ var chromeSerial = {
                             break;
                         case 'timeout':
                         	// TODO
+                        	//alert("timeout");
                             break;
                         case 'device_lost':
-                            // TODO
+							 //	alert("device lost");
+							 	 if (forceDisconnect) {
+                                 	if (GUI.connectedTo || GUI.connectingTo) {
+                                    	$('a.connect').click();
+                                 	} else {
+                                    	self.disconnect();
+                                 	}
+                                 }
                             break;
                         case 'disconnected':
+							 //	alert("disconnected");
                             // TODO
                             break;
                     }
@@ -126,7 +136,7 @@ var chromeSerial = {
     },
     disconnect: function (callback) {
         var self = this;
-
+    
         if (self.connectionId) {
             self.emptyOutputBuffer();
 
@@ -280,7 +290,7 @@ var chromeSerial = {
         return this.byteToHex(byte >> 8 & 0xff) + this.byteToHex(byte & 0xff);
     },
     dump: function (direction, data) {
-       /* var view = new Uint8Array(data);
+      /* var view = new Uint8Array(data); 
         var line = '';
         for (var i = 0; i < view.length; i++) {
             if (i%16==0) {

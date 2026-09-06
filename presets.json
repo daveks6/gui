@@ -19,6 +19,63 @@
 			"d": 5
 		}
 	},
+	"default_ultra_v2_exp": {
+		"author": "Alex Goresh",
+		"name": "ULTRA2 EXP DEFAULT",
+		"roll": {
+			"p": 3.2,
+			"i": 0.045,
+			"d": 18.5
+		},
+		"pitch": {
+			"p": 3.8,
+			"i": 0.055,
+			"d": 20.5
+		},
+		"yaw": {
+			"p": 8,
+			"i": 0.050,
+			"d": 5
+		}
+	},
+	"medium_ultra_v2_exp": {
+		"author": "Alex Goresh",
+		"name": "ULTRA2 EXP MEDIUM",
+		"roll": {
+			"p": 4.2,
+			"i": 0.045,
+			"d": 22.0
+		},
+		"pitch": {
+			"p": 4.8,
+			"i": 0.055,
+			"d": 24.0
+		},
+		"yaw": {
+			"p": 8,
+			"i": 0.050,
+			"d": 5
+		}
+	},
+	"high_ultra_v2_exp": {
+		"author": "Alex Goresh",
+		"name": "ULTRA2 EXP HIGH",
+		"roll": {
+			"p": 5.2,
+			"i": 0.045,
+			"d": 25.5
+		},
+		"pitch": {
+			"p": 5.8,
+			"i": 0.055,
+			"d": 27.5
+		},
+		"yaw": {
+			"p": 8,
+			"i": 0.050,
+			"d": 5
+		}
+	},
 	"default_kiss":{
 		"author": "Alex Fedorov",
 		"name": "KISS DEFAULT",

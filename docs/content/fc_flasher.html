@@ -1,19 +1,21 @@
 <div class="flex-container flasher">
 	<div class="column column-left">
 		<div class="block">
-			<div class="title" data-i18n="title.fc-flasher">KISS FC Flasher</div>
+			<div class="title" data-i18n="title.fc-flasher">Ultra FCFC Flasher</div>
 			<div class="body">
 			<p>
-			<a id="select_file" class="u-button" href="#" data-i18n="button.select-firmware"></a>
-			<a id="download_file" class="u-button" href="#" data-i18n="button.select-remote-firmware"></a>
+			<a id="select_file" class="u-button"  data-i18n="button.select-firmware"></a>
+			<a id="download_file" class="u-button"  data-i18n="button.select-remote-firmware"></a>
+			
+			<a id="factory_reset" class="u-button"  data-i18n="button.factory-reset" style="float:right; display:none;"></a>
 			<img id="loader1" class="loader" src="images/ajax-loader.gif" />
 		</p>
 
 		<div id="remote_fw" style="display:none">
-			<p class="half">
+			<!-- p class="half">
 				<label for="fc_type" data-i18n="text.flight-controller">Flight controller</label><select id="fc_type"></select>
-			</p>
-
+			</p -->
+			<input type="hidden" id="fc_type" value="KISS_ULTRA"/>
 			<p class="half_right">
 				<label for="fw_version" data-i18n="text.firmware-versions">Firmware versions</label><select id="fw_version"></select>
 			</p>
@@ -24,7 +26,7 @@
 			</p>
 
 			<p>
-				<a id="download_url" class="u-button" href="#" data-i18n="button.download-firmware"></a><img id="loader2"
+				<a id="download_url" class="u-button"  data-i18n="button.download-firmware"></a><img id="loader2"
 				 class="loader" src="images/ajax-loader.gif" />
 			</p>
 		</div>
@@ -32,10 +34,11 @@
 		<p id="file_info"></p>
 
 		<p id="flashp" class="hidden">
-			<a id="flash" class="u-button" href="#" data-i18n="button.flash-firmware"></a>
+			<a id="flash" class="u-button"  data-i18n="button.flash-firmware"></a>
 		</p>
 
 		<p id="status"></p>
+		<div id="progress" style="background-color: #559641; width: 0%; height: 3px; margin-left:-5px"></div>
 			</div>
 			
 		</div>
@@ -63,4 +66,13 @@
 		</div>
 	</div>	
 </div>
+
+<!--div id="log" style="width:100%; height:250px; background-color: white; color:red; overflow:scroll"-->
+	
+</div>
+
+<div class="kiss-warning factory-wizard noselect">
+	<div class="kiss-warning-inner factory-wizard-inner"></div>
+</div>
+
 

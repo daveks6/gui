@@ -1,4 +1,4 @@
-function BackgroundVideo(options) {
+function BackgroundVideo(options, callback) {
     if (options.container === undefined) {
         this.container = document.body;
     } else {
@@ -36,6 +36,9 @@ function BackgroundVideo(options) {
         overlayDiv.className = "bgv-overlay";
         overlayDiv.style.backgroundImage = "url(" + options.overlay + ")";
         this.container.appendChild(overlayDiv);
+    }
+    if (callback !== undefined) {
+    	callback();
     }
 }
 ;

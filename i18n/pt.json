@@ -233,8 +233,9 @@
     "telemetry.1": "ESC Temperaturas",
     "telemetry.2": "ESC Voltagem",
     "telemetry.3": "ESC Corrente",
-    "telemetry.4": "ESC A/h usados",
+    "telemetry.4": "ESC mAh usados",
     "telemetry.5": "ESC E-RpM / 1000",
+    "telemetry.5.1": "ESC RPM",
     "telemetry.6": "ESC Estado TLM",
     "text.3d": "3D",
     "text.acro": "Acro",
@@ -249,7 +250,7 @@
     "text.esc-flasher-loaded": "Carregado $1 blocos de $2",
     "text.esc-flasher-progress": "Progresso $1%",
     "text.esc-flasher-success": "SUCESSO!",
-    "text.esc-flasher-warning": "Atenção - Potencialmente perigoso!<br/><br/>O flasher das ESC funciona EXCLUSIVAMENTE com as ESCs KISS ESC<br> com o <b>bootloader</b> versão 1.02 ou posterior!<br/><br/>Por favor retire as hélices antes de flashar as ESCS!<br/><br/>Use esta função por sua conta e risco.<br/><br/>Terá reeiniciar a sua controladora KISS depois de flashar!<br/><br/>",
+    "text.esc-flasher-warning": "Atenção - Potencialmente perigoso!<br/><br/>O flasher das ESC funciona EXCLUSIVAMENTE com as ESCs ULTRA / KISS / VOLTARA ESC!<br/><br/>Por favor retire as hélices antes de flashar as ESCS!<br/><br/>Use esta função por sua conta e risco.<br/><br/>Terá reeiniciar a sua controladora KISS depois de flashar!<br/><br/>",
     "text.esc-type": "ESC type",
     "text.fc-flasher-complete": "Flash bem sucedido!!!",
     "text.fc-flasher-failure": "Falha: $1",
@@ -292,11 +293,11 @@
     "title.charts": "Gráficos",
     "title.custom-esc-orientation": "Motor output mapping",
     "title.custom-orientation": "Orientação da Controladora Personalizada",
-    "title.esc-flasher": "Flasher ESC KISS",
+    "title.esc-flasher": "Flasher ESC",
     "title.esc-flasher-complete": "FLASH DAS ESCS COMPLETO!!!",
-    "title.esc-info": "Info ESC KISS",
-    "title.esc-settings": "KISS ESC settings",
-    "title.fc-flasher": "Flashar KISS FC",
+    "title.esc-info": "Info ESC",
+    "title.esc-settings": "ESC settings",
+    "title.fc-flasher": "Flashar ULTRA",
     "title.filter": "Filtro",
     "title.general-settings": "Configuração Geral",
     "title.kiss": "ULTRA FCFC Flight Control GUI",
@@ -482,7 +483,51 @@
 	"title.motor.wizard": "Motor Wizard",
 	"button.wizard.next": "Next",
 	"button.wizard.prev": "Back",
-	"button.wizard.save": "Save"
-    
-    
+	"button.wizard.save": "Save",
+	
+	"column.acc-factor": "Acceleration factor (%)",
+	"column.exp-mode": "Experimental mode",
+	"column.experimental": "Enable",
+	"column.msp.baudrate": "Serial Baudrate",
+	
+	"button.factory-reset": "FACTORY RESET",
+	
+	"column.voltage.source": "Voltage source",
+	"column.current.source": "Current source",
+	"column.battery.type": "Battery type",
+	"title.voltage-current": "Voltage and current",
+	"column.lipo-volts": "Voltage is less than alarm (V)",
+	"column.lipo-mah": "MAh is greater than alarm (mAh)",
+	
+	"text.rx-center": "Stick center",
+	"button.calibrate-radio": "Calibrate stick center",
+	"legend.31": "Current",
+	
+	"title.rec.wizard": "Recommended settings",
+	"button.wizard.no": "No",
+	"button.wizard.yes": "Yes",
+	"button.wizard.flash": "FC Flasher",
+	"text.restore-warning": "Caution - potentially dangerous!<br/><br/>Restoring backup from the craft with <b>different FC orientation</b> or <b>different ESC layout</b><br/><br/>or <b>different propellers direction</b> can be <b>DANGEROUS!!!!</b><br/><br/><b>CHECK EVERYTHING</b> without propellers <b>BEFORE ARMING</b> this craft!<br/><br/>",
+	
+	"button.esc-reload": "RELOAD ESC",
+	
+	"column.altHold": "Alt Hold",
+	"column.led-mode": "Type",
+	
+	"led.rgb": "RGB",
+	"led.pwm": "PWM",
+	"led.gpio": "ON/OFF",
+	"led.inv-gpio": "OFF/ON",
+	"column.aux.led-brightness": "Led Brightness",
+	"column.aux.led-color": "Led Color",
+	"column.fast-telemetry": "Fast Telemetry",
+	"button.advanced.esc.config": "ULTRA ESC CONFIG",
+	"title.ultra-esc-config": "ULTRA ESC Config",
+	"column.config-mode": "Configuration mode",
+	"configMode.0": "Multiple ESC config",
+	"configMode.1": "Single ESC config",
+	"button.esc-saveall": "Save All",
+	"button.esc-reloadall": "Reload All"
+	
+			
 }

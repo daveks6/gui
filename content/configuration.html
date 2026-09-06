@@ -11,10 +11,10 @@
 					<img class="mixer-image main-mixer" src="./images/mixer/0.png" />
 				</div>
 
-				<select class="mixer unsafe" name="mixer" />
+				<select class="mixer unsafe" data-help="mixer-u1" name="mixer" style="margin-bottom:20px"/>
 					
-                    <div class="groupTitle" data-i18n="title.custom-esc-orientation">ESC orientation</div>
-                    <select class="unsafe" disabled="disabled" name="ESCOutputLayout" id="ESCOutputLayout">
+                    <div class="title" style="padding-left:0px" data-i18n="title.custom-esc-orientation">ESC orientation</div>
+                    <select class="unsafe" disabled="disabled" name="ESCOutputLayout" id="ESCOutputLayout" data-help="escLayout,right">
                         <option value="0" data-i18n="escOrientation.0">Default</option>
                         <option value="1" data-i18n="escOrientation.1">90° CW</option>
                         <option value="2" data-i18n="escOrientation.2">90° CCW</option>
@@ -31,7 +31,7 @@
                         <option value="13" data-i18n="escOrientation.13">BF Upside-Down 90° CW</option>
                         <option value="14" data-i18n="escOrientation.14">BF Upside-Down 90° CCW</option>
                         <option value="15" data-i18n="escOrientation.15">BF Upside-Down 180° CW/CCW</option>
-                    </select> <a href="#" id="motor-wizard-button" class="motor-wizard-button motor-wizard-button-disabled" style="display:none" data-i18n="button.motor.wizard">Wizard</a><br>
+                    </select> <a  id="motor-wizard-button" class="motor-wizard-button motor-wizard-button-disabled" style="display:none" data-i18n="button.motor.wizard" data-help="motorWizard,right">Wizard</a><br>
                    <span id="wizard-intro" style="color:#999; font-size:13px; display:none">If you want to use the wizard, please set <br>motor output mapping to Default.<br>ESC configuration requires LIPO!</span>
                     
                    </div>
@@ -42,10 +42,10 @@
 			<div class="title" data-i18n="title.receiver">Receiver</div>
 			<div class="body">
 				<dl>
-					<dt>Type:</dt>
+					<dt><span data-help="receiver">Type:</span></dt>
 					<dd>
 
-						<select id="rxType" class="rxType unsafe">
+						<select id="rxType" class="rxType unsafe" data-help="receiver,top">
 							<option value="6" style="display: none" data-i18n="rx-type.6"
 								id="rxdsm1">Spekt. Sat. DSM2</option>
 							<option value="7" style="display: none" data-i18n="rx-type.7"
@@ -76,21 +76,33 @@
 								id="rxghost">IRC GHOST</option>
 						</select>
 					
-						<select id="gimbalPTMode" class="rxType unsafe" style="display: none">
+						<select id="gimbalPTMode" class="rxType unsafe" style="display: none" data-help="crossfirePT,top">
 							<option value="0" data-i18n="gimbal-pt-mode.0">OpenTX/FreedomTX</option>
 							<option value="1" data-i18n="gimbal-pt-mode.1">Mode 1</option>
 							<option value="2" data-i18n="gimbal-pt-mode.2">Mode 2</option>
 							<option value="3" data-i18n="gimbal-pt-mode.3">Mode 3</option>
 							<option value="4" data-i18n="gimbal-pt-mode.4">Mode 4</option>
 						</select>
+						
+						<select id="channelOrder" class="rxType unsafe" style="display: none" data-help="channelOrder">
+							<option value="0">TAER</option>
+							<option value="1">AETR</option>
+						</select>
 					</dd>
 				</dl>
 				<dl>
-					<dt data-i18n="text.fs-mode-sec">FS. levelmode Sec.:</dt>
+					<dt><span data-i18n="text.fs-mode-sec"  data-help="failsafe,right">FS. levelmode Sec.:</span></dt>
 					<dd>
-						<input type="number" lang="en-150" step="1" name="failsaveseconds"
-							style="width: 40px;" data-step="1" min="0" max="20"
+						<input type="number" lang="en-150" step="1" name="failsaveseconds" data-help="failsafe,right"
+							 data-step="1" min="0" max="20"
 							class="unsafe" />
+					</dd>
+				</dl>
+				
+				<dl id="rxCenter">
+					<dt><span data-i18n="text.rx-center" data-help="rxCenter,right">Receiver center point</span></dt>
+					<dd>
+						<input type="number" lang="en-150" step="1" name="rxCenter" data-step="1" min="0" max="1550" data-help="rxCenter,right"/>
 					</dd>
 				</dl>
 
@@ -115,30 +127,30 @@
                 <tr class="roll">
                     <td data-i18n="column.roll">Roll</td>
                     <td>
-                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" data-help="pidP,top"/>
                     </td>
                     
                     <td>
                         <input type="number" lang="en-150" step="0.001" min="0" max="65" data-step="0.001"
-                            data-precision="3" />
+                            data-precision="3"  data-help="pidI,top"/>
                     </td>
                     
                     <td>
-                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2"  data-help="pidD,top"/>
                     </td>
                     
                     <td></td>
                     
                     <td>
-                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" data-help="rcRate,top"/>
                     </td>
                     
                     <td>
-                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" data-help="rate,top"/>
                     </td>
                     
                     <td>
-                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" data-help="rcCurve,top"/>
                     </td>
                     
                 </tr>
@@ -198,50 +210,64 @@
                     
                     
                 </tr>
-                <tr class="TPA">
+            
+                <!--tr class="TPA">
                     <td data-i18n="column.tpa">TPA</td>
                     <td>
                         <input type="number" lang="en-150" step="0.01" min="0" max="0.9" data-step="0.01"
-                            data-precision="2" />
+                            data-precision="2" data-help="tpaP,bottom"/>
                     </td>
                     <td>
                         <input type="number" lang="en-150" step="0.01" min="0" max="0.9" data-step="0.01"
-                            data-precision="2" />
+                            data-precision="2" data-help="tpaI,bottom"/>
                     </td>
                     <td>
                         <input type="number" lang="en-150" step="0.01" min="0" max="0.9" data-step="0.01"
-                            data-precision="2" />
+                            data-precision="2" data-help="tpaD,bottom"/>
                     </td>
                     
                     <td colspan="4"></td>
-                </tr>
+                </tr-->
                 
                 <tr class="level">
                   <td data-i18n="column.level">Level</td>
                     <td>
-                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" data-help="levelP,bottom"/>
                     </td>
                     <td>
                         <input type="number" lang="en-150" step="0.001" min="0" max="65" data-step="0.001"
-                            data-precision="3" />
+                            data-precision="3"  data-help="levelI,bottom" />
                     </td>
                     <td>
-                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" />
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2"  data-help="levelD,bottom"/>
                     </td>
                     <td colspan="2"></td>
                     
                     <td data-i18n="[column.level-max]">Max&deg;</td>
                     <td>
-                        <input type="number" lang="en-150" step="1" min="0" max="60" data-step="1" data-precision="0" />
+                        <input type="number" lang="en-150" step="1" min="0" max="60" data-step="1" data-precision="0"  data-help="levelMaxAnglew,bottom"/>
                     </td>
                     
                 </tr>
                 
+                 <tr class="altHold">
+                  <td data-i18n="column.altHold">Altitude Hold</td>
+                    <td>
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2" data-help="ahP,bottom"/>
+                    </td>
+                    <td>
+                        <input type="number" lang="en-150" step="0.001" min="0" max="65" data-step="0.001" data-precision="3"  data-help="ahI,bottom" />
+                    </td>
+                    <td>
+                        <input type="number" lang="en-150" step="0.01" min="0" max="65" data-step="0.01" data-precision="2"  data-help="ahD,bottom"/>
+                    </td>
+                </tr>
+                
                 <!-- presets -->
                 <tr class="presets" style="display:none">
-                  <td data-i18nx="column.presets" style="padding-top:5px">Preset</td>
+                  <td data-i18nx="column.presets" style="padding-top:5px" data-help="preset">Preset</td>
                     <td colspan="3" style="padding-top:5px">
-                      <select style="width:100%" id="presets"></select>
+                      <select style="width:100%" id="presets" data-help="preset"></select>
                     </td>
                 </tr>
             </table>
@@ -265,17 +291,17 @@
             	<br />
 		   
             	<span data-i18n="text.firmware-version">Firmware Version:</span>
-            	<span id="version"></span>
+            	<span id="version"></span>&nbsp;&nbsp;&nbsp;<a id="newVersion" class="u-button" style="display:none; margin:0" title=""></a>
             	
             	<br />
             	
             	<span data-i18n="text.sn">Serial Number:</span>
-            	<span id="SN" class="uuid"></span>
+            	<span id="SN" class="uuid" data-help="serialClipboard"></span>
             	
-            	<br />
+            	<!--br />
             
-            	<span data-i18n="text.eeprom-version">EEPROM:</span>
-            	<span id="eeprom1" class "uuid"></span>
+            	<span data-i18n="text.eeprom-version" style="color: #555">EEPROM:</span>
+            	<span id="eeprom1" class="uuid" style="color: #555"></span-->
 			</div>
 		</div>
 		
@@ -286,45 +312,32 @@
 
 	<div class="column column-33">
 		<div class="block">
-			<div class="title" data-i18n="title.general-settings">General
-				Settings</div>
+			<div class="title" data-i18n="title.general-settings">General Settings</div>
 			<div class="body">
 				<dl>
-					<dt title="the minimum throttle for the motors"
-						data-i18n="column.min-throttle">Min. Throttle</dt>
+					<dt><span data-i18n="column.min-throttle" data-help="minThrottle,left">Min. Throttle</span></dt>
 					<dd>
 						<input class="unsafe" type="number" lang="en-150" step="1"
-							name="minThrottle" data-step="1" min="0" max="2200" />
+							name="minThrottle" data-step="1" min="0" max="2200" data-help="minThrottle,left"/>
 							
-							&nbsp;<input class="unsafe scaling" type="checkbox" name="throttleScaling" /> <span class="scaling" data-i18n="column.throttle-scaling">Scaling</span>
+							&nbsp;<input class="unsafe scaling" type="checkbox" name="throttleScaling" data-help="scaling,bottom"/> <span class="scaling" data-i18n="column.throttle-scaling">Scaling</span>
 					</dd>
 				</dl>
 				<dl>
-					<dt title="the maximum throttle for the motors"
-						data-i18n="column.max-throttle">Max. Throttle</dt>
+					<dt><span data-i18n="column.max-throttle"  data-help="maxThrottle,left">Max. Throttle</span></dt>
 					<dd>
 						<input class="unsafe" type="number" lang="en-150" step="1"
-							name="maxThrottle" data-step="1" min="0" max="2200" />
+							name="maxThrottle" data-step="1" min="0" max="2200" data-help="maxThrottle,left"/>
 					</dd>
 				</dl>
 				<dl>
-					<dt
-						title="the throttle value where the PID controller starts acting"
-						data-i18n="column.min-command">Min. Command</dt>
+					<dt><span data-i18n="column.min-command" data-help="minCommand,left">Min. Command</span></dt>
 					<dd>
 						<input class="unsafe" type="number" lang="en-150" step="1"
-							name="minCommand" data-step="1" min="0" max="2200" />
+							name="minCommand" data-step="1" min="0" max="2200" data-help="minCommand,left"/>
 					</dd>
 				</dl>
 				<input type="hidden" name="midCommand" />
-				<!-- <dl >
-					<dt title="the ESC's middle command for 3D mode use"
-						data-i18n="column.mid-command">Mid. Command</dt>
-					<dd>
-						<input class="unsafe" type="number" lang="en-150" step="1"
-							name="midCommand" data-step="1" min="0" max="2200" />
-					</dd>
-				</dl> -->
 				<dl>
 					<dt class="tricopter" data-i18n="column.tri-yaw-mid">Tri Yaw
 						Mid.</dt>
@@ -342,10 +355,10 @@
 				</dl>
 				<dl>
 					<dt>
-						<span title="ESC Mode" data-i18n="column.esc-mode">ESC Mode</span>
+						<span title="ESC Mode" data-i18n="column.esc-mode" data-help="escMode,left">ESC Mode</span>
 					</dt>
 					<dd>
-						<select class="unsafe" name="outputMode" id="outputMode">
+						<select class="unsafe" name="outputMode" id="outputMode" data-help="escMode,left" style="width:72px; text-align:right">
 						
 							<option value="7" data-i18n="output.7">Dshot 2400</option>
 							<option value="6" data-i18n="output.6">Dshot 1200</option>
@@ -353,23 +366,16 @@
 							<option value="4" data-i18n="output.4">Dshot 300</option>
 							<option value="3" data-i18n="output.3">Dshot 150</option>
 							<option value="8" data-i18n="output.8">FETtec OneWire</option>
-						</select>
+						</select> &nbsp;<span  data-help="fastTelemetry,left" class="unsafe" id="fastTelemetry" style="display:none"><input type="checkbox" class="unsafe" name="fastTelemetry"/> <span class="" data-i18n="column.fast-telemetry">Fast Telemetry</span></span>
 					</dd>
 				</dl>
-			<!-- 	<dl>
-					<dt data-i18n="column.3d-mode">3D Mode</dt>
-					<dd>
-						<input class="unsafe" type="checkbox" disabled="true"
-							name="3dMode" />
-					</dd>
-				</dl> -->
 			</div>
 		</div>
 
 
 		<div class="block">
 			<div class="title" data-i18n="title.aux-functions">AUX Functions</div>
-			<div class="body">
+			<div class="body" id="aux_functions">
 				<dl id="aux0"></dl>
 			<!-- 	
 				<dl id="softarm_mode_row" style="display:none"><dt class="kiss-aux-function" data-i18n="column.softarm-mode">SoftARM Mode</dt><dd><input id="softarm_mode" 
@@ -379,7 +385,7 @@
 				
 				<dl id="aux14"></dl>
 				
-				<dl id="prearm_mode_row" style="display:none"><dt class="kiss-aux-function" data-i18n="column.prearm-mode">PreARM Safety Mode</dt><dd><select id="prearm_mode" class="unsafe prearm_mode">
+				<dl id="prearm_mode_row" style="display:none"><dt class="kiss-aux-function"><span data-i18n="column.prearm-mode" data-help="prearmMode,right">PreARM Safety Mode</span></dt><dd><select id="prearm_mode" class="unsafe prearm_mode" data-help="prearmMode,right">
 							<option value="0" data-i18n="prearm.0">First Arm Only</option>
 							<option value="1" data-i18n="prearm.1">Every Arm</option>
 						</select>
@@ -387,51 +393,29 @@
 				</dl>
 				
 				<dl id="aux1"></dl>
-				<dl id="aux4"></dl>
 				<dl id="aux2"></dl>
-				<dl id="aux3"></dl>
 				<dl id="aux10"></dl>
+				<dl id="aux3"></dl>
 				<dl id="aux5"></dl>
 				<dl id="aux6"></dl>
 				<dl id="aux7"></dl>
 				<dl id="aux8"></dl>
 				<dl id="aux9"></dl>
+				<dl id="aux4"></dl>
 				<dl id="aux13"></dl>
 				<!--  inflight tuning -->
 				<dl id="aux11"></dl>
 				<dl id="aux12"></dl>
 			</div>
 		</div>
-
-
-		<div class="block">
-			<div class="title" data-i18n="title.filter">Filter</div>
-			<div class="body">
-			<dl>
-				<dt data-i18n="column.lpf-frequency">LPF FRQ</dt>
-				<dd>
-					<select name="lpf">
-						<option value="0" data-i18n="filter.0">Off</option>
-						<option value="1" data-i18n="filter.1">High</option>
-						<option value="2" data-i18n="filter.2">Medium High</option>
-						<option value="3" data-i18n="filter.3">Medium</option>
-						<option value="4" data-i18n="filter.4">Medium Low</option>
-						<option value="5" data-i18n="filter.5">Low</option>
-						<option value="6" data-i18n="filter.6">Very Low</option>
-						<option value="7" data-i18n="filter.7">Advanced Settings</option>
-					</select>
-				</dd>
-			</dl>
-			</div>
-
-		</div>
-
+		
 	</div>
 	
 	<div class="footer">
-		<a id="backup" 	class="u-button" href="#" title="Backup to file" data-i18n="button.backup">Backup</a>&nbsp;
-		<a id="restore" class="u-button" href="#" title="Restore from file" data-i18n="button.restore">Restore</a>&nbsp;
-		<a id="save" 	class="u-button" href="#" title="Save Settings to EEPROM" data-i18n="button.save" style="margin-right:10px">Save</a>&nbsp;
+		<a id="hints" 	class="u-button u-button-help inactive" data-help="help,left">Help</a>&nbsp;
+		<a id="backup" 	class="u-button" title="Backup to file" data-i18n="button.backup">Backup</a>&nbsp;
+		<a id="restore" class="u-button" title="Restore from file" data-i18n="button.restore">Restore</a>&nbsp;
+		<a id="save" 	class="u-button" title="Save Settings to EEPROM" data-i18n="button.save" style="margin-right:10px">Save</a>&nbsp;
 	</div>
 </div>
 
@@ -457,4 +441,28 @@
        	<div class="kiss-warning motor-wizard noselect">
     		<div class="kiss-warning-inner motor-wizard-inner"></div>
     	</div>
+    	
+    	<div class="kiss-warning rec-wizard noselect">
+    		<div class="kiss-warning-inner rec-wizard-inner"></div>
+    	</div>
+    	
+    	<div class="kiss-warning aux-wizard noselect">
+    		<div class="kiss-warning-inner aux-wizard-inner"></div>
+    	</div>
+    	
+    		
+    	<div class="kiss-warning restore-wizard noselect">
+    		<div class="kiss-warning-inner restore-wizard-inner"></div>
+    	</div>
  
+<div id="restore-disclaimer" class="warning-disclaimer">
+    <div class="warning-disclaimer-inner">
+        <div class="warning1" data-i18n="title.warning"></div>
+        <div class="warning2" data-i18n="[html]text.restore-warning">
+
+        </div>
+        <br />
+        <br />
+        <a class="warning-button"  data-i18n="text.motor-test-button"></a>
+    </div>
+</div>

@@ -13,11 +13,18 @@ var fcFlasherReadHandler = function (info) {
     if (info.data.byteLength > 0) {
         var view = new Uint8Array(info.data);
         if (self.rxState == 0) {
-            if (view.length == 5) {
-                if (view[0] == 81 && view[1] == 255 && view[2] == 255 && view[3] == 125) {
-                    if (view[4] != 0) self.flasherAvailable = true;
+			
+			for (var i = 0; i < view.length; i++) self.receiveBuffer.push(view[i]);
+			if (self.receiveBuffer.length >= 5) {
+				if (self.receiveBuffer[0] == 81 && self.receiveBuffer[1] == 255 && self.receiveBuffer[2] == 255 && self.receiveBuffer[3] == 125) {
+                    if (self.receiveBuffer[4] != 0) self.flasherAvailable = true;
                 }
-            }
+                
+                if (!self.flasherAvailable) {
+					self.receiveBuffer = [];
+				}
+			}
+			
         } else if (self.rxState == 1) { // receive page back
             for (var i = 0; i < view.length; i++) self.receiveBuffer.push(view[i]);
             if (self.receiveBuffer.length >= (BLOCK_SIZE + 5)) {
@@ -55,6 +62,9 @@ var fcFlasherReadHandler = function (info) {
 var fcFlasherReadErrorHandler = function (info) {
 	var self = CONTENT.fc_flasher;
 	
+	
+	console.log("Error handler: " + JSON.stringify(info));
+	
 	if (info.error == "device_lost" || info.error.code == 19) {
 		console.log("Serial port lost during flashing, Ultra went to bootloader mode. Reconnecting...");
 		
@@ -68,47 +78,67 @@ var fcFlasherReadErrorHandler = function (info) {
 			// show reconnect button!
 			$(".modal-body").html("<p class='header'>BOOTLOADER</p>Your KISS ULTRA is ready for flashing. Click <b>Reconnect</b> button to continue.<br><span id=bootloader_timer>&nbsp;<span>");
         	$(".modal-footer").html("<a class='u-button' id='flash_serial_reconnect'>Reconnect</a>");
+        	
         	$(".modal-overlay").show();
         	$(".modal").show();
+        	
+        	$("#flash_serial_reconnect").removeClass('disabled').show();
         	
         	$(".modal-overlay").off('click'); 
         
         	var connectButton = document.getElementById('flash_serial_reconnect');
 
-    		connectButton.addEventListener('click', async () => {
-    			var selectedPort = String($('#port').val());
-    			try {
-    					let device;
-    					// See js/connection_handler.js for why this falls back on any
-    					// navigator.serial failure rather than trusting its existence.
-    					try {
-    						if (typeof navigator.serial === 'undefined') {
-    							throw new Error('navigator.serial is not available');
-    						}
-    						device = await navigator.serial.requestPort({'filters': []});
-    					} catch (serialError) {
-    						if (typeof navigator.usb === 'undefined') {
-    							throw serialError;
-    						}
-    						let usbDevice = await navigator.usb.requestDevice({'filters': []});
-    						device = new WebSerialPolyfill.SerialPort(usbDevice);
-    					}
-    					serialDevice = getSerialDriverForPort(selectedPort);
-    					serialDevice.connect(device, {
-    						baudRate: 115200,
-    						bufferSize: 16384
-    					}, function() {
-    						serialDevice.onReceive.addListener(fcFlasherReadHandler);
-    						console.log("Reconnected...");
-    						self.reconnected = true;
-    						$(".modal-overlay").hide();
-    			        	$(".modal").hide();
-    					});
-    			} catch (error) {
-    				console.log('Connect error: ' + error.message);
-    				alert('Connect error: ' + error.name + ': ' + error.message);
-    			}
-    		});
+        	connectButton.addEventListener('click', async () => {
+
+        
+
+        		if (!$("#flash_serial_reconnect").hasClass('disabled')) {
+        			
+        			$("#flash_serial_reconnect").addClass('disabled');
+        		
+
+        			var selectedPort = String($('#port').val());
+        			try {
+        				let device = null;
+
+        				if (isCapacitorNative()) {
+        					// See js/connection_handler.js for why this needs no
+        					// browser device-picker step at all.
+        				} else {
+        					// See js/connection_handler.js for why this falls back on any
+        					// navigator.serial failure rather than trusting its existence.
+        					try {
+        						if (typeof navigator.serial === 'undefined') {
+        							throw new Error('navigator.serial is not available');
+        						}
+        						device = await navigator.serial.requestPort({'filters': []});
+        					} catch (serialError) {
+        						if (typeof navigator.usb === 'undefined') {
+        							throw serialError;
+        						}
+        						let usbDevice = await navigator.usb.requestDevice({'filters': []});
+        						device = new WebSerialPolyfill.SerialPort(usbDevice);
+        					}
+        				}
+
+        				serialDevice = getSerialDriverForPort(selectedPort);
+        				serialDevice.connect(device, {
+        					baudRate: 115200,
+        					bufferSize: 16384
+        				}, function() {
+        					serialDevice.onReceive.addListener(fcFlasherReadHandler);
+        					console.log("Reconnected...");
+        					self.reconnected = true;
+        					$(".modal-overlay").hide();
+        					$(".modal").hide();
+        				});
+        			} catch (error) {
+        				$("#flash_serial_reconnect").removeClass('disabled');
+        				console.log('Connect error: ' + error.message);
+        				alert('Connect error: ' + error.name + ': ' + error.message);
+        			}
+        		}
+        	});
 		}
 	}
 }
@@ -123,7 +153,8 @@ CONTENT.fc_flasher.initialize = function (callback) {
     self.rxState = 0;
     self.timeout = null;
     self.retryCounter = 0;
-
+    
+    
     GUI.switchContent('fc_flasher', function () {
         GUI.load("./content/fc_flasher.html", htmlLoaded);
     });
@@ -181,7 +212,7 @@ CONTENT.fc_flasher.initialize = function (callback) {
             self.flashing = false;
             console.log('Done.');
             $("#status").html($.i18n("text.fc-flasher-success"));
-
+ 			//$("#progress").hide();
             setTimeout(function() {
             	$("#portArea").show();
             	GUI.switchToConnect();
@@ -197,6 +228,7 @@ CONTENT.fc_flasher.initialize = function (callback) {
             self.flashing = true;
             var percentage = 100 - 100 * (self.curPage / self.pages.length);
             $("#status").html($.i18n("text.fc-flasher-progress", Math.floor(percentage + 0.5)));
+            $("#progress").css("width","calc(5px + " + percentage + "%)").show();
             self.rxState = 1;
             self.retryCount++;
             console.log("Flashing page " + (self.curPage + 1) + " retry " + self.retryCount);
@@ -205,6 +237,7 @@ CONTENT.fc_flasher.initialize = function (callback) {
                 if (self.retryCount >= 3) {
                     console.log("Failed 3 times, aborting");
                     $("#status").html("FAILURE: No response from bootloader!");
+                    $("#progress").css("width", 0);
                     resetUI();
                 } else {
                     self.WritePage();
@@ -241,9 +274,14 @@ CONTENT.fc_flasher.initialize = function (callback) {
     					var intel_hex = e.target.result;
     					self.parsed_hex = read_hex_file(intel_hex);
 
+    					var max  = 262144;
+    				
+    					if (files[0].name.search("-BLU") > 1) {
+							max = 10000;
+						}
     					
-    					if (self.parsed_hex) {
-    						
+    					
+    					if (self.parsed_hex && (self.parsed_hex.bytes_total > max)) {
     						console.log("HEX OK " + self.parsed_hex.bytes_total + " bytes");
     						$("#file_info").html($.i18n("text.fc-flasher-loaded", self.parsed_hex.bytes_total, theFile.name));
     						$("#flashp").show();
@@ -260,6 +298,95 @@ CONTENT.fc_flasher.initialize = function (callback) {
     	}
     }
     
+    // reset wizard begin
+    function openFactoryResetWizard() {
+  	  
+    	var steps = [{ 
+			'template' : 'factory-wizard-welcome-template',
+			'type': 'welcome',
+			'dataProvider' : {
+				
+			},
+			'preload': function(plugin, step) {
+
+			},
+			'postload' : function(plugin, step) {
+				$(".wizard-button-save").hide();
+
+			}
+		},
+		{ 
+			'template' : 'factory-wizard-done-template',
+			'type': 'done',
+			'dataProvider' : {
+				
+			},
+			'preload': function(plugin, step) {
+				
+			},
+			'postload' : function(plugin, step) {
+				$("#factory-wizard-reset-input").val("").on("keyup keydown change", function() {
+					var conf = $(this).val().toUpperCase();
+					if (conf == "ULTRA") {
+						$(".wizard-button-save").show();
+					} else {
+						$(".wizard-button-save").hide();
+					}
+				});
+				
+				$(".wizard-button-save").off("click").click(function() {
+				  	var tmp = {
+				  			'buffer': new ArrayBuffer(10),
+				  			'code': [65, 34, 122, 244, 62, 176,	137, 55, 67, 87]
+				  	};
+				  	kissProtocol.send(kissProtocol.FACTORY_RESET, kissProtocol.preparePacket(kissProtocol.FACTORY_RESET, tmp));
+				  	
+				  	setTimeout(function() {
+				  		closeFactoryWizard();
+				  		GUI.switchToConnect();
+				  		GUI.timeoutKillAll();
+				  		GUI.intervalKillAll();
+				  		GUI.contentSwitchCleanup();
+				  		GUI.contentSwitchInProgress = false;
+				  		kissProtocol.removePendingRequests();
+				  		kissProtocol.disconnectCleanup();
+				  		GUI.connectedTo = false;
+				  		$('#content').empty();
+				  		// load welcome content
+				  		CONTENT.welcome.initialize();
+				  	}, 1000);
+				  	
+				});
+			}
+		}];
+
+    	
+    	$(".factory-wizard-inner").kissWizard({
+    		'buttonsTemplate': 'factory-wizard-buttons-template',
+    		'headerTemplate': 'factory-wizard-header-template',
+    		steps: steps,
+    		name: "Factory Reset Wizard",
+    		currentStep: 0
+    	});
+    	
+    	$(".modal-overlay").show();
+    	$(".factory-wizard").show();
+    	
+    
+    	$(".modal-overlay").click(function() {
+    		closeFactoryWizard();
+    	});
+    }
+        
+    function closeFactoryWizard() {
+    	$(".modal-overlay").off("click");
+	  	$(".modal-overlay").hide();
+    	$(".factory-wizard").hide();
+    	$(".factory-wizard").kissWizard("destroy");
+    }
+    
+    // reset wizard end
+    
     function htmlLoaded() {
 
         serialDevice.onReceive.removeListener(fcFlasherReadHandler);
@@ -268,6 +395,24 @@ CONTENT.fc_flasher.initialize = function (callback) {
         serialDevice.onReceiveError.addListener(fcFlasherReadErrorHandler);
         
         $("#dont-tab").hide();
+
+        $("#factory_reset").hide();
+        
+        if (!$(".portSelector").hasClass("flashing-in-progress")) {
+        	kissProtocol.send(kissProtocol.GET_SETTINGS, [kissProtocol.GET_SETTINGS], function () {
+        		var config = kissProtocol.data[kissProtocol.GET_SETTINGS];
+        		if (config.ver >= 139) {
+        			 kissProtocol.send(kissProtocol.GET_TELEMETRY, [kissProtocol.GET_TELEMETRY], function () {
+        				var telemetry = kissProtocol.data[kissProtocol.GET_TELEMETRY];
+        				 console.log("LIPO: " + telemetry.LiPoVolt);
+        				 $("#factory_reset").show();
+        				 if (telemetry.LiPoVolt >= 0.6) {
+        					 $("#factory_reset").addClass('disabled');
+        				 }
+        			 });
+        		} 
+        	});
+        }
         
         if (!isNative()) {
             document.getElementById('fcfiles').addEventListener('change', handleFileSelect, false);
@@ -285,6 +430,7 @@ CONTENT.fc_flasher.initialize = function (callback) {
             $("#file_info").html("");
             $("#flashp").hide();
             $("#status").hide();
+            $("#progress").hide();
         });
 
         $("#fc_type").on("change", function () {
@@ -298,86 +444,100 @@ CONTENT.fc_flasher.initialize = function (callback) {
             $("#file_info").html("");
             $("#flashp").hide();
             $("#status").hide();
+            $("#progress").hide();
         });
+        
+        $("#factory_reset").on("click", function () {
+        	if (!$(this).hasClass('disabled')) {
+        		openFactoryResetWizard();
+        	}
+        });
+        		
 
         $("#download_url").on("click", function () {
-            $("#loader2").show();
-            var asset = fcFirmwareMap2[$("#fc_type").val()][$("#fw_version").val()];
-            var url = asset.url;
-            console.log("Loading " + url);
-            $("#file_info").html("");
-            $("#flashp").hide();
-            $("#status").hide();
+        	if (!$(this).hasClass('disabled')) {
+        		$("#loader2").show();
+        		var asset = fcFirmwareMap2[$("#fc_type").val()][$("#fw_version").val()];
+        		var url = asset.url;
+        		console.log("Loading " + url);
+        		$("#file_info").html("");
+        		$("#flashp").hide();
+        		$("#status").hide();
+        		$("#progress").hide();
 
-            $.get(getProxyURL(url), function (intel_hex) {
-                console.log("Loaded ULTRA hex file");
-                self.parsed_hex = read_hex_file(intel_hex);
+        		$.get(getProxyURL(url), function (intel_hex) {
+        			console.log("Loaded ULTRA hex file");
+        			self.parsed_hex = read_hex_file(intel_hex);
 
-                $("#loader2").hide();
-                if (self.parsed_hex) {
-                    console.log("HEX OK " + self.parsed_hex.bytes_total + " bytes");
-                    $("#file_info").html($.i18n("text.fc-flasher-loaded", self.parsed_hex.bytes_total, url));
-                    $("#flashp").show();
-                } else {
-                    console.log("Corrupted firmware file");
-                    $("#file_info").html($.i18n("text.fc-flasher-invalid-firmware"));
-                    $("#flashp").hide();
-                }
-            });
+        			$("#loader2").hide();
+        			if (self.parsed_hex && (self.parsed_hex.bytes_total > 262144)) {
+        				console.log("HEX OK " + self.parsed_hex.bytes_total + " bytes");
+        				$("#file_info").html($.i18n("text.fc-flasher-loaded", self.parsed_hex.bytes_total, url));
+        				$("#flashp").show();
+        			} else {
+        				console.log("Corrupted firmware file");
+        				$("#file_info").html($.i18n("text.fc-flasher-invalid-firmware"));
+        				$("#flashp").hide();
+        			}
+        		});
+        	}
         });
 
         $("#download_file").on("click", function () {
-            $("#file_info").html("");
-            $("#flashp").hide();
-            fcFirmwares2 = [];
-            $("#remote_fw").hide();
-            $("#loader1").show();
-            loadGithubReleases("https://api.github.com/repos/KissUltra/firmware/releases", function (data) {
-                $("#loader1").hide();
-                console.log("DONE");
-                console.log(data);
-                $("#remote_fw").show();
-                fcFirmwareMap2 = {};
-                $.each(data, function (index, release) {
-                    console.log("Processing firmware: " + release.name);
-                    $.each(release.assets, function (index2, asset) {
-                        if (asset.name.endsWith(".hex")) {
-                            console.log("Processing asset: " + asset.name);
-                            var p = asset.name.indexOf("-");
-                            var board = asset.name.substr(0, p).toUpperCase().trim();
-                            console.log("Board: " + board);
+        	if (!$(this).hasClass('disabled')) {
+        		$("#file_info").html("");
+        		$("#flashp").hide();
+        		fcFirmwares2 = [];
+        		$("#remote_fw").hide();
+        		$("#loader1").show();
+        		loadGithubReleases("https://api.github.com/repos/KissUltra/firmware/releases").then(function (data) {
+        			$("#loader1").hide();
+        			console.log("DONE");
+        			console.log(data);
+        			$("#remote_fw").show();
+        			fcFirmwareMap2 = {};
+        			$.each(data, function (index, release) {
+        				console.log("Processing firmware: " + release.name);
+        				$.each(release.assets, function (index2, asset) {
+        					if (asset.name.endsWith(".hex")) {
+        						console.log("Processing asset: " + asset.name);
+        						var p = asset.name.indexOf("-");
+        						var board = asset.name.substr(0, p).toUpperCase().trim();
+        						console.log("Board: " + board);
 
-                            if (fcFirmwareMap2[board] == undefined) {
-                                fcFirmwareMap2[board] = [];
-                            }
-                            var file = {
-                                release: release.name,
-                                date: release.created_at,
-                                url: asset.browser_download_url,
-                                size: asset.size,
-                                info: release.body
-                            }
-                            fcFirmwareMap2[board].push(file);
-                        }
-                    });
-                    $("#fc_type").empty();
-                    $("#fw_version").empty();
-                    var fc2BoardNames = {
-                        'KISS_ULTRA': "FCFC_ULTRA"
-                    };
-                    $.each(fcFirmwareMap2, function (board, assets) {
-                        var add = true;
-                        if (add) $("#fc_type").append("<option value='" + board + "'>" + board + " - " + fc2BoardNames[board] + "</option>");
-                    });
-                    $("#fc_type").trigger("change");
-                });
-            })
+        						if (fcFirmwareMap2[board] == undefined) {
+        							fcFirmwareMap2[board] = [];
+        						}
+        						var file = {
+        								release: release.name,
+        								date: release.created_at,
+        								url: asset.browser_download_url,
+        								size: asset.size,
+        								info: release.body
+        						}
+        						fcFirmwareMap2[board].push(file);
+        					}
+        				});
+        				$("#fc_type").empty();
+        				$("#fw_version").empty();
+        				var fc2BoardNames = {
+        						'KISS_ULTRA': "FCFC_ULTRA"
+        				};
+        				$.each(fcFirmwareMap2, function (board, assets) {
+        					var add = true;
+        					if (add) $("#fc_type").append("<option value='" + board + "'>" + board + " - " + fc2BoardNames[board] + "</option>");
+        				});
+        				$("#fc_type").trigger("change");
+        			});
+        		})
+        	}
 
         });
         
         $("#select_file").on("click", function () {
         	if (!$(this).hasClass("disabled")) {
         		$("#status").html("");
+        		 $("#progress").hide();
 
 
         		if (isNative()) {
@@ -426,6 +586,7 @@ CONTENT.fc_flasher.initialize = function (callback) {
         		    $("#file_info").html("");
         	        $("#flashp").hide();
         	        $("#status").hide();
+        	        $("#progress").hide();
         	        $("#fcfiles").val('');
         			$("#fcfiles").click();
         		}
@@ -436,6 +597,9 @@ CONTENT.fc_flasher.initialize = function (callback) {
 
         $("#flash").on("click", function () {
             if (!$(this).hasClass('disabled')) {
+				
+				// prevent gui disconnect
+				forceDisconnect = false;
 
                 self.flashing = false;
 
@@ -444,10 +608,12 @@ CONTENT.fc_flasher.initialize = function (callback) {
                 console.log(self.pages);
 
                 $("#status").show().html("");
+                 $("#progress").show().css("width", 0);
                 $("#flash").addClass('disabled');
                 $("#select_file").addClass('disabled');
                 $("#download_file").addClass('disabled');
                 $("#download_url").addClass('disabled');
+                $("#factory_reset").addClass('disabled');
                 
                 if (!isNative()) {
                     $("#dont-tab").show();
@@ -460,6 +626,7 @@ CONTENT.fc_flasher.initialize = function (callback) {
                 self.Write([79, 72, 82, 69, 83, 69, 84], 0); // reset fc
                 
                 self.rxState = 0;
+                self.receiveBuffer = []; // clean up
                 console.log('Checking bootloader...');
                 
                 self.intcnt = isNative() ? 20 : 60;
@@ -474,7 +641,8 @@ CONTENT.fc_flasher.initialize = function (callback) {
                 		clearInterval(self.interval);
                 		console.log('got no answer. check your com port selection and see if you have the fc with bootloader.');
                         $("#status").html("FAILURE: No response from bootloader!");
-                        
+                         $("#progress").hide();
+                         
                         if (!isNative()) {
                         	$(".modal-overlay").hide();
     			        	$(".modal").hide();
@@ -523,6 +691,35 @@ CONTENT.fc_flasher.initialize = function (callback) {
         });
         
         scrollTop();
+        
+        console.log("---");
+        console.log(CONTENT.fc_flasher);
+        if (CONTENT.fc_flasher.goRemote === true) {
+			$("#download_file").click();
+			CONTENT.fc_flasher.goRemote = false;
+		}
+		
+		
+		///// LOG
+		
+/*		var log = document.querySelector('#log');
+['log','debug','info','warn','error'].forEach(function (verb) {
+    console[verb] = (function (method, verb, log) {
+        return function () {
+            method.apply(console, arguments);
+            var msg = document.createElement('div');
+            msg.classList.add(verb);
+            msg.textContent = verb + ': ' + Array.prototype.slice.call(arguments).join(' ');
+            log.appendChild(msg);
+        };
+    })(console[verb], verb, log);
+});*/
+		
+		
+		//// LOG
+		
+		
+		
     };
 }
 

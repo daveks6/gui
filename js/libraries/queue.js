@@ -59,6 +59,19 @@ function Queue(){
     return item;
 
   }
+  
+  this.getLast = function() {
+	    if (queue.length == 0) return undefined;
+	    var item = queue[queue.length];
+	    // return the dequeued item
+	    return item;
+  }
+  
+  this.removeLast = function() {
+	    if (queue.length == 0) return;
+	    queue  = queue.slice(0, queue.length - 1);
+  }
+
 
   /* Returns the item at the front of the queue (without dequeuing it). If the
    * queue is empty then undefined is returned.

@@ -44,7 +44,8 @@
                 if (!data) {
                     self.data(PLUGIN_NAME, $.extend(true, {
                         rcInput: 0,
-                        breakpoints: [{ throttle: 0, influence: 30 }, { throttle: 30, influence: 0 }, { throttle: 50, influence: 0 }, { throttle: 100, influence: 100 }]
+                        breakpoints: [{ throttle: 0, influence: 30 }, { throttle: 30, influence: 0 }, { throttle: 50, influence: 0 }, { throttle: 100, influence: 100 }],
+                        custom: false
                     }, options));
                     data = pluginData(self);
                 }
@@ -72,6 +73,14 @@
                 publicMethods.refresh(self);
             }
         },
+        
+        setCustom: function (newValue) {
+            var self = $(this);
+            var data = pluginData(self);
+            data.custom = newValue;
+            publicMethods.refresh(self);
+        },
+        
         setBreakpoints: function (newValue) {
             var self = $(this);
             var data = pluginData(self);
@@ -184,6 +193,10 @@
 
                 context.fillText($.i18n('title.tpa-influence'), padding + 4, padding + 2);
                 context.fillText($.i18n('column.throttle'), width - padding - context.measureText($.i18n('column.throttle')).width, height - padding - 4);
+                
+                var custom = data.custom ? "CUSTOM" : "DEFAULT";
+                context.fillText(custom, (width  - context.measureText(custom).width) / 2 - padding, padding + 2);
+                
             }
         }
     };
