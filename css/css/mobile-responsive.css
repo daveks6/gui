@@ -75,6 +75,15 @@
         width: 100%;
         box-sizing: border-box;
     }
+
+    /* The welcome-screen FC render images have no explicit width and sit
+       right-anchored at their native 800x343px (or 676x308px) resolution --
+       on any phone-width screen most of the image hangs off the left edge.
+       Cap them to the screen and let height scale to match. */
+    .welcome img[id^="fc_image_"] {
+        max-width: calc(100% - 40px);
+        height: auto;
+    }
 }
 
 @media (max-width: 480px) {
