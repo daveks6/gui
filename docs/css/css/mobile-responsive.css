@@ -76,6 +76,28 @@
         box-sizing: border-box;
     }
 
+    /* A second, separate two-column layout system (.flex-container with
+       .column-67/.column-33 children) is used by most of the actual
+       config tabs (Configuration, TPA, Rates, OSD, FC/ESC Flasher, Data
+       Output, Advanced) -- distinct from the .wrapper-* system above, so
+       it wasn't covered by that fix. At a >=1000px desktop width a 67/33
+       split has room to breathe; squeezed into a phone-width column it
+       forces controls to wrap onto extra rows, which then overflow any
+       fixed-height parent block and overlap the next block below it.
+       Stack these full-width too, same as .wrapper-*. */
+    .flex-container {
+        flex-wrap: wrap;
+    }
+    .column-33,
+    .column-67,
+    .column-100 {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .column-left {
+        padding-right: 0;
+    }
+
     /* The welcome-screen FC render images have no explicit width and sit
        right-anchored at their native 800x343px (or 676x308px) resolution --
        on any phone-width screen most of the image hangs off the left edge.
